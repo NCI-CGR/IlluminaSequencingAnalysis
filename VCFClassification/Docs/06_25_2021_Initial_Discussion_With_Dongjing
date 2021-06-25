@@ -2,6 +2,87 @@ This is the initial discussion with dongjing.
 
 This docs contains many important info realted to how to understand this project and how to repeat the current issue
 
-- Time: June 25, 2021
-- Purpose
+####### Head #########
+Time:    June 25, 2021
+Purpose: How to understand this project &
+         Understand current bug of this pipeline
+Status: All Set
+######################
 
+1: Background
+(1) The source code is wrote by snakemake and python
+(2) This project is started from 2017
+(3) The original developer has left CGR
+ 
+2: The purpose of this project
+(1) variant classification: classify variant in VCF to understand: 
+    a) which variant disease related
+    b) which variant does not that matter 
+    c) and something like these
+    
+3: Some key steps of this pipeline
+(1) Step1: CGR annotation -> Annotate variant in VCF by using public database
+    a) Several public database will be used to for variant annotation
+       1: REVEL
+       2: ClinVar
+       3: InterVar
+(2) Step2: Use the annodated VCF to run VCFClassification pipeline
+    a) Some types of file are required, including
+       1: vcf.gz: simply compress the annotated VCF.
+       2: vcf.gz.tbi: should be paired with vcf.gz
+    b) Other files will be introduced later
+    
+4: Current issue 
+(1) Some of old VCF works fine (no error)
+(2) Some new VCF does not work (report error, caused by the the position order is incorrect!)
+
+5: Testing data
+(1) Good case
+line 19 + line 28 (in snakemake file) -> correct position order
+(2) Bad case: 
+line 20 + line 27 (in snakemake file) -> incorrect position order
+ 
+ 6: The special cases 
+ (1) The problem VCF
+ /DCEG/Projects/Exome/builds/build_Osteosarcoma_2017_18794/20210127_reannotation/variant_classification/subset_vcf_failed_misorder/OSTEOSARCOMA.genesOfInterest.rare.nonsyn.vcf
+ a) Check the line contains keyword: 802140  -> line 333, 334
+ 
+ 7: The log file of the bad and good case
+ (1) Bad case: Check the error info contains by the log file below:
+     a) Error info: MESSAGE: Input file is not sorted by start position. 
+     b) File      :/DCEG/Projects/Exome/builds/build_Osteosarcoma_2017_18794/20210127_reannotation/variant_classification/logs_failed_misorder/snakejob.vcf_to_txt.1.sh.e1980315
+     
+ (2) Good case:
+     a) /DCEG/Projects/Exome/builds/build_Hong-Kong-Breast-Cancer_Exome_2017_18839/TCGA_Breast_cancer/new_annotation_revel_clinvar/new_variant_classification/classify_variant/HKBC.genesOfInterest.rare.nonsyn.txt
+     b) Related log file: 
+ /DCEG/Projects/Exome/builds/build_Hong-Kong-Breast-Cancer_Exome_2017_18839/TCGA_Breast_cancer/new_annotation_revel_clinvar/new_variant_classification/logs/snakejob.vcf_to_txt.1.sh.e3324438
+ 
+ 
+ 8: Our final target vcf
+ (1) /DCEG/Projects/Exome/builds/build_Osteosarcoma_2017_18794/20210127_reannotation/cgr_annotated_InterVar_annotated.vcf
+ 
+ 9: Commandline 
+ (1) How to run the code
+ qsub -q research.q -j y -o /DCEG/Projects/Exome/builds/build_Osteosarcoma_2017_18794/20210127_reannotation/variant_classification/test_bed.log -N bed_classification -S /bin/sh /DCEG/Projects/Exome/builds/build_Osteosarcoma_2017_18794/20210127_reannotation/variant_classification/mainSnake.sh
+ 
+ 
+10: What we need to run snakemake 
+(1) In the folder 
+/DCEG/Projects/Exome/builds/build_Osteosarcoma_2017_18794/20210127_reannotation
+    a) We need to have the file in line 15, 21, 22, 23, 28, 30, 31 to run the pipeline
+       1) line 15:      15 -rw-rw-r-- 1 wud7 ncicgf_dceg_exome       21 Jun 22 04:31 fz27838_test.bed
+       2) line 21:      21 -rw-rw-r-- 1 wud7 ncicgf_dceg_exome     1150 Jun 23 11:29 mainSnake.sh
+       3) line 22:      22 drwxrwsr-x 2 wud7 ncicgf_dceg_exome      136 Apr 29 01:21 scripts
+       4) line 23:      23 -rw-rw-r-- 1 wud7 ncicgf_dceg_exome    10667 Jun 25 11:36 Snakefile
+       5) line 28:      28 -rw-rw-r-- 1 wud7 ncicgf_dceg_exome       38 Mar 29 14:01 test.bed
+       6) line 30:      30 -rw-rw-r-- 1 wud7 ncicgf_dceg_exome     4669 Mar 24 17:39 vcf_fields_to_keep.txt
+       7) line 31:      31 -rw-rw-r-- 1 wud7 ncicgf_dceg_exome     3142 Mar 24 17:55 vcf_fields_to_keep_v4_updated.txt
+
+    b) we need a) + the combination of either 5(1) or 5(2) to run good/bad case. 
+ 
+Complementory
+Some files mentioned by Dongjing: 
+1: /DCEG/Projects/Exome/builds/build_Osteosarcoma_2017_18794/20210127_reannotation/cgr_annotated_InterVar_annotated.vcf.gz.tbi
+2: /DCEG/Projects/Exome/builds/build_Osteosarcoma_2017_18794/20210127_reannotation/cgr_annotated_InterVar_annotated.vcf.gz
+3: /DCEG/Projects/Exome/builds/build_Osteosarcoma_2017_18794/20210127_reannotation/variant_classification/fz27838_test.bed
+4: /DCEG/Projects/Exome/builds/build_Osteosarcoma_2017_18794/20210127_reannotation/variant_classification/fz27838_cgr_annotated_aab_hardfiltered_tag_fixed_rep_removed_with_osteo_head.vcf.gz 
