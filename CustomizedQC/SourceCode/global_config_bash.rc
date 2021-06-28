@@ -1,0 +1,207 @@
+#!/bin/bash -l
+set -o pipefail
+
+# A date threshold - only flowcells with the above-mentioned flag file newer than the mentioned date will be processed
+# This is a measure to prevent the cronjob from processing all legacy data
+# Format: YYYYMMDDhhmm.ss
+# ILLUMINA_DATE_THRESHOLD=201704200000.00
+
+# new system, load necessary modules
+. /etc/profile.d/modules.sh
+#module load sge jdk boost/1.44.0 Picard samtools/0.1.18 ImageMagick bcl2fastq gcc
+module purge
+module load java/1.8.0_181 bcl2fastq/2.20.0 picard/2.25.0 samtools/1.12 ImageMagick/7.0.7 python/3.7 bwa-mem2/2-2.0 bedtools/2.30.0 zlib/1.2.11 R/4.0.5 fastqc/0.11.9
+# export PATH=$PATH:/cm/shared/apps/sge/2011.11/bin/linux-x64/
+
+
+# Wrapper for picard, either use local wrapper script or directly use JAVA call
+# for higher flexibility
+PICARD_DIR="/usr/local/apps/picard/2.25.0/picard.jar"
+# PICARD_MARK_DUPLICATES="picard MarkDuplicates"
+PICARD_MARK_DUPLICATES="java -Xmx16g -jar $PICARD_DIR MarkDuplicates"
+#PICARD_ESTIMATE_LIBRARY_COMPLEXITY="picard EstimateLibraryComplexity"
+PICARD_ESTIMATE_LIBRARY_COMPLEXITY="java -Xmx8g -jar $PICARD_DIR EstimateLibraryComplexity"
+PICARD_INSERTSIZE="java -Xmx16g -jar $PICARD_DIR CollectInsertSizeMetrics"
+PICARD_ADDORREPLACEREADGROUPS="java -Xmx16g -jar $PICARD_DIR AddOrReplaceReadGroups"
+
+
+# ILLUMINA_PROCESSED_DATA_ROOT_DIR will be specified by users to make enviroment switch between testing and prodution
+ILLUMINA_RAW_DATA_ROOT_DIR=${ILLUMINA_ROOT_DIR}/Staging
+ILLUMINA_NEW_MANIFEST_DIR=${ILLUMINA_RAW_DATA_ROOT_DIR}/Manifests
+ILLUMINA_PROCESSED_MANIFEST_DIR=${ILLUMINA_RAW_DATA_ROOT_DIR}/Manifests/Processed_Manifests
+ILLUMINA_FLOWCELL_LEVEL_REPORT_DIR_TMP=${ILLUMINA_FLOWCELL_LEVEL_REPORT_DIR}/tmp
+
+# this is where to drop QC metrics for LIMS pickup
+ILLUMINA_LIMS_DROPBOX_DIR=/CGF/Laboratory/LIMS/drop-box-prod/sequenceqc
+if [[ ${ILLUMINA_OUTPUT_DIR} == "/scratch/lix33/CGR/Pipeline/Primary_Pipeline/Data/Illumina" ]]; then
+  ILLUMINA_LIMS_DROPBOX_DIR="/scratch/lix33/CGR/Pipeline/Primary_Pipeline/Laboratory/LIMS/drop-box-prod/sequenceqc"
+fi
+echo "ILLUMINA_LIMS_DROPBOX_DIR: "${ILLUMINA_LIMS_DROPBOX_DIR}
+
+# this is where to find the basecalling information for each run id
+# **under the sub-directory of the run id**
+# in most cases you don't need to change (as this is designated by ILLUMINA CASAVA software)
+ILLUMINA_RAW_DATA_SUB_DIR=Data/Intensities/BaseCalls
+
+# whether to include PhiX control samples in the analysis or not
+ILLUMINA_PROCESS_PHIX=false
+# this is the name of the sample directory for PhiX
+ILLUMINA_PHIX_SAMPLE_DIR="Sample_PhiX"
+
+RUNINI="Run.ini"
+# The processed data will be under the sub-directory named by the Run ID
+# i.e. $ILLUMINA_PROCESSED_DATA_ROOT_DIR/<Run ID>
+# Then we'll create the following sub-directories in this directory
+# this is where to put all processing log files
+ILLUMINA_LOG_SUB_DIR="logs"
+# this is where to put CASAVA results (FASTQ files)
+ILLUMINA_CASAVA_SUB_DIR="CASAVA"
+# this is where to put reference mapping results (BAM files)
+ILLUMINA_BAM_SUB_DIR="BAM"
+# this is where to put reports
+ILLUMINA_REPORT_SUB_DIR="reports"
+# flags for different aligner and reference version (2-layers subfolder)
+ILLUMINA_FLAG_SUB_DIR="Flag"
+DEMULTIPLEX_ONLY_SUB_DIR="DemultiplexOnly"
+
+########################################
+# Automation related configurations    #
+# In most cases you don't need to edit #
+########################################
+# this is the file in the run directory that will trigger the whole primary analysis process
+# this is essentially a flag file written by the HiSeq sequencer that indicates the
+# whole sequencing run is complete
+ILLUMINA_PROCESS_START_TRIGGER=RTAComplete.txt
+
+# this is the file in the same run directory that will tell the script to IGNORE AND SKIP the
+# analysis. This file needs to be manually generated should this particular run id to be ignored
+
+# HiSeq flowcells are by default INCLUDED, unless there is an ignore triggle file below
+ILLUMINA_PROCESS_IGNORE_TRIGGLE=EXCLUDE_FROM_PRIMARY_ANALYSIS.txt
+ILLUMINA_FLAG_IGNORE_EMAIL_SENT=EMAIL_NOTIFICATION_SENT.txt
+
+# MiSeq flowcells are by default EXCLUDED, unless there is an inclusion triggle file below
+ILLUMINA_MISQL_INCLUSION_TRIGGLE=INCLUDE_TO_PRIMARY_ANALYSIS.txt
+
+# NextSeq R&D requires demultiplx only
+ILLUMINA_NEXTSEQ_DEMULTIPLEX_ONLY=DEMULTIPLEX_ONLY.txt
+
+# these are the flag files in the output run directory indicating the different stages of processes
+# there will be only one global flag file for the demultiplex process
+# in the run directory
+ILLUMINA_FLAG_DEMULTIPLEX_WORKING=flag_demultiplex_working
+ILLUMINA_FLAG_DEMULTIPLEX_DONE=flag_demultiplex_done
+
+ILLUMINA_FLAG_QUALITY_TRIMMING_WORKING=flag_quality_trimming_working
+ILLUMINA_FLAG_QUALITY_TRIMMING_DONE=flag_quality_trimming_done
+
+ILLUMINA_FLAG_REFERENCE_MAPPING_WORKING=flag_reference_mapping_working
+ILLUMINA_FLAG_REFERENCE_MAPPING_DONE=flag_reference_mapping_done
+
+ILLUMINA_FLAG_REPORT_GENERATION_WORKING=flag_report_generation_working
+ILLUMINA_FLAG_REPORT_GENERATION_DONE=flag_report_generation_done
+
+ILLUMINA_FLAG_REPORT_OUTPUT_DONE=flag_report_output_done
+
+ILLUMINA_FLAG_ALL_DONE=flag_all_analysis_done
+
+# this is a quick process so with done flag only
+ILLUMINA_FLAG_MAIL_NOTIFICATION_DONE=flag_email_notification_done
+WARNING_RUN_INI_EMAIL_SENT=flag_warning_run_ini_email_sent
+WARNING_EMAIL_SENT=flag_warning_email_sent
+WARNING_DEMULTIPLEX_EMAIL_SENT=flag_warning_demultiplex_email_sent
+WARNING_TRIMMING_EMAIL_SENT=flag_warning_trimming_email_sent
+WARNING_MAPPING_EMAIL_SENT=flag_warning_mapping_email_sent
+WARNING_REPORT_EMAIL_SENT=flag_warning_report_email_sent
+
+# there will be multiple flag files for every FASTQ files in the CASAVA directory
+ILLUMINA_FLAG_QUALITY_TRIMMING_WORKING_EXTENSION=.flag_quality_trimming_working
+ILLUMINA_FLAG_QUALITY_TRIMMING_DONE_EXTENSION=.flag_quality_trimming_done
+
+ILLUMINA_FLAG_REFERENCE_MAPPING_WORKING_EXTENSION=.flag_reference_mapping_working
+ILLUMINA_FLAG_REFERENCE_MAPPING_DONE_EXTENSION=.flag_reference_mapping_done
+
+ILLUMINA_FLAG_REPORT_GENERATION_WORKING_EXTENSION=.flag_report_generation_working
+ILLUMINA_FLAG_REPORT_GENERATION_DONE_EXTENSION=.flag_report_generation_done
+
+
+#############################
+##### Reference Mapping #####
+#############################
+# where to find NovoAlign program
+# NOVOCRAFT_PRG_DIR=/DCEG/Resources/Tools/novocraft-new/novocraftV4.02.01.1
+# NOVOALIGN=$NOVOCRAFT_PRG_DIR/novoalign
+
+# when doing reference mapping, if to replace existing BAM files or not
+# set to "true" if you: are redoing reference alignment using new data / parameter / program
+# set to "false" if you: are re-running the process to fill in "holes" caused by any service interruptions
+# (e.g. broken cluster queue, dead computing cluster, etc.)
+NOVOALIGN_REPLACE_EXISTING_BAM=false
+
+# there are multiple stages of BAM files generated below
+# you can set this flag as true to delete the intermediate files (specifically, dedup & properly_paired,
+# but NOT original and nophix)
+NOVOALIGN_DELETE_INTERMEDIATE_FILES=true
+
+# naming suffix for different levels of QC process
+# this is the original reference mapping results straight out of NovoAlign
+# NOTE: this is in addition to $SUFFIX_HQ_PAIRED above, should quality trimming is enabled
+# e.g. xxxx_HQ_paired_original.bam
+SUFFIX_BAM_ORIGINAL="original"
+
+# suffix for deduplication results
+# we used Picard to remove optical and PCR duplicates
+# NOTE: this is a replacement to $SUFFIX_BAM_ORIGINAL above
+# so there will be a xxx[_HQ_paired]_original.bam and a xxx[_HQ_paired]_dedup.bam
+SUFFIX_BAM_DEDUP="dedup"
+
+# suffix for properly aligned pairs
+# a properly aligned pair must meet the complimentary strand criteria and
+# fall within reasonable insert size
+# NOTE: this is in addition to the $SUFFIX_BAM_DEDUP above
+# so there will be a xxx[_HQ_paired]_dedup_properly_paired.bam
+SUFFIX_BAM_PROPERLY_PAIRED="properly_paired"
+
+# this is the BAM after removal of phiX records
+# this is in addition to above
+SUFFIX_BAM_NOPHIX="nophix"
+# this is the phiX reference ID to search and remove
+PHIX_REFERENCE_ID_TO_CLEAN="phiX174"
+
+
+#############################
+# Flowcell-level report     #
+#############################
+#All the things has been moved to captureKit.ini
+
+
+
+# this is the bed file for the exome capture kit
+#ILLUMINA_CAPTURE_KIT_BED_FILE=/home/hej3/nexterarapidcapture_exome_targetedregions.bed
+# this is the total number of bases in the beds, used for calculation of % of exome coverage
+#ILLUMINA_CAPTURE_KIT_TOTAL_BASES=37105383
+
+MIN_COVERAGE_THRESHOLD1=10
+MIN_COVERAGE_THRESHOLD2=15
+
+######$LAST_LINE_FINISH
+#### JH: Per discussions with Meredith and lab colleagues, we are going to report the coverage in
+#### all UCSC CDS instead of the whole capture kit regions
+######
+UCSC_CDS_BED_FILE=/DCEG/Projects/Exome/annotation/Exome_capture_targets/hg19_cds_merged.bed
+#UCSC_CDS_BED_FILE=/DCEG/Projects/Exome/annotation/Exome_capture_targets/hg19_cds_merged_v37.bed
+UCSC_CDS_TOTAL_BASES=34990773
+UCSC_COVERAGE_PERCENT_WARNING_THRESHOLD=0.80
+
+#############################
+##### Mail Notification #####
+#############################
+MAIL_FROM_ADDRESS="xin.li4@nih.gov"
+# list of email address that new flowcell notification will send to
+# MAIL_NEW_FLOWCELL_NOTIFICATION_TO_ADDRESS="malaskym@mail.nih.gov, teshomek@mail.nih.gov, katherine.tolley@nih.gov, joneskm4@mail.nih.gov, russell.williams@nih.gov, leee4@mail.nih.gov, dagnallc@mail.nih.gov,herbert.higson@nih.gov,chowdhsa@mail.nih.gov,bin.zhu2@nih.gov,dongjing.wu@nih.gov,xin.li4@nih.gov"
+# MAIL_NEW_FLOWCELL_NOTIFICATION_TO_ADDRESS="mingyi.wang@nih.gov,xin.li4@nih.gov"
+MAIL_NEW_FLOWCELL_NOTIFICATION_TO_ADDRESS="xin.li4@nih.gov"
+#MAIL_NEW_FLOWCELL_NOTIFICATION_TO_ADDRESS="dongjing.wu@nih.gov"
+#MAIL_NEW_FLOWCELL_NOTIFICATION_TO_ADDRESS="wen.luo@nih.gov"
+# list of email address that completion notification will send to
+MAIL_COMPLETION_NOTIFICATION_TO_ADDRESS=$MAIL_NEW_FLOWCELL_NOTIFICATION_TO_ADDRESS
