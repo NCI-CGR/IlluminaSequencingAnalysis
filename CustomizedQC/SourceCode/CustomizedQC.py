@@ -224,7 +224,7 @@ class ClsSample:
         #4: Prepare parameters required by shell script -> Go!!!
         strRunID = os.path.basename(strFlowcellDir)
         strProjectID = os.path.basename(os.path.dirname(self.strSampleDir))
-        strSampleName = self.GetUniqueName()
+        strSampleName = self.GetUniqueName("_")
         strTmpSummaryReportFile = "WeDoNotNeedTmpSummaryReport"
         strBaseSampleDir = os.path.basename(self.strSampleDir)
         strLaneNumRunLevel = "1"
