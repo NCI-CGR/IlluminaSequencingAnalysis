@@ -21,7 +21,7 @@ fi
 
 dirCurScript=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
 
-. /scratch/lix33/lxwg/SourceCode/CommonTools/CustomizedQC/global_config_bash.rc
+. /home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode/global_config_bash.rc
 
 #takes in arguments
 argIndex=1
@@ -272,7 +272,7 @@ echo "Reference to Whole genome, Total Exome Bases >= 15x Coverage: ${TOTAL_BASE
 resultFileName=L${LANE_ID}_${BASE_SAMPLE_DIR}_dimer_ratio
 resultFilePath=${reportDir}/$resultFileName
 # (2) Call python function of CalcDimerRatio
-CMD="python3 /scratch/lix33/lxwg/SourceCode/CommonTools/CustomizedQC/CalAdapterDimerSingle.py ${sampleDir} $resultFilePath"
+CMD="python3 /home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode/CalAdapterDimerSingle.py ${sampleDir} $resultFilePath"
 echo $CMD
 eval $CMD
 #Check return value and determine if we need to exit the main code

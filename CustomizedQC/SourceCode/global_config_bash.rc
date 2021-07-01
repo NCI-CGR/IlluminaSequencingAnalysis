@@ -10,7 +10,7 @@ set -o pipefail
 . /etc/profile.d/modules.sh
 #module load sge jdk boost/1.44.0 Picard samtools/0.1.18 ImageMagick bcl2fastq gcc
 module purge
-module load java/1.8.0_181 bcl2fastq/2.20.0 picard/2.25.0 samtools/1.12 ImageMagick/7.0.7 python/3.7 bwa-mem2/2-2.0 bedtools/2.30.0 zlib/1.2.11 R/4.0.5 fastqc/0.11.9
+module load java/1.8.0_181 bcl2fastq/2.20.0 picard/2.25.0 samtools/1.12 ImageMagick/7.0.7 python/3.7 bwa/0.7.12 bedtools/2.30.0 zlib/1.2.11 R/4.0.5 fastqc/0.11.9
 # export PATH=$PATH:/cm/shared/apps/sge/2011.11/bin/linux-x64/
 
 

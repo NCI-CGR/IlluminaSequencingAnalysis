@@ -17,8 +17,8 @@ import os
 import sys
 import subprocess
 TMPFolder = "/scratch/lix33/TmpSequencing/"
-REFSeq = "/scratch/lix33/DCEG/CGF/Bioinformatics/Production/data/hg38/Homo_sapiens_assembly38.fasta"
-REFSamIndex = "/scratch/lix33/DCEG/CGF/Bioinformatics/Production/data/hg38/Homo_sapiens_assembly38.fasta.fai"
+REFSeq = "/scratch/lix33/DCEG/CGF/Bioinformatics/Production/data/ref38/Homo_sapiens_assembly38.fasta"
+REFSamIndex = "/scratch/lix33/DCEG/CGF/Bioinformatics/Production/data/ref38/Homo_sapiens_assembly38.fasta.fai"
 
 EMAILSender = "xin.li4@nih.gov"
 EMAILReceiver = "xin.li4@nih.gov"
@@ -39,13 +39,13 @@ class ClsSample:
         self.strFastq2 = ""
         self.strFlagDir = ""
         self.strLogDir = ""
-        self.strRootDir = ""
-        self.strRawDataDir = ""
+        self.strSampleDir = ""
+        self.strFlowcellDir = ""
         self.strAligner = ""
         self.strRef = ""
     
-    def GetUniqueName(self):
-        strName = self.strName + "_" + self.strBarcode + "_" + self.strLane
+    def GetUniqueName(self, strSplit="-"):
+        strName = self.strName + strSplit + self.strBarcode + strSplit + self.strLane
         return strName           
         
     def CreatFolder(self, strDir):
@@ -53,22 +53,27 @@ class ClsSample:
             CMD = "mkdir -p " + strDir
             os.system(CMD)        
     
-    def Init(self, strSampleDir, strRootSampleDir, strAlinger, strRef):
+    def Init(self, strSampleDir, strAlinger, strRef):
+        #Init Sample Dir 
+        self.strSampleDir = strSampleDir 
+        #print("strSampleDir", strSampleDir)        
+                
         #Get fastq info
-        CMD = "find " + strSampleDir + "/ -maxdepth 1 -type f -name \"*.fastq.gz\""
+        CMD = "find " + strSampleDir + " -maxdepth 1 -type l -name \"*.fastq.gz\""
+        #print(CMD)
         strFastqList = subprocess.getoutput(CMD)
         vFastqList = strFastqList.split('\n')
+        #print("vFastqList:", vFastqList)
         if len(vFastqList) != 2:
             return 1
         else:
             vFastqList.sort()            
             self.strFastq1 = vFastqList[0]
             self.strFastq2 = vFastqList[1]
-        
-        self.strRawDataDir = strSampleDir
+                
         strDirName = os.path.basename(strSampleDir)
         vItems = strDirName.split("_")
-        #Get init info of sample
+        #Get init info of sample (example: Sample_Name_Barcode_Lane)
         self.strLane = vItems[-1]
         self.strBarcode = vItems[-2]
         self.strName = vItems[-3]    
@@ -76,11 +81,8 @@ class ClsSample:
         self.strAligner = strAlinger
         self.strRef = strRef
         
-        # Create a folder in Sample
-        strBackupSampleDir = strRootSampleDir + "/" + strDirName
-        self.strRootDir = strBackupSampleDir 
-        self.CreatFolder(strBackupSampleDir)
-        self.strFlagDir = strBackupSampleDir + "/Flag/" + self.strAligner + "/" + self.strRef         
+        # Create a folder in Sample        
+        self.strFlagDir = strSampleDir + "/Flag/" + self.strAligner + "/" + self.strRef         
         self.CreatFolder(self.strFlagDir)
         
         # return value 
@@ -116,7 +118,7 @@ class ClsSample:
                 return 2 
             
     # submit jobs for each simple sample -> Go!!
-    def SubmitAlignmentJob(self, strProcessedDir, strRootDir, strRootLogDir, strRootQCReportDir, strRootBAMDir):
+    def SubmitAlignmentJob(self, strProcessedDir, strFlowcellDir, strRootLogDir, strRootQCReportDir, strRootBAMDir):
         # Check working flag 
         iReturn = self.CheckFlags("Alignment")
         if iReturn == 0 or iReturn == 1:  # everything is done or still working
@@ -144,15 +146,15 @@ class ClsSample:
         strShellScript = strCurDirPath + "/reference_mapping_single.sh"
         
         #4: Prepare parameters required by shell script        
-        strBamFileBase = self.GetUniqueName() + "_HQ_paired"
+        strBamFileBase = self.GetUniqueName("_") + "_HQ_paired"
         strBamBase = strRootBAMDir + "/" + strBamFileBase
-        strRunID = "ProcessedData"
+        strRunID = os.path.basename(strFlowcellDir)
         sampleType = "DNAWholeGenome"
         tmpFolder = TMPFolder + "/" + strRunID
         reference = REFSeq
         refSamIndex = REFSamIndex
         refSamBed = ""
-        IN_DIR = strRootDir
+        IN_DIR = strFlowcellDir
         alignerTool = "BWA"
         refVersion = "v38"
         sizeRam = "10g"
@@ -191,7 +193,7 @@ class ClsSample:
         print(CMD)
         os.system(CMD)
     
-    def SubmitQCReportJob(self, strProcessedDir, strRootDir, strRootLogDir, strRootQCReportDir, strRootBAMDir):
+    def SubmitQCReportJob(self, strProcessedDir, strFlowcellDir, strRootLogDir, strRootQCReportDir, strRootBAMDir):
         # Check working flag 
         iReturn = self.CheckFlags("QCReport")
         if iReturn == 0 or iReturn == 1:  # everything is done or still working
@@ -219,11 +221,11 @@ class ClsSample:
         strShellScript = strCurDirPath + "/generate_report_single_wgs.sh"
         
         #4: Prepare parameters required by shell script -> Go!!!
-        strRunID = "ProcessedData"
-        strProjectID = "WeDoNotNeedProjectID"
+        strRunID = os.path.basename(strFlowcellDir)
+        strProjectID = os.path.basename(os.path.dirname(self.strSampleDir))
         strSampleName = self.GetUniqueName()
         strTmpSummaryReportFile = "WeDoNotNeedTmpSummaryReport"
-        strBaseSampleDir = os.path.basename(self.strRootDir)
+        strBaseSampleDir = os.path.basename(self.strSampleDir)
         strLaneNumRunLevel = "1"
         strAlignerTool = "BWA"
         strRefVersion = "v38"
@@ -253,7 +255,7 @@ class ClsSample:
                     "\"" + strReportDir + "\"" + " " +
                     "\"" + strSampleFlagDir + "\"" + " " +
                     "\"" + strContainUMI + "\"" + " " +
-                    "\"" + self.strRawDataDir + "\"" + " " +
+                    "\"" + self.strSampleDir + "\"" + " " +
                     "\"" + self.strFlagDir + "/" + FLAGQCReportWorking + "\""  + " " +
                     "\"" + self.strFlagDir + "/" + FLAGQCReportDone + "\"")
         print(CMD)
@@ -263,46 +265,52 @@ class ClsBuild:
     def __init__(self):
         self.vSample = []
         self.strProcessedDir = ""       
-        self.strRootDir = ""
+        self.strFlowcellDir = "" # It is flowcell Dir
         self.strRootFlagDir = ""
         self.strRootLogDir = ""
         self.strRootQCReportDir = ""
-        self.strRootSampleDir = ""
+        #self.strRootSampleDir = ""
         self.strRootBAMDir = ""
         self.strAligner = "BWA"
         self.strRef = "v38"
+        self.strFlowcellName = ""
+        self.bAllSet = False
                     
-    def Init(self, strDir, strOutput):
-        self.strProcessedDir = strOutput
+    def Init(self, strFlowcellDir):
+        # Get main processed folder name and file basename
+        self.strProcessedDir = os.path.dirname(strFlowcellDir)
+        self.strFlowcellName = os.path.basename(strFlowcellDir)
          
         #1: Set Root Dir
-        self.strRootDir = strOutput + "/" + "ProcessedData"
-        self.CreatFolder(self.strRootDir)
+        self.strFlowcellDir = strFlowcellDir
+        self.CreatFolder(self.strFlowcellDir)
         
-        self.strRootFlagDir = self.strRootDir + "/Flag/" + self.strAligner + "/" + self.strRef
+        self.strRootFlagDir = self.strFlowcellDir + "/Flag/" + self.strAligner + "/" + self.strRef
         self.CreatFolder(self.strRootFlagDir)
          
-        self.strRootLogDir = self.strRootDir + "/Log/" + self.strAligner + "/" + self.strRef
+        self.strRootLogDir = self.strFlowcellDir + "/Log/" + self.strAligner + "/" + self.strRef
         self.CreatFolder(self.strRootLogDir)
         
-        self.strRootQCReportDir = self.strRootDir + "/reports/" + self.strAligner + "/" + self.strRef
+        self.strRootQCReportDir = self.strFlowcellDir + "/reports/" + self.strAligner + "/" + self.strRef
         self.CreatFolder(self.strRootQCReportDir)
         
-        self.strRootSampleDir = self.strRootDir + "/Sample"
-        self.CreatFolder(self.strRootSampleDir)
+        # self.strRootSampleDir = self.strRootDir + "/Sample"
+        # self.CreatFolder(self.strRootSampleDir)
         
-        self.strRootBAMDir = self.strRootDir + "/BAM/" + self.strAligner + "/" + self.strRef
+        self.strRootBAMDir = self.strFlowcellDir + "/BAM/" + self.strAligner + "/" + self.strRef
         self.CreatFolder(self.strRootBAMDir)
         
         #2: Init Samples
         self.vSample.clear()
-        CMD = "find " + strDir + "/ -maxdepth 1 -type d -name \"Sample_*\""
+        # Get Sample Dir
+        
+        CMD = "find " + strFlowcellDir + "/CASAVA -maxdepth 3 -type d -name \"Sample_*\""
         strList = subprocess.getoutput(CMD)
         vList = strList.split('\n')        
-        print(vList)
+        #print(vList)
         for strSampleDir in vList:
             objSample = ClsSample()
-            iReturn = objSample.Init(strSampleDir, self.strRootSampleDir, self.strAligner, self.strRef)
+            iReturn = objSample.Init(strSampleDir, self.strAligner, self.strRef)
             if iReturn == 0:
                 self.vSample.append(objSample)
         self.Print()
@@ -326,7 +334,7 @@ class ClsBuild:
             if len(vDir) == 0:
                 # send the email to notify people the a new analysis will be launched!
                 #it is new -> send start notification
-                strInputFile = os.path.dirname(self.strRootDir)
+                strInputFile = os.path.dirname(self.strFlowcellDir)
                 strPlatform = "COVID 19"     
                 strMsg = "============ " + strPlatform + " ============\n"
                 strMsg += ("New Customized QC pipeline has been Launched in Biowulf: " + strInputFile) 
@@ -341,12 +349,12 @@ class ClsBuild:
             else:
                 #check all done flag ->
                 if len(vDir) == 2 and FLAGAlignmentDone in vDir and FLAGQCReportDone in vDir:
-                    strInputFile = os.path.dirname(self.strRootDir)
+                    strInputFile = os.path.dirname(self.strFlowcellDir)
                     # need to send all done email and create all done flag
                     # 1: send email
                     strPlatform = "COVID 19"
                     strFileName = "QCReport" + "-" + self.strAligner + "-" + self.strRef + ".csv"
-                    strQCReportFile = self.strRootDir + "/" + strFileName     
+                    strQCReportFile = self.strFlowcellDir + "/" + strFileName     
                     strMsg = "============ " + strPlatform + " ============\n\n"
                     strMsg += ("New Customized QC pipeline is all set: " + strInputFile + "\n\n" + 
                                "Total Number of Sample: " + str(len(self.vSample)) + "\n\n" + 
@@ -376,10 +384,10 @@ class ClsBuild:
             elif os.path.exists(workingFlag):
                 # Check if everything is all set --> if it is then done -> Go!!
                 # 1: Check the number of sample folders
-                CMD = "find " + self.strRootSampleDir + " -maxdepth 1 -type d -name \"Sample_*\" | wc -l"
+                CMD = "find " + self.strFlowcellDir + "/CASAVA -maxdepth 3 -type d -name \"Sample_*\" | wc -l"
                 iNumSampleFolder = int(subprocess.getoutput(CMD))
                 
-                strFindPath = self.strRootSampleDir + "/*/Flag" + "/" + self.strAligner + "/" + self.strRef 
+                strFindPath = self.strFlowcellDir + "/CASAVA/*/*/*/Flag/" + self.strAligner + "/" + self.strRef 
                 # 2: Check the number of working flags                
                 CMD = "find " + strFindPath + " -maxdepth 1 -type f -name \"" + FLAGAlignmentWorking + "\" | wc -l"
                 iNumSampleWorking = int(subprocess.getoutput(CMD))
@@ -410,10 +418,10 @@ class ClsBuild:
             elif os.path.exists(workingFlag):
                 # Check if everything is all set --> if it is then done -> Go!!
                 # 1: Check the number of sample folders
-                CMD = "find " + self.strRootSampleDir + " -maxdepth 1 -type d -name \"Sample_*\" | wc -l"
+                CMD = "find " + self.strFlowcellDir + "/CASAVA -maxdepth 3 -type d -name \"Sample_*\" | wc -l"
                 iNumSampleFolder = int(subprocess.getoutput(CMD))
                 
-                strFindPath = self.strRootSampleDir + "/*/Flag" + "/" + self.strAligner + "/" + self.strRef 
+                strFindPath = self.strFlowcellDir + "/CASAVA/*/*/*/Flag/" + self.strAligner + "/" + self.strRef 
                 # 2: Check the number of working flags
                 CMD = "find " + strFindPath + " -maxdepth 1 -type f -name \"" + FLAGQCReportWorking + "\" | wc -l"
                 iNumSampleWorking = int(subprocess.getoutput(CMD))
@@ -449,7 +457,7 @@ class ClsBuild:
         
         # This is the new case that flowcell need a new analysis--> Go!!
         for sample in self.vSample:
-            sample.SubmitAlignmentJob(self.strProcessedDir, self.strRootDir, self.strRootLogDir, self.strRootQCReportDir, self.strRootBAMDir)
+            sample.SubmitAlignmentJob(self.strProcessedDir, self.strFlowcellDir, self.strRootLogDir, self.strRootQCReportDir, self.strRootBAMDir)
         return 2
     
     def CustomizedQCReport(self):
@@ -463,13 +471,13 @@ class ClsBuild:
          
         # This is the new case that flowcell need a new analysis (QC report) --> Go!!
         for sample in self.vSample:
-            sample.SubmitQCReportJob(self.strProcessedDir, self.strRootDir, self.strRootLogDir, self.strRootQCReportDir, self.strRootBAMDir)
+            sample.SubmitQCReportJob(self.strProcessedDir, self.strFlowcellDir, self.strRootLogDir, self.strRootQCReportDir, self.strRootBAMDir)
         return 2
                 
     def GenerateQCSummary(self):
         print("I am the last step: GenerateQCSummary!")
         strFileName = "QCReport" + "-" + self.strAligner + "-" + self.strRef + ".csv"
-        strQCReport = self.strRootDir + "/" + strFileName
+        strQCReport = self.strFlowcellDir + "/" + strFileName
         
         # remove the old one
         if os.path.exists(strQCReport):
@@ -509,21 +517,41 @@ Dimer Reads,% Dimer\"" +
         
 def main():
     # Folder Path
-    strDir = sys.argv[1]
-    strOutputDir = sys.argv[2]
+    strPrcessedDataDir = sys.argv[1]    
     
-    # Init build -> Done
-    objBuild = ClsBuild()
-    objBuild.Init(strDir, strOutput)
+    # Collect All flowcells in current Folder (each flowcell is a build) -->
+    vFlowcellDir = []
+    for subDir in os.listdir(strPrcessedDataDir):
+        strSubDirPath = strPrcessedDataDir + "/" + subDir
+        if os.path.isdir(strSubDirPath):
+            vFlowcellDir.append(strSubDirPath)
+    # <-- 
+    #print(vFlowcellDir)
         
-    # Sent email start notification
-    iReturn = objBuild.CheckFlags("GeneralStatus")
-    if iReturn == 0:
-        return 0 
+    #Create Builds
+    vBuild = []
+    for strFlowcellDir in vFlowcellDir:
+        print()
+        objBuild = ClsBuild()
+        objBuild.Init(strFlowcellDir)
+            
+        # Sent email start notification
+        iReturn = objBuild.CheckFlags("GeneralStatus")
+        if iReturn == 0:
+            objBuild.bAllSet = True
+            vBuild.append(objBuild)
+            continue
+        
+        # Spawn jobs do customized alignment
+        objBuild.CustomizedAlignment()    
+        objBuild.CustomizedQCReport()
+        vBuild.append(objBuild)
     
-    # Spawn jobs do customized alignment
-    objBuild.CustomizedAlignment()    
-    objBuild.CustomizedQCReport()
+    #Print status of each build
+    print("\n", ">>>>> Summary <<<<<")
+    for build in vBuild:
+        print("Flowcell:", build.strFlowcellName, "-> All Set Status:", build.bAllSet)
+    
     return 0
             
 if __name__ == "__main__":

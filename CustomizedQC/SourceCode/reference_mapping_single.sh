@@ -27,7 +27,7 @@ fi
 
 dirCurScript=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
 
-. /scratch/lix33/lxwg/SourceCode/CommonTools/CustomizedQC/global_config_bash.rc
+. /home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode/global_config_bash.rc
 # calls NovoAlign to align paired-end reads to reference genome
 # PATH=$NOVOCRAFT_PRG_DIR:$PATH
 
@@ -89,6 +89,8 @@ ILLUMINA_FLAG_SUB_DIR="Flag"
 # but just in case the full name including extension is passed, strip down the extension
 OUTDIR=`dirname $OUTBAM`
 OUTNAME=`basename $OUTBAM .bam`
+echo "OUTDIR : "${OUTDIR}
+echo "OUTNAME: "${OUTNAME}
 # the first token delimited by "_" is assumed to be the name of the sample
 SAMPLE=`echo $OUTNAME |rev|cut -d_ -f5-|rev`
 #remove the last 3part lane (https://unix.stackexchange.com/questions/234432/how-to-delete-the-last-column-of-a-file-in-linux)
@@ -173,12 +175,12 @@ if [[ ! -f $OUTBAM_ORIGINAL ]] || [[ ! -f $OUTBAI_ORIGINAL ]]; then
   samFile="${TMP_DIR}/${OUTNAME}.sam"
   tmpRawBAM="${TMP_DIR}/${OUTNAME}.bam"
   #2: print version of novoalign
-  echo "Run novoalign -->"
-  echo "NovoAlign Version: "`${NOVOALIGN} --version`
   #3: run novoalign
   if [[ ${doneAlignment} == "no" ]] || [[ ! -f ${samFile} ]]; then
     #Check Different Aligner
     if [[ ${alignerTool} == "NovoAlign" ]]; then
+      echo "Run novoalign -->"
+      echo "NovoAlign Version: "`${NOVOALIGN} --version`
       CMD="${NOVOALIGN} -c ${coreNum} \
                         -d ${reference} \
                         -f ${FASTQ1} ${FASTQ2} \
@@ -199,7 +201,7 @@ if [[ ! -f $OUTBAM_ORIGINAL ]] || [[ ! -f $OUTBAI_ORIGINAL ]]; then
       fi
     elif [[ ${alignerTool} == "BWA" ]]; then
       echo "Do Alignment by using BWA"
-      CMD="bwa-mem2 mem -t ${coreNum} -R \"${RGArea}\" ${reference} ${FASTQ1} ${FASTQ2} > ${samFile}"
+      CMD="bwa mem -t ${coreNum} -R \"${RGArea}\" ${reference} ${FASTQ1} ${FASTQ2} > ${samFile}"
       echo ${CMD}
       SECONDS=0
       eval ${CMD}
