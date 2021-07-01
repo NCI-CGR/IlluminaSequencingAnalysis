@@ -163,9 +163,10 @@ class ClsSample:
         donePhix="no"
         doneUMI="no"
         allLaneDemultiplexOnly = "no"
+        strRunningTime = "10-00:00:00"
                 
         CMD = ("sbatch " + " --ntasks=" + strNumCore + " --nodes=1 " + 
-               "--job-name=" + strJobName + " --output=" + strStdOut + " --error=" + strStdErr + " " + 
+               "--job-name=" + strJobName + " --time=" + strRunningTime + " --output=" + strStdOut + " --error=" + strStdErr + " " + 
                "--export=ALL,ILLUMINA_PROCESSED_DATA_ROOT_DIR=" + strProcessedDir  + " " +
                " " + strShellScript + " " + 
                     "\"" + self.strFastq1 + "\"" + " " + 
@@ -236,9 +237,10 @@ class ClsSample:
         #     strReportDir += "/" + strAlignerTool + "/" + strRefVersion  
         strSampleFlagDir = self.strFlagDir
         strContainUMI = "no"
+        strRunningTime = "10-00:00:00"
         
         CMD = ("sbatch " + " --ntasks=" + strNumCore + " --nodes=1 " + 
-               "--job-name=" + strJobName + " --output=" + strStdOut + " --error=" + strStdErr + " " + 
+               "--job-name=" + strJobName + " --time=" + strRunningTime + " --output=" + strStdOut + " --error=" + strStdErr + " " + 
                "--export=ALL,ILLUMINA_PROCESSED_DATA_ROOT_DIR=" + strProcessedDir  + " " +
                " " + strShellScript + " " + 
                     "\"" + strRunID + "\"" + " " + 
