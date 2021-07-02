@@ -527,6 +527,8 @@ def main():
         strSubDirPath = strPrcessedDataDir + "/" + subDir
         if os.path.isdir(strSubDirPath):
             vFlowcellDir.append(strSubDirPath)
+    # make sure the order are always the same for each run 
+    vFlowcellDir.sort()
     # <-- 
     #print(vFlowcellDir)
         
@@ -548,9 +550,11 @@ def main():
         objBuild.CustomizedAlignment()    
         objBuild.CustomizedQCReport()
         vBuild.append(objBuild)
+        # Only do one (the first) unfinished flowcell for each run 
+        break
     
     #Print status of each build
-    print("\n", ">>>>> Summary <<<<<")
+    print("\n", ">>>>> Summary (All Finished Flowcells + the first working one) <<<<<")
     for build in vBuild:
         print("Flowcell:", build.strFlowcellName, "-> All Set Status:", build.bAllSet)
     
