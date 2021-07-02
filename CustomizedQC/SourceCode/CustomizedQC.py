@@ -16,6 +16,7 @@ Processed Data folder Structure
 import os
 import sys
 import subprocess
+from datetime import datetime
 TMPFolder = "/scratch/lix33/TmpSequencing/"
 REFSeq = "/scratch/lix33/DCEG/CGF/Bioinformatics/Production/data/ref38/Homo_sapiens_assembly38.fasta"
 REFSamIndex = "/scratch/lix33/DCEG/CGF/Bioinformatics/Production/data/ref38/Homo_sapiens_assembly38.fasta.fai"
@@ -324,11 +325,11 @@ class ClsBuild:
         
     def Print(self):
         print("Sample Num:", len(self.vSample))
-        iIndex = 1
-        for sample in self.vSample:
-            print("******", iIndex, "******")
-            sample.Print()
-            iIndex += 1
+        # iIndex = 1
+        # for sample in self.vSample:
+        #     print("******", iIndex, "******")
+        #     sample.Print()
+        #     iIndex += 1
             
     def CheckFlags(self, strPhase):
         if strPhase == "GeneralStatus":            
@@ -518,6 +519,13 @@ Dimer Reads,% Dimer\"" +
         return 0
         
 def main():
+    print('\n', "==============")
+    today = datetime.today()
+    print("Date:", today.strftime("%B %d, %Y"))
+    now = datetime.now()
+    dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+    print("Time:", dt_string)
+    print("==============", '\n')
     # Folder Path
     strPrcessedDataDir = sys.argv[1]    
     
