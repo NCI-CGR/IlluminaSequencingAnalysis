@@ -495,11 +495,11 @@ PCR Dup (Paired),% PCR Dup,Optical Dup (Paired),% Optical Dup,% All Dups,\
 HQ Mapped (Dedup and phiX Removed),\
 On-target Reads,Capture Kit Efficiency (% On-target/HQ Mapped),\
 Overall Sequencing Efficiency (% On-target/All Sequenced),Median InsertSize,Mean InsertSize,\
-Capture Kit Bases Covered,% Capture Kit Bases Covered,Avg. Coverage,Capture Kit Bases >= ${MIN_COVERAGE_THRESHOLD1}X,\
-% Capture Kit Bases >=${MIN_COVERAGE_THRESHOLD1}X,Capture Kit Bases >= ${MIN_COVERAGE_THRESHOLD2}X,\
-% Capture Kit Bases >=${MIN_COVERAGE_THRESHOLD2}X,UCSC CDS Bases Covered,% UCSC CDS Bases Covered,\
-Avg. Coverage,UCSC CDS Bases >= ${MIN_COVERAGE_THRESHOLD1}X,% UCSC CDS Bases >=${MIN_COVERAGE_THRESHOLD1}X,\
-UCSC CDS Bases >= ${MIN_COVERAGE_THRESHOLD2}X,% UCSC CDS Bases >=${MIN_COVERAGE_THRESHOLD2}X,\
+Capture Kit Bases Covered,% Capture Kit Bases Covered,Avg. Coverage,Capture Kit Bases >= 10X,\
+% Capture Kit Bases >=10X,Capture Kit Bases >= 15X,\
+% Capture Kit Bases >=15X,UCSC CDS Bases Covered,% UCSC CDS Bases Covered,\
+Avg. Coverage,UCSC CDS Bases >= 10X,% UCSC CDS Bases >=10X,\
+UCSC CDS Bases >= 15X,% UCSC CDS Bases >=15X,\
 Attention,Percentage of trimmed bases R1,Percentage of trimmed bases R2,\
 Percentage of inserts <36 bp R1,Percentage of inserts <36 bp R2,% of the lane,% binned indices,\
 Dimer Reads,% Dimer\"" + 
