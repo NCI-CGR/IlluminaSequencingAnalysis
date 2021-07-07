@@ -264,6 +264,14 @@ class ClsSample:
         print(CMD)
         os.system(CMD)
         
+# class ClsSubject:
+#     def __init__(self):
+#         self.sample = ClsSample()
+#         self.strName = ""
+#         self.strBarcode = ""
+#         self.
+#
+        
 class ClsBuild:
     def __init__(self):
         self.vSample = []

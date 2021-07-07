@@ -8,6 +8,7 @@ import subprocess
 from datetime import date
 import gzip
 
+
 def is_gz_file(filepath):
     with open(filepath, 'rb') as test_f:
         return test_f.read(2) == b'\x1f\x8b'
@@ -54,18 +55,8 @@ class ClsSample:
         else:
             return True
     
-    def Reconstruct(self, strCASAVA):
-        strOutputDir = strCASAVA + "/" + self.strLane + "/Project_COVID19"
-        CMD = "mkdir -p " + strOutputDir
-        os.system(CMD)  
-        
-        # 1: Create Sample Folder        
-        strFolderName = "Sample_" + self.strSampleName + "_" + self.strBarcode + "_" + self.strLane 
-        strFolderPath = strOutputDir + "/" + strFolderName 
-        CMD = "mkdir -p " + strFolderPath
-        os.system(CMD)
-        
-        #2: Create soft link for reads file
+    def Reconstruct(self, strFolderPath):
+        # Create soft link for reads file
         # 1) reads 1
         strReadsName = self.strSampleName + "_" + self.strBarcode + "_" + self.strLane + "_" + "R1_001_HQ_paired.fastq.gz"
         strReadsPath = strFolderPath + "/" + strReadsName 
@@ -77,12 +68,56 @@ class ClsSample:
         strReadsPath = strFolderPath + "/" + strReadsName 
         CMD = "ln -s " + self.strReads2 + " " + strReadsPath
         os.system(CMD)
+        
+
+class ClsSubject:
+    def __init__(self):
+        self.strSampleName = ""
+        self.strFlowcellName = ""
+        self.strLane = ""
+        self.strBarcode = ""
+        self.vSample = []
+    
+    def Init(self, objSample):
+        self.vSample.clear()
+        self.strSampleName = objSample.strSampleName
+        self.strFlowcellName = objSample.strFlowcellName
+        self.strLane = objSample.strLane
+        self.strBarcode = objSample.strBarcode
+        self.vSample.append(objSample)
+            
+    def UpdateLaneIndex(self, strCurSampleLaneIndex):
+        if int(self.strLane[-1]) > int(strCurSampleLaneIndex[-1]):
+            self.strLane = strCurSampleLaneIndex 
+    
+    def CheckIdentical(self, strSampleName, strBarcode):
+        if (self.strSampleName == strSampleName and             
+            self.strBarcode == strBarcode):
+            return True
+        else:
+            return False 
+    
+    def Reconstruct(self, strCASAVA):
+        strOutputDir = strCASAVA + "/" + self.strLane + "/Project_COVID19"
+        CMD = "mkdir -p " + strOutputDir
+        os.system(CMD)  
+        
+        # 1: Create Sample Folder        
+        strFolderName = "Sample_" + self.strSampleName + "_" + self.strBarcode + "_" + self.strLane 
+        strFolderPath = strOutputDir + "/" + strFolderName 
+        CMD = "mkdir -p " + strFolderPath
+        os.system(CMD)
+        
+        for sample in self.vSample:
+            sample.Reconstruct(strFolderPath)
+        
 
 class ClsFlowcell:
     def __init__(self):
         self.strName = ""
         self.vSample = []
         self.strTimeStamp = ""
+        self.vSubject = []
     
     def AddSample(self, objSample):
         self.vSample.append(objSample)
@@ -99,6 +134,22 @@ class ClsFlowcell:
             strMonth = "0" + strMonth
         self.strTimeStamp = strYear + strMonth   
         #<--
+    
+    def PrepareSubject(self):
+        self.vSubject.clear()
+        for sample in self.vSample:
+            bFind = False
+            for subject in self.vSubject:
+                if subject.CheckIdentical(sample.strSampleName, sample.strBarcode):
+                    subject.vSample.append(sample)
+                    subject.UpdateLaneIndex(sample.strLane)
+                    bFind = True
+            if not bFind:
+                #-> It is a new subject
+                objSubject = ClsSubject()
+                objSubject.Init(sample)
+                self.vSubject.append(objSubject)
+            
         
     def Reconstruct(self, strRootOutputDir):
         # 1: Check if this flowcell is existed (folder contains the flowcell's name)
@@ -117,9 +168,13 @@ class ClsFlowcell:
         CMD = "mkdir -p " + strFlowcellDir
         os.system(CMD)
         
-        # 4: Put sample into CASAVA folder
-        for sample in self.vSample:
-            sample.Reconstruct(strCASAVA)
+        # 4: Prepare subject -> Go!        
+        self.PrepareSubject()
+                
+        # 5: Put sample into CASAVA folder
+        for subject in self.vSubject:
+            subject.Reconstruct(strCASAVA)
+
         
 def AddSample(vSample, strReads):
     # 1: Parse current reads
@@ -129,6 +184,8 @@ def AddSample(vSample, strReads):
     strReadsInfo = ""
     if is_gz_file(strReads):
         with gzip.open(strReads, 'rb') as f1:
+            i = 1
+            targetLine = 1
             for x in f1:                
                 strLine = x.decode("utf-8")
                 strReadsInfo = strLine.split('\n')[0] #  this is very  tricky!! Important!
@@ -203,7 +260,7 @@ def Reconstruct(strRootOutputDir, vFlowcell):
     print("Total number of flowcells:", len(vFlowcell))
     print("----", '\n', "Flowcell Details (Flowcell Name + Sample Number)")
     for flowcell in vFlowcell:
-        print(flowcell.strName, "->", len(flowcell.vSample))
+        print(flowcell.strName, "->", len(flowcell.vSubject))
 
 def main():
     # Get arguments and check if the folder path is available
