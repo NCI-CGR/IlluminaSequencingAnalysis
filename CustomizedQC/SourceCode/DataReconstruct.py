@@ -180,20 +180,54 @@ def AddSample(vSample, strReads):
     # 1: Parse current reads
     #Check the first line of Reads
     #print(strReads)
-    #(1) Get flowcell name and barcode from reads content!
+    #(1) Get flowcell name and barcode from reads content!    
     strReadsInfo = ""
+    # -> obtain the first 5 reads and choose the most common barcode. (this is because that the barcode may have 1 bp different)
+    vLine = []
+    iMaxLines = 5
+    #print(strReads)
     if is_gz_file(strReads):
-        with gzip.open(strReads, 'rb') as f1:
-            i = 1
-            targetLine = 1
+        i = 1
+        targetLine = 1
+        with gzip.open(strReads, 'rb') as f1:            
             for x in f1:                
                 strLine = x.decode("utf-8")
-                strReadsInfo = strLine.split('\n')[0] #  this is very  tricky!! Important!
-                break
+                if i == targetLine:                    
+                    vLine.append(strLine.split('\n')[0]) #  this is very tricky!! Important!
+                    targetLine = targetLine + 4
+                i += 1 
+                if len(vLine) == iMaxLines:
+                    break
     else:        
-        CMD = "less " + strReads + " | head -n 1"
-        #print(CMD)
-        strReadsInfo = subprocess.getoutput(CMD)
+        CMD = "less " + strReads + " | awk 'NR % 4 == 1' | head -n " + str(iMaxLines)
+        #os.system(CMD)
+        #print(subprocess.getoutput(CMD))
+        vLine = subprocess.getoutput(CMD).split('\n')
+    
+    #print(vLine)
+    # Get the most common barcode
+    dicBarcode = {}
+    for strLine in vLine:
+        bFind = False
+        strBarcode = strLine.split(':')[-1]
+        for key in dicBarcode:
+            if key == strBarcode:
+                dicBarcode[key] += 1
+                bFind = True
+                break
+        if not bFind:
+            dicBarcode[strBarcode] = 1
+            
+    #print(dicBarcode)
+    listSortedBarcode = sorted(dicBarcode.items(), key=lambda x: x[1], reverse=True)
+    #print(dicSortedBarcode)
+    #print(dicBarcode)
+    strMostCommonBarcode = listSortedBarcode[0][0]
+    #print(strMostCommonBarcode)
+    for strLine in vLine:
+        if strLine.split(':')[-1] == strMostCommonBarcode:
+            strReadsInfo = strLine
+            break    
     
     #print(strReadsInfo)
     vItem = strReadsInfo.split(':')
