@@ -79,6 +79,8 @@ do
     flagWorking=${arg}
   elif [[ ${argIndex} == 22 ]]; then
     flagDone=${arg}
+  elif [[ ${argIndex} == 22 ]]; then
+    iMergedSample=${arg}  
   fi
   argIndex=$((argIndex + 1))
 done
@@ -686,6 +688,11 @@ fi
 # make output files group RW-able
 chmod g+rw ${OUTDIR}/${OUTNAME_SIMPLE}*.*
 chmod g+rw $FLAGSTAT_FILE
+
+if [[ ${iMergedSample} -eq 1 ]]; then
+    rm -f ${FASTQ1}
+    rm -f ${FASTQ2}
+fi
 
 # set flags
 if [[ -f ${flagWorking} ]];  then
