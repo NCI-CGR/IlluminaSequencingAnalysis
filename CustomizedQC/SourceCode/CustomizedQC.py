@@ -224,7 +224,7 @@ class ClsSample:
                         
         #2: Set other job info
         strJobName = "RMP." + self.GetUniqueName()
-        strNumCore = "16"
+        strNumCore = "32"
         
         #３: Get shell script file        
         strCurDirPath = os.path.dirname(os.path.realpath(__file__))
