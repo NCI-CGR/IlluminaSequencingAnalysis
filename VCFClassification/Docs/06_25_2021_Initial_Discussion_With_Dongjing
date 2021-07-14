@@ -66,7 +66,7 @@ line 20 + line 27 (in snakemake file) -> incorrect position order
  qsub -q research.q -j y -o /DCEG/Projects/Exome/builds/build_Osteosarcoma_2017_18794/20210127_reannotation/variant_classification/test_bed.log -N bed_classification -S /bin/sh /DCEG/Projects/Exome/builds/build_Osteosarcoma_2017_18794/20210127_reannotation/variant_classification/mainSnake.sh
  
  
-10: What we need to run snakemake 
+10: What we need in order to run snakemake 
 (1) In the folder 
 /DCEG/Projects/Exome/builds/build_Osteosarcoma_2017_18794/20210127_reannotation
     a) We need to have the file in line 15, 21, 22, 23, 28, 30, 31 to run the pipeline
