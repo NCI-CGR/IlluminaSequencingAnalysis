@@ -79,7 +79,7 @@ do
     flagWorking=${arg}
   elif [[ ${argIndex} == 22 ]]; then
     flagDone=${arg}
-  elif [[ ${argIndex} == 22 ]]; then
+  elif [[ ${argIndex} == 23 ]]; then
     iMergedSample=${arg}  
   fi
   argIndex=$((argIndex + 1))
@@ -689,6 +689,8 @@ fi
 chmod g+rw ${OUTDIR}/${OUTNAME_SIMPLE}*.*
 chmod g+rw $FLAGSTAT_FILE
 
+echo "Remove Fastq File for the case of merged sample"
+echo "iMergedSample: ${iMergedSample}"
 if [[ ${iMergedSample} -eq 1 ]]; then
     rm -f ${FASTQ1}
     rm -f ${FASTQ2}
