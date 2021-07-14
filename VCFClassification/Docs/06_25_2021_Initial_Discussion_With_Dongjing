@@ -68,7 +68,7 @@ line 20 + line 27 (in snakemake file) -> incorrect position order
  
 10: What we need in order to run snakemake 
 (1) In the folder 
-/DCEG/Projects/Exome/builds/build_Osteosarcoma_2017_18794/20210127_reannotation
+/DCEG/Projects/Exome/builds/build_Osteosarcoma_2017_18794/20210127_reannotation/variant_classification
     a) We need to have the file in line 15, 21, 22, 23, 28, 30, 31 to run the pipeline
        1) line 15:      15 -rw-rw-r-- 1 wud7 ncicgf_dceg_exome       21 Jun 22 04:31 fz27838_test.bed
        2) line 21:      21 -rw-rw-r-- 1 wud7 ncicgf_dceg_exome     1150 Jun 23 11:29 mainSnake.sh
