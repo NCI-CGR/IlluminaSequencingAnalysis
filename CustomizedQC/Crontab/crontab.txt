@@ -3,6 +3,6 @@ How to deploy pipeline as a crontab job in HPC
 # @hourly . ~/.bashrc && source /home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/Crontab/run.sh >> /home/lix33/lxwg/Project/CustomizedQC/Log/$(date +\%Y\%m).txt 2>&1
 
 Please use the crontab below to avoid warning message (check issue 15 for details)
-@hourly bash /home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/Crontab/run.sh >> /home/lix33/lxwg/Project/CustomizedQC/Log/$(date +\%Y\%m).txt 2>&1
+@hourly source /home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/Crontab/run.sh >> /home/lix33/lxwg/Project/CustomizedQC/Log/$(date +\%Y\%m).txt 2>&1
 
 
