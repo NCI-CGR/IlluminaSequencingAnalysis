@@ -695,6 +695,7 @@ def main():
         
     #Create Builds
     vBuild = []
+    iNum = 0
     for strFlowcellDir in vFlowcellDir:
         print()
         objBuild = ClsBuild()
@@ -712,8 +713,12 @@ def main():
         objBuild.CustomizedAlignment()    
         objBuild.CustomizedQCReport()
         vBuild.append(objBuild)
-        # Only do one (the first) unfinished flowcell for each run 
-        break
+        
+        # Only do one (the first) unfinished flowcell for each run
+        # We can do 3 flowcells at the same time to save the total running time
+        iNum += 1
+        if iNum >= 2:             
+            break
     
     #Print status of each build
     print("\n", ">>>>> Summary (All Finished Flowcells + the first working one) <<<<<")
