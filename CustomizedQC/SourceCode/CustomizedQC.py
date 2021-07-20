@@ -23,7 +23,7 @@ REFSamIndex = "/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/ref
 
 EMAILSender = "xin.li4@nih.gov"
 EMAILReceiver = "xin.li4@nih.gov"
-#EMAILReceiver = "xin.li4@nih.gov,mingyi.wang@nih.gov"
+EMAILReceiverAllSet = "xin.li4@nih.gov,bin.zhu2@nih.gov,jia.liu3@nih.gov,wen.luo@nih.gov,nathan.cole@nih.gov,shukwanwendy.wong@nih.gov,hicksbel@mail.nih.gov"
 
 FLAGAlignmentWorking = "flag.alignment.working"
 FLAGAlignmentDone = "flag.alignment.done"
@@ -434,7 +434,7 @@ class ClsBuild:
             if len(vDir) == 0:
                 # send the email to notify people the a new analysis will be launched!
                 #it is new -> send start notification
-                strInputFile = os.path.dirname(self.strFlowcellDir)
+                strInputFile = self.strFlowcellDir #os.path.dirname(self.strFlowcellDir)
                 strPlatform = "COVID 19"     
                 strMsg = "============ " + strPlatform + " ============\n"
                 strMsg += ("New Customized QC pipeline has been Launched in Biowulf: " + strInputFile) 
@@ -450,7 +450,7 @@ class ClsBuild:
                 #check all done flag ->
                 if len(vDir) == 3 and FLAGAlignmentDone in vDir and FLAGQCReportDone in vDir and FLAGMergeSampleDone in vDir:                    
                     # 1: Send successful notification email
-                    strInputFile = os.path.dirname(self.strFlowcellDir)
+                    strInputFile = self.strFlowcellDir #os.path.dirname(self.strFlowcellDir)
                     # need to send all done email and create all done flag
                     #  send email
                     strPlatform = "COVID 19"
@@ -464,7 +464,7 @@ class ClsBuild:
                     strSubject = strInputFile + " is all set."
 
                     CMD = ("echo -e \"" + strMsg + "\" | mail -r " + EMAILSender + " -a " + strQCReportFile +
-                           " -s \"" + strSubject + "\" " + EMAILReceiver)
+                           " -s \"" + strSubject + "\" " + EMAILReceiverAllSet)
                     print(strMsg)               
                     os.system(CMD)
                     
