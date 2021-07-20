@@ -108,17 +108,19 @@ class ClsSample:
             # Get fastq info (Check soft link)
             CMD = "find " + self.strSampleDir + " -maxdepth 1 -type l -name \"*.fastq.gz\""
             self.iMergeSample = 0 # False
-        #print(CMD)        
+        #print(CMD)
         strFastqList = subprocess.getoutput(CMD)
-        vFastqList = strFastqList.split('\n')
+        vFastqList = []
+        if strFastqList != "":
+            vFastqList = strFastqList.split('\n')
         #print("vFastqList:", vFastqList)
         if len(vFastqList) != 2:            
-            return 1
+            return 1, vFastqList
         else:
             vFastqList.sort()            
             self.strFastq1 = vFastqList[0]
             self.strFastq2 = vFastqList[1]
-            return 0
+            return 0, vFastqList
         # <- 
     
     def Print(self):
@@ -126,7 +128,7 @@ class ClsSample:
         print("Fastq 1:", self.strFastq1)
         print("Fastq 2:", self.strFastq2)
     
-    def CheckFlags(self, strPhase):
+    def CheckFlags(self, strPhase, bTouch=True):
         if strPhase == "MergeSample":
             workingFlag = self.strFlagDir + "/" + FLAGMergeSampleWorking
             doneFlag = self.strFlagDir + "/" + FLAGMergeSampleDone
@@ -147,9 +149,11 @@ class ClsSample:
             elif os.path.exists(workingFlag):
                 return 1
             else:
-                CMD = "touch " + workingFlag
-                os.system(CMD) 
-                return 2        
+                if bTouch:
+                    CMD = "touch " + workingFlag
+                    os.system(CMD) 
+                return 2
+
         if strPhase == "QCReport":
             workingFlag = self.strFlagDir + "/" + FLAGQCReportWorking
             doneFlag = self.strFlagDir + "/" + FLAGQCReportDone
@@ -607,14 +611,24 @@ class ClsBuild:
             
     def CustomizedAlignment(self):        
         iReturn = self.CheckFlags("Alignment")
-        if iReturn == 0 or iReturn == 1 or iReturn == 3:  # everything is done or still working
+        #print(iReturn, self.strFlowcellDir)
+        if iReturn == 0 or iReturn == 1 or iReturn == 3:  # everything is done or still working            
             return iReturn
         
         # This is the new case that flowcell need a new analysis--> Go!!
         for sample in self.vSample:
-            iResult = sample.UpdateFastqInfo()
+            # Check if the alignment has been done (the sum-fastq file will be removed automatically once aligment is all set)
+            iReturn = sample.CheckFlags("Alignment", False)
+            #print(sample.strName, sample.strBarcode, iReturn)
+            if iReturn == 0 or iReturn == 1:  # everything is done or still working
+                continue
+            
+            iResult, vFastqList = sample.UpdateFastqInfo()
+            #print(vFastqList)
             if iResult != 0:
                 print("Error: Bad number of fastq files!")
+                print("vFastqList Len:", len(vFastqList))
+                print("vFastqList    :", vFastqList)                
                 return 4
             sample.SubmitAlignmentJob(self.strProcessedDir, self.strFlowcellDir, self.strRootLogDir, self.strRootQCReportDir, self.strRootBAMDir)
         return 2
@@ -696,6 +710,7 @@ def main():
     #Create Builds
     vBuild = []
     iNum = 0
+    iMaxSimuFlowcell = 4
     for strFlowcellDir in vFlowcellDir:
         print()
         objBuild = ClsBuild()
@@ -717,7 +732,7 @@ def main():
         # Only do one (the first) unfinished flowcell for each run
         # We can do 3 flowcells at the same time to save the total running time
         iNum += 1
-        if iNum >= 2:             
+        if iNum >= iMaxSimuFlowcell:             
             break
     
     #Print status of each build
