@@ -710,7 +710,7 @@ def main():
     #Create Builds
     vBuild = []
     iNum = 0
-    iMaxSimuFlowcell = 4
+    iMaxSimuFlowcell = 5
     for strFlowcellDir in vFlowcellDir:
         print()
         objBuild = ClsBuild()

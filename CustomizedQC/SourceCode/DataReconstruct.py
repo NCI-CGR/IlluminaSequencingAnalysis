@@ -182,24 +182,31 @@ def AddSample(vSample, strReads):
     #print(strReads)
     #(1) Get flowcell name and barcode from reads content!    
     strReadsInfo = ""
-    # -> obtain the first 5 reads and choose the most common barcode. (this is because that the barcode may have 1 bp different)
+    # -> obtain the first "iMaxReadsNum" reads and choose the most common barcode. (this is because that the barcode may have 1 bp different)
+    #    Notice: we use the first 5 reads before, however, it is not enough based on the real data, then we are using the first 101 reads to reduce the bias. 
     vLine = []
-    iMaxLines = 5
+    iStartReadsNum = 100 # we start to count the reads if the reads index > "iStartReadsNum" 
+                         # motivation: we plan to skip the first some parts of reads, since the barcode in 
+                         #             these reads may contain many uncertain things "e.g. contain 'N'")
+    iMaxReadsNum = 101 # total number of reads we need to collect
     #print(strReads)
     if is_gz_file(strReads):
         i = 1
         targetLine = 1
+        iCount = 0
         with gzip.open(strReads, 'rb') as f1:            
             for x in f1:                
                 strLine = x.decode("utf-8")
-                if i == targetLine:                    
-                    vLine.append(strLine.split('\n')[0]) #  this is very tricky!! Important!
+                if i == targetLine:
+                    iCount += 1
+                    if iCount > iStartReadsNum:
+                        vLine.append(strLine.split('\n')[0]) #  this is very tricky!! Important!
                     targetLine = targetLine + 4
                 i += 1 
-                if len(vLine) == iMaxLines:
+                if len(vLine) == iMaxReadsNum:
                     break
     else:        
-        CMD = "less " + strReads + " | awk 'NR % 4 == 1' | head -n " + str(iMaxLines)
+        CMD = "less " + strReads + " | awk 'NR % 4 == 1' | head -n " + str(iStartReadsNum + iMaxReadsNum) + " | tail -n " + str(iMaxReadsNum)
         #os.system(CMD)
         #print(subprocess.getoutput(CMD))
         vLine = subprocess.getoutput(CMD).split('\n')
