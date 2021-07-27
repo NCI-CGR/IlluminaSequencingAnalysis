@@ -23,7 +23,7 @@ REFSamIndex = "/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/ref
 
 EMAILSender = "xin.li4@nih.gov"
 EMAILReceiver = "xin.li4@nih.gov"
-EMAILReceiverAllSet = "xin.li4@nih.gov,bin.zhu2@nih.gov,jia.liu3@nih.gov,wen.luo@nih.gov,nathan.cole@nih.gov,shukwanwendy.wong@nih.gov,hicksbel@mail.nih.gov"
+EMAILReceiverAllSet = "xin.li4@nih.gov,bin.zhu2@nih.gov,jia.liu3@nih.gov,wen.luo@nih.gov,nathan.cole@nih.gov,shukwanwendy.wong@nih.gov,hicksbel@mail.nih.gov,mia.steinberg@nih.gov"
 
 FLAGAlignmentWorking = "flag.alignment.working"
 FLAGAlignmentDone = "flag.alignment.done"
@@ -710,7 +710,7 @@ def main():
     #Create Builds
     vBuild = []
     iNum = 0
-    iMaxSimuFlowcell = 5
+    iMaxSimuFlowcell = 1
     for strFlowcellDir in vFlowcellDir:
         print()
         objBuild = ClsBuild()
