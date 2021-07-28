@@ -5,7 +5,6 @@ This is a simple testing, including dry_run and wet_run
 import subprocess
 import sys
 import os
-from traitlets.config.application import catch_config_error
 
 def main():
     strDataDir = "/home/lix33/lxwg/Test/object_storage"
@@ -20,8 +19,8 @@ def main():
         if strFile == "":
             continue
         strPrefix = strObjPrefix + os.path.dirname(strFile).replace(strRootDir, '') + "/"        
-        CMD = "obj_put -v DCEG_COVID_WGS -p " + "\"" + strPrefix + "\" " + strFile + " --dry-run -V" # Dry run
-        #CMD = "obj_put -v DCEG_COVID_WGS -p " + "\"" + strPrefix + "\" " + strFile + " -V" # wet run
+        #CMD = "obj_put -v DCEG_COVID_WGS -p " + "\"" + strPrefix + "\" " + strFile + " --dry-run -V" # Dry run
+        CMD = "obj_put -v DCEG_COVID_WGS -p " + "\"" + strPrefix + "\" " + strFile + " -V" # wet run
         print(CMD)
         iReturn = os.system(CMD)
         if iReturn != 0:
