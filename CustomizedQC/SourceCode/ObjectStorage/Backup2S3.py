@@ -11,6 +11,7 @@ import sys
 import os
 
 def BackupFlowcell2S3(strFlowcellDir, strRootDir, strObjPrefix):
+    print("Start to back up flowcell:", strFlowcellDir, " ---->")
     # Step1: Check if such flowcell is already existed in s3 -> Do it later
     # Step2: Backup
     CMD = "find " + strFlowcellDir + " -type f"    
@@ -29,8 +30,12 @@ def BackupFlowcell2S3(strFlowcellDir, strRootDir, strObjPrefix):
             print("\n", ">>>>>> Error Occured!")
             print(CMD, "\n", "<<<<<<<", "\n") 
             exit()
+    print("\n", "**********")
+    print("Current Flowcell is all set:", strFlowcellDir)
+    print("**********", "\n")
             
 def RemoveFlowcellFromBiowulf(strFlowcellDir):
+    print("Removing finished flowcell -> ")
     if os.path.exists(strFlowcellDir):
         CMD = "rm -r " + strFlowcellDir
         iResult = os.system(CMD)
@@ -38,6 +43,9 @@ def RemoveFlowcellFromBiowulf(strFlowcellDir):
             print("\n", ">>>>>> Error Occured!")            
             print(CMD, "\n", "<<<<<<<", "\n") 
             exit()
+    print("\n", "**********")
+    print("Flowcell has been removed from Biowulf:", strFlowcellDir)
+    print("<<<<<<<<<<<<<<", "\n")
 
 def main():
     strDataDir = "/data/COVID_WGS/primary_analysis/COVID19/06_30_2021/ProcessedData"
@@ -72,7 +80,7 @@ def main():
         
         if bAllDone and bQCReportGenerated:
             BackupFlowcell2S3(strFlowcellDir, strRootDir, strObjPrefix)
-            #RemoveFlowcellFromBiowulf(strFlowcellDir)
+            RemoveFlowcellFromBiowulf(strFlowcellDir)
                 
     print("All Set!")
 

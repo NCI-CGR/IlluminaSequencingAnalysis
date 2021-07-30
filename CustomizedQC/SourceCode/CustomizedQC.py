@@ -684,6 +684,46 @@ Dimer Reads,% Dimer\"" +
             CMD = "grep -A 1 \"Contents to be streamed to the flowcell-level report file\" " + strLogFile + " | tail -n 1 >> " + strQCReport   
             os.system(CMD)
         return 0
+
+def GetMaxParallelFlowcellNum(vFlowcellDir):
+    # Get Free space
+    CMD = "checkquota --tb | grep -i 'data(COVID_WGS)' | awk '{print $2,$3}'"
+    vQuota = subprocess.getoutput(CMD).split(' ')
+    print(vQuota)
+    iFreeSpace = int(vQuota[1]) - int(vQuota[0])
+    
+    #Get the number of parallel jobs
+    # 1: get the run number which can support run alignment (require big size ROM)
+    iROMPerJob = 16
+    iRunNum = iFreeSpace // iROMPerJob #zheng chu!!!    
+    # 2: get the lite number of flowcell which is still running but already finished
+    iLiteNum = 0
+    for strFlowcellDir in vFlowcellDir:
+        #Check if all set 
+        #Check if still in alignment
+        strFlagDir = strFlowcellDir + "/Flag/BWA/v38"
+        strAllDoneFlag = strFlagDir + "/flag.all.done"
+        strAlignmentWorkingFlag = strFlagDir + "/flag.alignment.working"
+        if not os.path.exists(strFlagDir): # this is the case of non processed flowcell
+            continue        
+        if os.path.exists(strAllDoneFlag): # this is the case of finished flowcell 
+            continue        
+        if os.path.exists(strAlignmentWorkingFlag): # For the flowcells which is still working
+            # check is we still in the phase of sam file generating
+            strTmpDir = strFlowcellDir + "/ttemp/BWA/v38"
+            if os.path.exists(strTmpDir):
+                CMD = "find " + strTmpDir + " -maxdepth 2 -type f | wc -l"
+                iNumFile = int(subprocess.getoutput(CMD))
+                if iNumFile > 0:
+                    continue
+            else:
+                continue 
+        #Such flowcell do not eat many space so go !
+        iLiteNum += 1
+        
+    iSumRun = iRunNum + iLiteNum
+    print("Number of Parallel Running Jobs:", iSumRun)
+    return iSumRun 
         
 def main():
     print('\n', "==============")
@@ -710,7 +750,8 @@ def main():
     #Create Builds
     vBuild = []
     iNum = 0
-    iMaxSimuFlowcell = 2
+    iMaxSimuFlowcell = GetMaxParallelFlowcellNum(vFlowcellDir)
+    
     for strFlowcellDir in vFlowcellDir:
         print()
         objBuild = ClsBuild()
