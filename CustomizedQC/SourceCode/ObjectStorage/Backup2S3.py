@@ -38,7 +38,7 @@ def RemoveFlowcellFromBiowulf(strFlowcellDir):
     print("Removing finished flowcell -> ")
     if os.path.exists(strFlowcellDir):
         CMD = "rm -r " + strFlowcellDir
-        iResult = os.system(CMD)
+        iReturn = os.system(CMD)
         if iReturn != 0:
             print("\n", ">>>>>> Error Occured!")            
             print(CMD, "\n", "<<<<<<<", "\n") 
