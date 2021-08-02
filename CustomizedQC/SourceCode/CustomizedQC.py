@@ -17,6 +17,7 @@ import os
 import sys
 import subprocess
 from datetime import datetime
+from contextlib import ExitStack
 TMPFolder = "/scratch/lix33/TmpSequencing/"
 REFSeq = "/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/ref38/Homo_sapiens_assembly38.fasta"
 REFSamIndex = "/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/ref38/Homo_sapiens_assembly38.fasta.fai"
@@ -687,10 +688,19 @@ Dimer Reads,% Dimer\"" +
 
 def GetMaxParallelFlowcellNum(vFlowcellDir):
     # Get Free space
-    CMD = "checkquota --tb | grep -i 'data(COVID_WGS)' | awk '{print $2,$3}'"
-    vQuota = subprocess.getoutput(CMD).split(' ')
-    print(vQuota)
-    iFreeSpace = int(vQuota[1]) - int(vQuota[0])
+    # CMD = "checkquota --tb | grep -i 'data(COVID_WGS)' | awk '{print $2,$3}'"
+    # vQuota = subprocess.getoutput(CMD).split(' ')
+    # print(vQuota)
+    # iFreeSpace = int(vQuota[1]) - int(vQuota[0])    
+    iSize = 0
+    iMaxQuota = 81
+    strDir = "/data/COVID_WGS/COVNET_Data_Delivery"     
+    CMD = "du -sB 1T " + strDir + " | awk '{print $1}'"
+    iSize += int(subprocess.getoutput(CMD))
+    strDir = "/data/COVID_WGS/primary_analysis"
+    CMD = "du -sB 1T " + strDir + " | awk '{print $1}'"
+    iSize += int(subprocess.getoutput(CMD))
+    iFreeSpace = iMaxQuota - iSize   
     
     #Get the number of parallel jobs
     # 1: get the run number which can support run alignment (require big size ROM)
@@ -704,6 +714,8 @@ def GetMaxParallelFlowcellNum(vFlowcellDir):
         strFlagDir = strFlowcellDir + "/Flag/BWA/v38"
         strAllDoneFlag = strFlagDir + "/flag.all.done"
         strAlignmentWorkingFlag = strFlagDir + "/flag.alignment.working"
+        strMergeDoneFlag = strFlagDir + "/flag.merge.sample.done"
+        strAlignmentDoneFlag = strFlagDir + "/flag.alignment.done"
         if not os.path.exists(strFlagDir): # this is the case of non processed flowcell
             continue        
         if os.path.exists(strAllDoneFlag): # this is the case of finished flowcell 
@@ -716,11 +728,17 @@ def GetMaxParallelFlowcellNum(vFlowcellDir):
                 iNumFile = int(subprocess.getoutput(CMD))
                 if iNumFile > 0:
                     continue
+                else:
+                    #Such flowcell do not eat many space so go ! (still in the phase of alignment)
+                    iLiteNum += 1
+                    continue
             else:
                 continue 
-        #Such flowcell do not eat many space so go !
-        iLiteNum += 1
-        
+        #Such flowcell do not eat many space so go ! (alignment and merging has been finished)
+        if os.path.exists(strMergeDoneFlag) and os.path.exists(strAlignmentDoneFlag):
+            iLiteNum += 1
+            continue
+                
     iSumRun = iRunNum + iLiteNum
     print("Number of Parallel Running Jobs:", iSumRun)
     return iSumRun 
@@ -771,7 +789,7 @@ def main():
         vBuild.append(objBuild)
         
         # Only do one (the first) unfinished flowcell for each run
-        # We can do 3 flowcells at the same time to save the total running time
+        # We can do 3 flowcells at the same time to save the total running time (now, we decide this number dynamically)
         iNum += 1
         if iNum >= iMaxSimuFlowcell:             
             break
