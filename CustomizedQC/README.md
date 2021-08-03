@@ -43,16 +43,35 @@ This is the project for generating customized QC and run in Biowulf
 1： Command line
 
 ```
-python3 ./CustomizedQC.py /scratch/lix33/lxwg/Data/ad-hoc/WGS
+Step 1 (Optional): Create seperate folder and put all of target delivered folders inside -- one time
+   - This is optional but highly recommanded, since 
+      - some new data may come in when you run the command line.
+      - the file may not in sub-folder
+      
+Step 2: Reconstruct data  -- one time
+python3 /home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode/DataReconstruct.py /data/COVID_WGS/primary_analysis/Data/07_02_2021 /data/COVID_WGS/primary_analysis/COVID19/06_30_2021/ProcessedData
+
+Step 3: Run Customized QC python sourcecode  -- crontab job
+python3 /home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode/CustomizedQC.py /data/COVID_WGS/primary_analysis/COVID19/06_30_2021/ProcessedData
+
+Step 4 (Optional): Move data from biowulf to S3 (object storage system)
+python3 /home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode/ObjectStorage/Backup2S3.py
+Also check: /home/lix33/lxwg/Test/slurm/object_storage/job.sh
 ```
 
 2: Output: 
-- CustomizedQC will auto create a folder named "ProcessedData" in the folder of input file
- - All outputs will locate in the folder "ProcessedData"
-- For example:
- - Final results: /scratch/lix33/lxwg/Data/ad-hoc/WGS/ProcessedData
- - BAM file: /scratch/lix33/lxwg/Data/ad-hoc/WGS/ProcessedData/BAM/BWA/v38
- - QC report: /scratch/lix33/lxwg/Data/ad-hoc/WGS/ProcessedData/QCReport-BWA-v38.csv
+- Step 1
+   - softlink to the existing folder or fastq files
+   - example: /data/COVID_WGS/primary_analysis/Data/07_26_2021
+- Step 2
+   - Flowcells which parsed from the existing fastq files  
+   - example: /data/COVID_WGS/primary_analysis/COVID19/06_30_2021/ProcessedData
+- Step 3
+   - BAM files, QC report will be in each flowcell folder
+   - example: /data/COVID_WGS/primary_analysis/COVID19/06_30_2021/ProcessedData
+- Step 4
+   - In vault: DCEG_COVID_WGS
+   - you can use obj_ls and obj_df to check it
  
 ### Naming rules
 - Aligner name and reference verion will be appended as the suffix in final QC report
