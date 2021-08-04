@@ -57,21 +57,31 @@ python3 /home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode/
 Step 4 (Optional): Move data from biowulf to S3 (object storage system)
 python3 /home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode/ObjectStorage/Backup2S3.py
 Also check: /home/lix33/lxwg/Test/slurm/object_storage/job.sh
+
+Step 5: merge qc report together
+python3 /home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode/MergeQCReport.py
 ```
 
 2: Output: 
 - Step 1
    - softlink to the existing folder or fastq files
    - example: /data/COVID_WGS/primary_analysis/Data/07_26_2021
+
 - Step 2
    - Flowcells which parsed from the existing fastq files  
    - example: /data/COVID_WGS/primary_analysis/COVID19/06_30_2021/ProcessedData
+ 
 - Step 3
    - BAM files, QC report will be in each flowcell folder
    - example: /data/COVID_WGS/primary_analysis/COVID19/06_30_2021/ProcessedData
+ 
 - Step 4
    - In vault: DCEG_COVID_WGS
    - you can use obj_ls and obj_df to check it
+
+- Step 5
+   - Once everything is all set, merge qc report together 
+   - example: /data/COVID_WGS/primary_analysis/COVID19/06_30_2021/QCReport
  
 ### Naming rules
 - Aligner name and reference verion will be appended as the suffix in final QC report
