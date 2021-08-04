@@ -701,25 +701,53 @@ def GetMaxParallelFlowcellNum(vFlowcellDir):
     CMD = "du -sB 1T " + strDir + " | awk '{print $1}'"
     iSize += int(subprocess.getoutput(CMD))
     iFreeSpace = iMaxQuota - iSize   
-    
+    print("Current Free space:", iFreeSpace, "T")
     #Get the number of parallel jobs
     # 1: get the run number which can support run alignment (require big size ROM)
-    iROMPerJob = 16
-    iRunNum = iFreeSpace // iROMPerJob #zheng chu!!!    
+    iROMPerSample = 0.7  # Each sample need max 0.7TB to be finished (SAM and fastq)
+    iMaxSupportSample = iFreeSpace // iROMPerSample     
+    iRunNum = 0 #iFreeSpace // iROMPerJob #zheng chu!!!
+    bOverFlow = False
+    iNumValidSample = 0
+        
     # 2: get the lite number of flowcell which is still running but already finished
     iLiteNum = 0
+    
+    iUnprocessedNum = 0
+    iDoneNum = 0
+    iWorkingNum = 0
     for strFlowcellDir in vFlowcellDir:
-        #Check if all set 
-        #Check if still in alignment
+        #Get number of samples
+        CMD = "find " + strFlowcellDir + " -maxdepth 4 -type d -iname 'Sample_*' | wc -l"
+        iSampleNum = int(subprocess.getoutput(CMD))
+        
+        #Get number of flags
         strFlagDir = strFlowcellDir + "/Flag/BWA/v38"
+        iNumFlags = 0
+        if os.path.exists(strFlagDir):
+            CMD = "find " + strFlagDir + " -maxdepth 3 -type f -iname '*flag*' | wc -l"
+            iNumFlags = int(subprocess.getoutput(CMD))
+        
+        #Check if all set 
+        #Check if still in alignment        
         strAllDoneFlag = strFlagDir + "/flag.all.done"
         strAlignmentWorkingFlag = strFlagDir + "/flag.alignment.working"
         strMergeDoneFlag = strFlagDir + "/flag.merge.sample.done"
         strAlignmentDoneFlag = strFlagDir + "/flag.alignment.done"
-        if not os.path.exists(strFlagDir): # this is the case of non processed flowcell
+        if iNumFlags == 0: # this is the case of non processed flowcell
+            iUnprocessedNum += 1
+            if not bOverFlow:
+                if iNumValidSample + iSampleNum <= iMaxSupportSample:
+                    iRunNum += 1
+                iNumValidSample += iSampleNum
+                if iNumValidSample >= iMaxSupportSample:
+                    bOverFlow = True
             continue        
-        if os.path.exists(strAllDoneFlag): # this is the case of finished flowcell 
-            continue        
+        if os.path.exists(strAllDoneFlag): # this is the case of finished flowcell
+            iDoneNum += 1
+            continue
+        #For the case of processing but unfinished flowcell -> Go  
+        iWorkingNum += 1      
         if os.path.exists(strAlignmentWorkingFlag): # For the flowcells which is still working
             # check is we still in the phase of sam file generating
             strTmpDir = strFlowcellDir + "/ttemp/BWA/v38"
@@ -727,20 +755,47 @@ def GetMaxParallelFlowcellNum(vFlowcellDir):
                 CMD = "find " + strTmpDir + " -maxdepth 2 -type f | wc -l"
                 iNumFile = int(subprocess.getoutput(CMD))
                 if iNumFile > 0:
+                    if not bOverFlow:
+                        if iNumValidSample + iSampleNum <= iMaxSupportSample:
+                            iRunNum += 1
+                        iNumValidSample += iSampleNum
+                        if iNumValidSample >= iMaxSupportSample:
+                            bOverFlow = True
                     continue
                 else:
                     #Such flowcell do not eat many space so go ! (still in the phase of alignment)
                     iLiteNum += 1
                     continue
             else:
-                continue 
-        #Such flowcell do not eat many space so go ! (alignment and merging has been finished)
-        if os.path.exists(strMergeDoneFlag) and os.path.exists(strAlignmentDoneFlag):
+                continue
+            
+        if not os.path.exists(strAlignmentWorkingFlag) and not os.path.exists(strAlignmentDoneFlag):
+            # This means next step is doing alignment, so we need to check if we need to update the run number
+            if not bOverFlow:
+                if iNumValidSample + iSampleNum <= iMaxSupportSample:
+                    iRunNum += 1
+                iNumValidSample += iSampleNum
+                if iNumValidSample >= iMaxSupportSample:
+                    bOverFlow = True
+        else:
             iLiteNum += 1
             continue
+        # #Such flowcell do not eat many space so go ! (alignment and merging has been finished)
+        # if os.path.exists(strMergeDoneFlag) and os.path.exists(strAlignmentDoneFlag):
+        #     iLiteNum += 1
+        #     continue
                 
     iSumRun = iRunNum + iLiteNum
-    print("Number of Parallel Running Jobs:", iSumRun)
+    print("**** Flowcell Status ****")
+    print("iTotalNum      :", iUnprocessedNum + iDoneNum + iWorkingNum)
+    print("iUnprocessedNum:", iUnprocessedNum)
+    print("iDoneNum       :", iDoneNum)
+    print("iWorkingNum    :", iWorkingNum)
+    print()
+    print("**** Dynamic Job Status ****")
+    print("iRunNum                             :", iRunNum)
+    print("iLiteNum                            :", iLiteNum)
+    print("Number of Parallel Running flowcells:", iSumRun)    
     return iSumRun 
         
 def main():
