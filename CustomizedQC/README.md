@@ -59,7 +59,7 @@ python3 /home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode/
 Also check: /home/lix33/lxwg/Test/slurm/object_storage/job.sh
 
 Step 5: merge qc report together
-python3 /home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode/MergeQCReport.py
+python3 /home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode/MergeQCReport.py /data/COVID_WGS/primary_analysis/COVID19/06_30_2021/QCReport
 ```
 
 2: Output: 
