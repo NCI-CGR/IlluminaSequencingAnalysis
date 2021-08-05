@@ -55,7 +55,9 @@ def UpdateOutVcf(outVCF):
             os.system(CMD)
         CMD = "sed '/#CHROM/q' " + outVCF + " >> " + outVCFTmp
         os.system(CMD)
-        CMD = "sed -n '/#CHROM/,$p' " + outVCF + " | tail -n +2 " + "| sort -k 2,2 | uniq >> " + outVCFTmp
+        #CMD = "sed -n '/#CHROM/,$p' " + outVCF + " | tail -n +2 " + "| sort -k 2,2 | uniq >> " + outVCFTmp
+        # need to sort both chromosome and position
+        CMD = "sed -n '/#CHROM/,$p' " + outVCF + " | tail -n +2 " + "| sort -k1,1V -k2,2n | uniq >> " + outVCFTmp
         os.system(CMD)
         CMD = "mv " + outVCF + " " + outVCFOrg
         os.system(CMD)
