@@ -49,7 +49,9 @@ Step 1 (Optional): Create seperate folder and put all of target delivered folder
       - the file may not in sub-folder
       
 Step 2: Reconstruct data  -- one time
-python3 /home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode/DataReconstruct.py /data/COVID_WGS/primary_analysis/Data/07_02_2021 /data/COVID_WGS/primary_analysis/COVID19/06_30_2021/ProcessedData
+rawDir="/data/COVID_WGS/primary_analysis/Data/07_02_2021"
+processedDir="/data/COVID_WGS/primary_analysis/COVID19/08_03_2021/ProcessedData"
+python3 /home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode/DataReconstruct.py ${rawDir} ${processedDir}
 
 Step 3: Run Customized QC python sourcecode  -- crontab job
 python3 /home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode/CustomizedQC.py /data/COVID_WGS/primary_analysis/COVID19/06_30_2021/ProcessedData
