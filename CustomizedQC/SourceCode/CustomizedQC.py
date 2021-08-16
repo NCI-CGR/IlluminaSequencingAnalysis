@@ -17,14 +17,13 @@ import os
 import sys
 import subprocess
 from datetime import datetime
-from contextlib import ExitStack
 TMPFolder = "/scratch/lix33/TmpSequencing/"
 REFSeq = "/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/ref38/Homo_sapiens_assembly38.fasta"
 REFSamIndex = "/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/ref38/Homo_sapiens_assembly38.fasta.fai"
 
 EMAILSender = "xin.li4@nih.gov"
 EMAILReceiver = "xin.li4@nih.gov"
-EMAILReceiverAllSet = "xin.li4@nih.gov,bin.zhu2@nih.gov,jia.liu3@nih.gov,wen.luo@nih.gov,nathan.cole@nih.gov,shukwanwendy.wong@nih.gov,hicksbel@mail.nih.gov,mia.steinberg@nih.gov"
+EMAILReceiverAllSet = "xin.li4@nih.gov,bin.zhu2@nih.gov,jia.liu3@nih.gov,wen.luo@nih.gov,nathan.cole@nih.gov,shukwanwendy.wong@nih.gov,hicksbel@mail.nih.gov,mia.steinberg@nih.gov,kristine.jones@nih.gov"
 
 FLAGAlignmentWorking = "flag.alignment.working"
 FLAGAlignmentDone = "flag.alignment.done"
@@ -62,6 +61,7 @@ class ClsSample:
             os.system(CMD)        
     
     def Init(self, strSampleDir, strAlinger, strRef):
+        #print("strSampleDir -->", strSampleDir)
         #Init Sample Dir 
         self.strSampleDir = strSampleDir 
         #print("strSampleDir", strSampleDir)        
@@ -378,6 +378,7 @@ class ClsBuild:
         self.bAllSet = False
                     
     def Init(self, strFlowcellDir):
+        print("strFlowcellDir -->", strFlowcellDir)
         # Get main processed folder name and file basename
         self.strProcessedDir = os.path.dirname(strFlowcellDir)
         self.strFlowcellName = os.path.basename(strFlowcellDir)
@@ -452,10 +453,11 @@ class ClsBuild:
                 if len(vDir) == 3 and FLAGAlignmentDone in vDir and FLAGQCReportDone in vDir and FLAGMergeSampleDone in vDir:                    
                     # 1: Send successful notification email
                     strInputFile = self.strFlowcellDir #os.path.dirname(self.strFlowcellDir)
+                    strFlowcellName = os.path.basename(self.strFlowcellDir)
                     # need to send all done email and create all done flag
                     #  send email
                     strPlatform = "COVID 19"
-                    strFileName = "QCReport" + "-" + self.strAligner + "-" + self.strRef + ".csv"
+                    strFileName = strFlowcellName + "_QCReport" + "-" + self.strAligner + "-" + self.strRef + ".csv"
                     strQCReportFile = self.strFlowcellDir + "/" + strFileName     
                     strMsg = "============ " + strPlatform + " ============\n\n"
                     strMsg += ("New Customized QC pipeline is all set: " + strInputFile + "\n\n" + 
@@ -647,7 +649,7 @@ class ClsBuild:
                 
     def GenerateQCSummary(self):
         print("I am the last step: GenerateQCSummary!")
-        strFileName = "QCReport" + "-" + self.strAligner + "-" + self.strRef + ".csv"
+        strFileName = self.strFlowcellName + "_" + "QCReport" + "-" + self.strAligner + "-" + self.strRef + ".csv"
         strQCReport = self.strFlowcellDir + "/" + strFileName
         
         # remove the old one

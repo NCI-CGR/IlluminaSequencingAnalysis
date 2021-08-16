@@ -13,6 +13,9 @@ def is_gz_file(filepath):
     with open(filepath, 'rb') as test_f:
         return test_f.read(2) == b'\x1f\x8b'
 
+def func_match(s1, s2):
+    return sum(s1[i] != s2[i] for i in range(len(s1))) <= 1
+
 class ClsSample:
     def __init__(self):
         self.strReads1 = ""
@@ -88,11 +91,11 @@ class ClsSubject:
             
     def UpdateLaneIndex(self, strCurSampleLaneIndex):
         if int(self.strLane[-1]) > int(strCurSampleLaneIndex[-1]):
-            self.strLane = strCurSampleLaneIndex 
+            self.strLane = strCurSampleLaneIndex     
     
     def CheckIdentical(self, strSampleName, strBarcode):
         if (self.strSampleName == strSampleName and             
-            self.strBarcode == strBarcode):
+            func_match(self.strBarcode, strBarcode)):
             return True
         else:
             return False 
@@ -118,6 +121,8 @@ class ClsFlowcell:
         self.vSample = []
         self.strTimeStamp = ""
         self.vSubject = []
+        # parse ID and name
+        self.dictIDName = {} 
     
     def AddSample(self, objSample):
         self.vSample.append(objSample)
@@ -156,6 +161,7 @@ class ClsFlowcell:
         for subDir in os.listdir(strRootOutputDir):
             strSubDirPath = strRootOutputDir + "/" + subDir
             if os.path.isdir(strSubDirPath) and self.strName in subDir:
+                print("WARNING: Flowcell has already existed (skip):", strSubDirPath)
                 return
         
         # 2: Create Flowcell Folder
@@ -286,7 +292,12 @@ def GetFlowcells(vFlowcell, vSample):
         if not bFind:
             objFlowcell = ClsFlowcell()
             objFlowcell.Init(sample)            
-            vFlowcell.append(objFlowcell)    
+            vFlowcell.append(objFlowcell)
+    
+    #Print the info of flowcell
+    print("Number of Flowcell:", len(vFlowcell)) 
+    for flowcell in vFlowcell:
+        print(flowcell.strName, "-->", len(flowcell.vSample))        
 
 def Reconstruct(strRootOutputDir, vFlowcell):
     # Create output Dir
@@ -333,6 +344,8 @@ def main():
     print('\n', "GetFlowcells -->")
     vFlowcell = []
     GetFlowcells(vFlowcell, vSample)
+    
+    #  
     
     # Reshape data if everything is OK -> Go
     print('\n', "Reconstruct -->")

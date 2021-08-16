@@ -41,7 +41,12 @@ def CheckValidation(vFlowcell):
     return 0
 
 def MergeQCReport(strDir, vFlowcell):
-    strMergedFile = strDir + "/" + "Sum_" + os.path.basename(vFlowcell[0].strQCReport)
+    # Get suffix of sum report
+    strSuffix = os.path.basename(vFlowcell[0].strQCReport)
+    if '_' in strSuffix:
+        strSuffix = strSuffix.split('_')[1] 
+         
+    strMergedFile = strDir + "/" + "Sum_" + strSuffix
     
     #1: Remove old file first 
     if os.path.exists(strMergedFile):

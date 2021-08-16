@@ -9,6 +9,7 @@
 import subprocess
 import sys
 import os
+from datetime import datetime
 
 def BackupFlowcell2S3(strFlowcellDir, strRootDir, strObjPrefix):
     print("Start to back up flowcell:", strFlowcellDir, " ---->")
@@ -28,6 +29,15 @@ def BackupFlowcell2S3(strFlowcellDir, strRootDir, strObjPrefix):
         iReturn = os.system(CMD)
         if iReturn != 0:
             print("\n", ">>>>>> Error Occured!")
+            
+            print('\n', "==============")
+            today = datetime.today()
+            print("Date:", today.strftime("%B %d, %Y"))
+            now = datetime.now()
+            dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+            print("Time:", dt_string)
+            print("==============", '\n')
+            
             print(CMD, "\n", "<<<<<<<", "\n") 
             exit()
     print("\n", "**********")
@@ -40,7 +50,16 @@ def RemoveFlowcellFromBiowulf(strFlowcellDir):
         CMD = "rm -r " + strFlowcellDir
         iReturn = os.system(CMD)
         if iReturn != 0:
-            print("\n", ">>>>>> Error Occured!")            
+            print("\n", ">>>>>> Error Occured!")
+            
+            print('\n', "==============")
+            today = datetime.today()
+            print("Date:", today.strftime("%B %d, %Y"))
+            now = datetime.now()
+            dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+            print("Time:", dt_string)
+            print("==============", '\n')
+                
             print(CMD, "\n", "<<<<<<<", "\n") 
             exit()
     print("\n", "**********")
@@ -53,6 +72,7 @@ def main():
     strObjPrefix = "lix33/COVID19/USU/Data"
         
     #Get all of files 
+    vBackupFlowcellDir = []
     CMD = "find " + strDataDir + " -mindepth 1 -maxdepth 1 -type d"
     strFlowcellList = subprocess.getoutput(CMD)
     vFlowcell = strFlowcellList.split('\n')
@@ -79,8 +99,20 @@ def main():
                 bQCReportGenerated = True
         
         if bAllDone and bQCReportGenerated:
-            BackupFlowcell2S3(strFlowcellDir, strRootDir, strObjPrefix)
-            RemoveFlowcellFromBiowulf(strFlowcellDir)
+            vBackupFlowcellDir.append(strFlowcellDir)
+    
+    # Print the summarize info for all flowcell that will be backup ->
+    print('\n', "============")
+    print("Total Number of Backup flowcell:", len(vBackupFlowcellDir))
+    print("--------")
+    for dirFlowcell in vBackupFlowcellDir:
+        print(dirFlowcell)
+    print("--------", '\n')
+    #<-
+    
+    for dirFlowcell in vBackupFlowcellDir:        
+        BackupFlowcell2S3(dirFlowcell, strRootDir, strObjPrefix)
+        RemoveFlowcellFromBiowulf(dirFlowcell)
                 
     print("All Set!")
 
