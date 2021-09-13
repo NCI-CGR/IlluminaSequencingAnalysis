@@ -8,7 +8,6 @@
 import os
 import sys
 import subprocess
-from appdirs import system
 
 class ClsSample:
     def __init__(self):
