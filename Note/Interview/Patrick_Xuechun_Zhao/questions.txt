@@ -1,12 +1,12 @@
 ********** 1: About HPC cluster **************
 HPC -> three different ways to use the software resources in cluster.
 
-1: module file 
-   container (sandbox) -> singularity
-   bioconda
+1: Three different strategies
+   (1) module file 
+   (2) container (sandbox) -> singularity
+   (3) bioconda
   
 If a team member want to start a project or pipeline, and some of third party tools need to be used. May I know your suggestion about which strategy should be used in cluster. 
-
 
 
 
@@ -27,16 +27,12 @@ So, if a people suggest you that in order to make everything be consistent & eas
 
 
 
-
-
 *********** 3: How to balance research and programming ***********
 Assume the situation
 1: there are a lot of pipeline development works for your team. You need people to do it. These development works are more related to software engineer work rather than research work. 
 2: In you team, may people hold the PhD degree and they have the strong ability to do the deep research work. they also want to do it. 
 
 How you balance the development work and research work for these team members. 
-
-
 
 
 
@@ -49,7 +45,6 @@ Assume the situation
 3: However, Some of your team menber has a very strong research ablity and want to do some deep research works. 
 
 how you solve this conflicts. 
-
 
 
 
