@@ -1,0 +1,62 @@
+********** 1: About HPC cluster **************
+HPC -> three different ways to use the software resources in cluster.
+
+1: module file 
+   container (sandbox) -> singularity
+   bioconda
+  
+If a team member want to start a project or pipeline, and some of third party tools need to be used. May I know your suggestion about which strategy should be used in cluster. 
+
+
+
+
+********** 2: About how to manage the old, on-going, and upcoming project ************
+Assume the situation 
+1: We have many pipelines that are already existed neary 10 yeards (we still use it frequently and keep it updating). These pipeline use some old techs. 
+   (1) For example, use cron job and "flag" to do the automation. 
+   (2) contians many different coding style （different style of indentations）. 
+   (3) Different language, such as R, bash, perl and so on. 
+   
+2: For the latest pipeline, all of them are using the popular workflow framwork for the implementation
+   (1) Such as snakemake. 
+   Such workflow framwork could  
+   (1) make the coding easier. 
+   (2) easy to be managed.
+   
+So, if a people suggest you that in order to make everything be consistent & easy to be managed, please let your team member convert all old pipelines by using the new techs (such as snakemake). May I know what's your idea about this suggestion? 
+
+
+
+
+
+*********** 3: How to balance research and programming ***********
+Assume the situation
+1: there are a lot of pipeline development works for your team. You need people to do it. These development works are more related to software engineer work rather than research work. 
+2: In you team, may people hold the PhD degree and they have the strong ability to do the deep research work. they also want to do it. 
+
+How you balance the development work and research work for these team members. 
+
+
+
+
+
+*********** 4: About PI *************
+Assume the situation
+1: many PIs have their own researh projects. For research parts, they are more willing to assign these works to their postdoc, research fellow or the embeded bioinfomatican (which is more convenient). 
+
+2: In another words, PI will only send some labor works (such as prepare data, run pipeline) to the bioinfomatics team. 
+
+3: However, Some of your team menber has a very strong research ablity and want to do some deep research works. 
+
+how you solve this conflicts. 
+
+
+
+
+********** Others ************
+Assuem the situation:
+There are a lot of works should be done, 
+how you balance the time cost among requirement analysis, development, testing and documentation.
+
+
+
