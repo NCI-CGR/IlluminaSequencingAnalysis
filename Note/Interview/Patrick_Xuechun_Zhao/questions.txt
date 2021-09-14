@@ -40,7 +40,7 @@ How you balance the development work and research work for these team members.
 Assume the situation
 1: many PIs have their own researh projects. For research parts, they are more willing to assign these works to their postdoc, research fellow or the embeded bioinfomatican (which is more convenient). 
 
-2: In another words, PI will only send some labor works (such as prepare data, run pipeline) to the bioinfomatics team. 
+2: In another words, PI may only send some labor works (such as prepare data, run pipeline) to the bioinfomatics team. 
 
 3: However, Some of your team menber has a very strong research ablity and want to do some deep research works. 
 
