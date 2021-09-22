@@ -17,6 +17,9 @@ import os
 import sys
 import subprocess
 
+SCRIPTMergeSample = "/home/lix33/lxwg/Git/sync_script_biowulf/gatk_build_bam_for_single_name_v4.sh"
+DIRRootBuild = "/home/lix33/Test/2ndPipeline/Build"
+
 class ClsSample:
     def __init__(self):
         self.strUSUID = ""
@@ -46,7 +49,7 @@ class ClsSample:
         if self.strUSUID == "SC571826":
             self.strBAM = "/home/lixin/lxwg/project/MergeSample/2ndPipeline/BAM/SC571826_TACCAGGA-GTACTCTC_L001.bam"     
 
-    def PrepareManifest(self, vContent):
+    def PrepareManifest(self, vContent, strAnalysisID):
         if not os.path.exists(self.strBAM):
             return
         # Prepare line for current sample
@@ -57,22 +60,22 @@ class ClsSample:
                 
         strRGLine = strRGList.split('\n')[0]
         vRG = strRGLine.split('\t')
-        print(vRG)
+        #print(vRG)
         # --> Prepare info for current sample
         strInstrument = "E0180-03"
         strSeqDate = ""
         strLane = "1"
         strIndex = vRG[-2].split('.')[-1]
         strFullFlowcellID = vRG[-2].split('.')[0].split(':')[1]
-        print(strFullFlowcellID)
-        print(strIndex)
-        strGroup = "ACS"
+        #print(strFullFlowcellID)
+        #print(strIndex)
+        strGroup = "WGS"
         strLMSIndividual = "I-0000510733"
         strEXPECTEDGENDER = "M"
         strIDENTIFILERGENDER = "M"
         strUCSCAVGCOV = "99.99"
         strASSAYID = "EZ_Exome+UTR_PE"
-        strANALYSISID = "NA12878_GDNA_HS4K_KHPL_1"
+        #strANALYSISID = "NA12878_GDNA_HS4K_KHPL_1"
         
         strLine = (strInstrument + "," + 
                    strSeqDate + "," +
@@ -86,7 +89,7 @@ class ClsSample:
                    strIDENTIFILERGENDER  + "," +
                    strUCSCAVGCOV  + "," +
                    strASSAYID  + "," +
-                   strANALYSISID  + "," +
+                   strAnalysisID  + "," +
                    self.strCGRID + "\n")
         vContent.append(strLine)
         print(strLine)
@@ -96,6 +99,7 @@ class ClsSample:
 class ClsSubject:
     def __init__(self):
         self.strCGRID = ""
+        self.strAnalysisID = ""
         self.vSample = []
     
     def GetBAMFile(self):
@@ -104,12 +108,75 @@ class ClsSubject:
     
     def PrepareManifest(self, vContent):
         for sample in self.vSample:
-            sample.PrepareManifest(vContent)
+            sample.PrepareManifest(vContent, self.strAnalysisID)
+    
+    def GetAnalysisID(self):
+        if len(self.vSample) == 0:
+            return ""
+        strAnalysisID = self.vSample[0].strCGRID
+        for sample in self.vSample:
+            strAnalysisID += "_" + sample.strUSUID
+        self.strAnalysisID = strAnalysisID 
+        return  strAnalysisID   
+    
+    def SubmitJobs(self, strManifestFile, strCurBuildDir, strLogDir):
+        if len(self.vSample) == 0:
+            print("Error: No Sample contained by current subject!")
+            return
+        
+        # Prepare Bash command line
+        strCmdBashScript = ("bash " + SCRIPTMergeSample + " " + 
+                            self.strAnalysisID + " " + 
+                            "1" + " " + 
+                            strManifestFile)
+        strSamplelist = ""
+        for sample in self.vSample:
+            strSamplelist += " " + sample.strBAM
+        
+        strCmdBashScript += strSamplelist
+        strJobScript = strCurBuildDir + "/run.job"
+        f = open(strJobScript, "w")
+        f.write("#!/bin/bash\n\n")
+        f.write(strCmdBashScript)
+        f.close()        
+        
+        # Prepare slurm script
+        #1: Set std output and std error
+        strStdOut = strLogDir + "/merge_sample_" + self.strAnalysisID + ".log.std"
+        strStdErr = strLogDir + "/merge_sample_" + self.strAnalysisID + ".log.err"
+        if os.path.exists(strStdOut):
+            CMD = "rm " + strStdOut
+            os.system(CMD)  
+        if os.path.exists(strStdErr):
+            CMD = "rm " + strStdErr
+            os.system(CMD)
             
+        # Get Script file
+        str2ndPipelineDir = "/home/lix33/lxwg/Git/sync_script_biowulf"
+        strRunningTime = "10-00:00:00"
+        strNumCore = "1"
+        strNodeNum = "1"
+        strMem = "10g"
+        strJobName = "MSP." + self.strCGRID # Merge Sample
+        
+        strSlurmScript = ("sbatch " + 
+                          "--export=SCRIPT_HOME='" + str2ndPipelineDir + "' " + 
+                          "--ntasks=" + strNumCore + " " +  
+                          "--nodes=" + strNodeNum + " " +
+                          "--mem=" + strMem + " " +  
+                          "--job-name=" + strJobName + " " + 
+                          "--time=" + strRunningTime + " " + 
+                          "--output=" + strStdOut + " " +
+                          "--error=" + strStdErr)
+        CMD = strSlurmScript + " " + strJobScript
+        print(CMD)
+        #os.system(CMD) 
+
 class ClsBuild:
     def __init__(self):
         self.vSubject = []
-        self.strManifestFile = ""
+        self.strRootDir = ""
+        self.strManifestFile = ""        
     
     # it may contain both 1,2,and multiple files for each subject (1 BAM for a single subject is allowed)
     def GetGroupInfo(self, strKeyTable):
@@ -137,17 +204,30 @@ class ClsBuild:
                         break
                 if not bFind:
                     objSubject = ClsSubject()
-                    objSubject.strCGRID = objSample.strCGRID
+                    objSubject.strCGRID = objSample.strCGRID                    
                     objSubject.vSample.append(objSample)
                     self.vSubject.append(objSubject)
                 iIndex += 1
         file.close()
+        #Update Analysis ID
+        for subject in self.vSubject:
+            subject.GetAnalysisID()
     
     def GetBAMFile(self):
         for subject in self.vSubject:
             subject.GetBAMFile()
     
-    def BuidManifestFile(self, strDir):
+    def BuidManifestFile(self, strKeyTable):
+        print(strKeyTable)
+        # Create build folder for this 
+        strKeyTableName = os.path.basename(strKeyTable).split('.')[0]
+        print(strKeyTableName)
+        strDir = DIRRootBuild + "/" + strKeyTableName
+        CMD = "mkdir -p " + strDir
+        #print(CMD)
+        os.system(CMD)
+        self.strRootDir = strDir 
+         
         strFile = strDir + "/Manifest_Mimic.csv"
         if os.path.exists(strFile):
             CMD = "rm " + strFile
@@ -166,6 +246,22 @@ class ClsBuild:
         f = open(strFile, "w")
         f.writelines(vContent)        
         f.close()
+        self.strManifestFile = strFile 
+    
+    def SubmitJobs(self):
+        if not os.path.exists(self.strManifestFile):
+            print("Can not find Manifest file(Mimic)!")
+            return
+    
+        # Create A specific log folder for current build
+        strLogDir = self.strRootDir + "/Log/MergeSample"
+        CMD = "mkdir -p " + strLogDir
+        os.system(CMD) 
+        
+        # Now prepare script to submit jobs
+        for subject in self.vSubject:
+            subject.SubmitJobs(self.strManifestFile, self.strRootDir, strLogDir)
+        
 
 def main():
     strKeyTable = sys.argv[1]
@@ -177,10 +273,13 @@ def main():
     
     # 2: Get BAM file for each sample
     objBuild.GetBAMFile()
-    print(len(objBuild.vSubject))
+    #print(len(objBuild.vSubject))
     
     # 3: Build Manifest file -> GO!
-    objBuild.BuidManifestFile(os.path.dirname(strKeyTable))    
+    objBuild.BuidManifestFile(strKeyTable)
+    
+    # 4: Submit jobs
+    objBuild.SubmitJobs()
     
     print("All Set!")
 
