@@ -1,0 +1,99 @@
+ (1) Step 1: Merge BAM file    
+     a) gatk_build_bam_for_single_name_v4.sh
+	 
+	 ***** Command line *****
+	 module load python samtools
+	 script="/home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode/Tools/MergeSubject/MergeSubject.py"
+	 manifest="/home/lix33/Test/2ndPipeline/TestDataSet/MergeSample/keytable_09_14_2021.csv"
+	 python MergeSubject.py
+	 ************************
+	 
+ (2) Step 2: reconstruct the data
+     a) step7b_take_incoming_bams.sh
+
+	 ***** Command line *****	 
+	 script="/home/lix33/lxwg/Git/sync_script_biowulf/step7b_take_incoming_bams.sh"
+	 bash ${script}
+	 ************************
+	 
+ (3) Step 3: recalibrate BAM file
+     a) step8_sync_and_recalibrate_bam.sh
+     b) sync_script_biowulf/recalibrate_bam.sh
+	 
+	 ***** Command line *****
+	 script="/spin1/home/linux/lix33/lxwg/Git/sync_script_biowulf/step8_sync_and_recalibrate_bam.sh"
+	 bash ${script}
+	 ************************
+	 
+ (4) Step 4: construct BAM recaliberated per manifest
+     a) step9_construct_BAM_recaliberated_per_manifest.sh
+	 
+	***** Command line *****
+	script="/home/lix33/lxwg/Git/sync_script_biowulf/step9_construct_BAM_recaliberated_per_manifest.sh"
+	manifest="/home/lix33/Test/2ndPipeline/Manifest_Mimic.csv"
+	buildName="build_lxwg_09_24_2021"
+	
+	bash ${script} ${manifest} ${buildName} GERMLINE
+	************************ 
+	
+	---> This is the final output of this step
+	/home/lix33/Test/2ndPipeline/Build/processed/build_lxwg_09_24_2021/bam_location/WGS	
+	 
+ (5) step 5: generate coverage report
+     a) step5_generate_coverage_report_batch.sh
+     b) generate_coverage_report_single.sh
+     c) step5_2_generate_coverage_report_batch.sh
+	
+	***** Command line *****
+	a)
+	buildName="build_lxwg_09_24_2021"	
+	script="/home/lix33/lxwg/Git/sync_script_biowulf/step5_generate_coverage_report_batch.sh"
+	manifest="/home/lix33/Test/2ndPipeline/Manifest_Mimic.csv"
+	dirBuildBAM="/home/lix33/Test/2ndPipeline/Build/processed/${buildName}/bam_location/WGS"
+	
+	bash ${script} ${manifest} ${dirBuildBAM}
+	
+	--
+	
+	b) after a) finished
+	script="/home/lix33/lxwg/Git/sync_script_biowulf/step5_2_generate_coverage_report_batch.sh"
+	bash ${script}
+	************************ 
+	Notice:
+	1: Log file is located in: /home/lix33/Test/2ndPipeline/Data/secondary_buf/cluster_job_logs/09252021
+	2: Coverage report file is located in: /home/lix33/Test/2ndPipeline/Data/secondary_buf/coverage_report/coverage_report_09252021.txt
+	 
+ (6) Step 6: generate pre-calling qc report
+     a) step6_generate_pre_calling_qc_report_batch.sh
+     b) pre_calling_qc_single.sh 
+     c) step6_2_generating_pre_calling_qc_report_batch.sh
+	 
+	***** Command line *****
+	a) 
+	buildName="build_lxwg_09_24_2021"
+	script="/home/lix33/lxwg/Git/sync_script_biowulf/step6_generate_pre_calling_qc_report_batch.sh"
+	manifest="/home/lix33/Test/2ndPipeline/Manifest_Mimic.csv"
+	dirBuildBAM="/home/lix33/Test/2ndPipeline/Build/processed/${buildName}/bam_location/WGS"
+
+	bash ${script} ${manifest} ${dirBuildBAM} 
+	
+	--
+	
+	b) after a) finished -> check it later.
+	report="/home/lix33/Test/2ndPipeline/Data/secondary_buf/coverage_report/pre_calling_qc_report_09252021.txt"
+	script="/home/lix33/lxwg/Git/sync_script_biowulf/step6_2_generating_pre_calling_qc_report_batch.sh"
+
+	bash ${script} ${report}
+	*************************
+	Notice: 
+	1: "pre_calling_qc_report_09252021.txt" is the output from "step6_generate_pre_calling_qc_report_batch.sh"
+	
+	
+	 
+ (7) Step 7: BAM contamination check: develop a completely new code to do this job
+	a) ContaminationCheck.py (this is the automation framework)
+    b) ContaminationCheckSingle.sh
+	 
+	***** Command line ***** 
+	script="/home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode/Tools/BAMContaminationCheck/ContaminationCheck.py"
+	python3 ${script}
