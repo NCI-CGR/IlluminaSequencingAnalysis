@@ -18,7 +18,7 @@ import sys
 import subprocess
 
 SCRIPTMergeSample = "/home/lix33/lxwg/Git/sync_script_biowulf/gatk_build_bam_for_single_name_v4.sh"
-DIRRootBuild = "/home/lix33/Test/2ndPipeline/Build/tmp"
+DIRRootBuild = "/data/COVID_WGS/lix33/Test/2ndpipeline/Build/tmp"
 
 DECORATEAnalysisIDPrefix = "WGS_"
 
@@ -130,7 +130,7 @@ class ClsSubject:
         print()
         print("strAnalysisID        :", self.strAnalysisID)
         strDecorateAnalysisID = DECORATEAnalysisIDPrefix + self.strAnalysisID
-        print("strDecorateAnalysisID:", strDecorateAnalysisID) 
+        print("strDecorateAnalysisID:", strDecorateAnalysisID, '\n') 
         strCmdBashScript = ("bash " + SCRIPTMergeSample + " " + 
                             strDecorateAnalysisID + " " + 
                             "1" + " " + 
@@ -140,7 +140,7 @@ class ClsSubject:
             strSamplelist += " " + sample.strBAM
         
         strCmdBashScript += strSamplelist
-        strJobScript = strCurBuildDir + "/run.job"
+        strJobScript = strCurBuildDir + "/" + self.strAnalysisID + ".run.job"
         f = open(strJobScript, "w")
         f.write("#!/bin/bash\n\n")
         f.write(strCmdBashScript)
