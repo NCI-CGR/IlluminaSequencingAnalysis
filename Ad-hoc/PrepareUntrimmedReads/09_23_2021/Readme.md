@@ -13,3 +13,6 @@ They are:
  
  #### Additionally, when these are ready, we'll want to deliver the attached manifest to Wei, as well
  [SR0493-008-9.21.2021.csv](https://github.com/NCI-CGR/IlluminaSequencingAnalysis/files/7218892/SR0493-008-9.21.2021.csv)
+
+ #### Result Location
+ /DCEG/Projects/Exome/SequencingData/DAATeam/Xin/Illumina/HiSeq/PostRun_Analysis/Data
