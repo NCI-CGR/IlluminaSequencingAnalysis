@@ -18,7 +18,9 @@ import sys
 import subprocess
 
 SCRIPTMergeSample = "/home/lix33/lxwg/Git/sync_script_biowulf/gatk_build_bam_for_single_name_v4.sh"
-DIRRootBuild = "/home/lix33/Test/2ndPipeline/Build"
+DIRRootBuild = "/home/lix33/Test/2ndPipeline/Build/tmp"
+
+DECORATEAnalysisIDPrefix = "WGS_"
 
 class ClsSample:
     def __init__(self):
@@ -44,10 +46,10 @@ class ClsSample:
         # file BAM file -> need to grab data from S3 storage space
         print(self.strCGRID)
         if self.strUSUID == "SC571825":
-            self.strBAM = "/home/lixin/lxwg/project/MergeSample/2ndPipeline/BAM/SC571825_CTTCACCA-AAGAGCCA_L001.bam"
+            self.strBAM = "/home/lix33/Test/2ndPipeline/BAM/SC571825_CTTCACCA-AAGAGCCA_L001.bam"
         
         if self.strUSUID == "SC571826":
-            self.strBAM = "/home/lixin/lxwg/project/MergeSample/2ndPipeline/BAM/SC571826_TACCAGGA-GTACTCTC_L001.bam"     
+            self.strBAM = "/home/lix33/Test/2ndPipeline/BAM/SC571826_TACCAGGA-GTACTCTC_L001.bam"     
 
     def PrepareManifest(self, vContent, strAnalysisID):
         if not os.path.exists(self.strBAM):
@@ -60,7 +62,7 @@ class ClsSample:
                 
         strRGLine = strRGList.split('\n')[0]
         vRG = strRGLine.split('\t')
-        #print(vRG)
+        print(vRG)
         # --> Prepare info for current sample
         strInstrument = "E0180-03"
         strSeqDate = ""
@@ -125,8 +127,12 @@ class ClsSubject:
             return
         
         # Prepare Bash command line
+        print()
+        print("strAnalysisID        :", self.strAnalysisID)
+        strDecorateAnalysisID = DECORATEAnalysisIDPrefix + self.strAnalysisID
+        print("strDecorateAnalysisID:", strDecorateAnalysisID) 
         strCmdBashScript = ("bash " + SCRIPTMergeSample + " " + 
-                            self.strAnalysisID + " " + 
+                            strDecorateAnalysisID + " " + 
                             "1" + " " + 
                             strManifestFile)
         strSamplelist = ""
@@ -170,7 +176,7 @@ class ClsSubject:
                           "--error=" + strStdErr)
         CMD = strSlurmScript + " " + strJobScript
         print(CMD)
-        #os.system(CMD) 
+        os.system(CMD) 
 
 class ClsBuild:
     def __init__(self):
