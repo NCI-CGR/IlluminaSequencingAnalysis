@@ -7,8 +7,8 @@
 	 ***** Command line *****
 	 module load python samtools
 	 script="/home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode/Tools/MergeSubject/MergeSubject.py"
-	 manifest="/home/lix33/Test/2ndPipeline/TestDataSet/MergeSample/keytable_09_14_2021.csv"
-	 python MergeSubject.py
+	 keytable="/home/lix33/Test/2ndPipeline/TestDataSet/MergeSample/keytable_09_14_2021.csv"
+	 python ${script} ${keytable}
 	 ************************
 	 
  (2) Step 2: reconstruct the data
