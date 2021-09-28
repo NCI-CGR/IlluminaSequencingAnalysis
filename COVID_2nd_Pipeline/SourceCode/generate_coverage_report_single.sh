@@ -1,6 +1,8 @@
 #!/bin/sh
 
 # source global configuration files
+SCRIPT=$(readlink -f "$0")
+DCEG_SEQ_POOL_SCRIPT_DIR=$(dirname "$SCRIPT")
 . ${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/global_config_bash.rc
 
 # takes in arguments

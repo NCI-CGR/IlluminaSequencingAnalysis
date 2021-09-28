@@ -1,6 +1,9 @@
 #!/bin/sh
 
-. ./global_config_bash.rc
+SCRIPT=$(readlink -f "$0")
+DCEG_SEQ_POOL_SCRIPT_DIR=$(dirname "$SCRIPT")
+. ${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/global_config_bash.rc
+#. ./global_config_bash.rc
 
 #find the most recent coverage report file as the coverage report file. There is a potential bug that it only works on the most recently created report file. 
 #COVERAGE_REPORT_FILE=`find ${COVERAGE_REPORT_DIR} -name coverage_report_????????.txt  -print0 | xargs -0r ls -ltr | tail -n 1 | awk '{print $9}'`

@@ -1,8 +1,9 @@
 #!/bin/sh
 # . ${SCRIPT_DIR:-.}/global_config_bash.rc
 . ${SCRIPT_DIR}/global_config_bash.rc
-module load jdk/1.8.0_111
-module load samtools/1.8
+#module load jdk/1.8.0_111
+#module load samtools/1.8
+module load samtools/1.8 java/1.8.0_211 GATK/3.8-1
 IN_BAM=$1
 OUT_BAM=$2
 VARIANT_TYPE=$3
@@ -31,8 +32,15 @@ fi
 # FLG_WORKING=$OUT_BAM.$RECALIBRATION_WORKING_FLAG_EXTENSION
 # FLG_INQUEUE=$OUT_BAM.$RECALIBRATION_INQUEUE_FLAG_EXTENSION
 
-FLG_WORKING=${BAM_REFORMATTED_RECALIBRATED_DIR}/${IN_NAME}.bam.${RECALIBRATION_WORKING_FLAG_EXTENSION}
-FLG_INQUEUE=${BAM_REFORMATTED_RECALIBRATED_DIR}/${IN_NAME}.bam.${RECALIBRATION_INQUEUE_FLAG_EXTENSION}
+dirFlag=${BAM_REFORMATTED_RECALIBRATED_DIR}/Flag
+if [ ! -d ${dirFlag} ]; then
+  mkdir -p ${dirFlag}
+fi
+#FLG_WORKING=${BAM_REFORMATTED_RECALIBRATED_DIR}/${IN_NAME}.bam.${RECALIBRATION_WORKING_FLAG_EXTENSION}
+#FLG_INQUEUE=${BAM_REFORMATTED_RECALIBRATED_DIR}/${IN_NAME}.bam.${RECALIBRATION_INQUEUE_FLAG_EXTENSION}
+FLG_WORKING=${dirFlag}/${IN_NAME}.bam.${RECALIBRATION_WORKING_FLAG_EXTENSION}
+FLG_DONE=${dirFlag}/${IN_NAME}.bam.${RECALIBRATION_DONE_FLAG_EXTENSION}
+FLG_INQUEUE=${dirFlag}/${IN_NAME}.bam.${RECALIBRATION_INQUEUE_FLAG_EXTENSION}
 
 touch $FLG_WORKING
 rm -f $FLG_INQUEUE
@@ -71,50 +79,49 @@ fi
 echo ========================
 date
 echo Recalibrate BAM according to reference InDels and SNPs
-echo Input: $IN_BAM
-echo Output: $OUT_BAM
-echo Type: $VARIANT_TYPE
+echo Input\(IN_BAM\)  : ${IN_BAM}
+echo Output\(OUT_BAM\): ${OUT_BAM}
+echo Type             : ${VARIANT_TYPE}
 echo ========================
 
 echo
 # Make sure all InDels are left-aligned
 # turned on by default
 if [[ $LEFT_ALIGN_INDELS != "false" ]] ; then
-        echo "[$(date)] Left align InDels..."
-        CMD="java -Xmx8g -jar $GATK   \
-                -T LeftAlignIndels   \
-                -R $REFERENCE_GENOME \
-                -I $IN_BAM \
-                -o $LEFT_ALIGNED_BAM"
+  echo "[$(date)] Left align InDels..."
+  CMD="java -Xmx8g -jar $GATK   \
+          -T LeftAlignIndels   \
+          -R $REFERENCE_GENOME \
+          -I $IN_BAM \
+          -o $LEFT_ALIGNED_BAM"
 	echo $CMD
 	eval $CMD
 	if [[ $? -ne 0 ]]; then
 	    echo "Error: LeftAlignIdels is failed!"
 	    exit 1
 	fi
-        if [[ ! -f $LEFT_ALIGNED_BAM ]] ; then
-            echo "Error: Expected output $LEFT_ALIGNED_BAM is missing."
-            exit 1
-        fi
 
-        echo "[$(date)] Left align is done."
-
+  if [[ ! -f $LEFT_ALIGNED_BAM ]] ; then
+      echo "Error: Expected output $LEFT_ALIGNED_BAM is missing."
+      exit 1
+  fi
+  echo "[$(date)] Left align is done."
 else
-        echo "[$(date)] InDel left alignment skipped as LEFT_ALIGN_INDELS is set to false. Input BAM file assumed to be left-aligned."
-        rm -f $LEFT_ALIGNED_BAM $LEFT_ALIGNED_BAI
-        ln -s $IN_BAM $LEFT_ALIGNED_BAM
+  echo "[$(date)] InDel left alignment skipped as LEFT_ALIGN_INDELS is set to false. Input BAM file assumed to be left-aligned."
+  rm -f $LEFT_ALIGNED_BAM $LEFT_ALIGNED_BAI
+  ln -s $IN_BAM $LEFT_ALIGNED_BAM
 fi
 
 echo
 echo "[$(date)] Calculating target intervals that need local realignment..."
-CMD="java -Xmx8g -jar $GATK        \
-	-T RealignerTargetCreator \
-	-R $REFERENCE_GENOME      \
-	-known $REFERENCE_INDELS  \
-	-known $REFERENCE_MILLS_INDELS  \
-	-I $LEFT_ALIGNED_BAM      \
-	-o $REALIGN_TARGETS \
-        --disable_auto_index_creation_and_locking_when_reading_rods"
+CMD="java -Xmx8g -jar $GATK \
+          -T RealignerTargetCreator \
+          -R $REFERENCE_GENOME \
+          -known $REFERENCE_INDELS  \
+          -known $REFERENCE_MILLS_INDELS  \
+          -I $LEFT_ALIGNED_BAM      \
+          -o $REALIGN_TARGETS \
+          --disable_auto_index_creation_and_locking_when_reading_rods"
 echo $CMD
 eval $CMD
 if [[ $? -ne 0 ]]; then
@@ -128,15 +135,15 @@ fi
 echo "[$(date)] Calculating target intervals is done!"
 echo
 echo "[$(date)] Carrying out local alignment in target intervals..." &&
-CMD="java -Xmx8g -jar $GATK                 \
-	-T IndelRealigner                  \
-	-R $REFERENCE_GENOME               \
-	-targetIntervals $REALIGN_TARGETS  \
-	-known $REFERENCE_INDELS           \
-	-known $REFERENCE_MILLS_INDELS     \
-        -rf NotPrimaryAlignment            \
-	-I $LEFT_ALIGNED_BAM               \
-	-o $REALIGN_BAM"
+CMD="java -Xmx8g -jar $GATK \
+          -T IndelRealigner \
+          -R $REFERENCE_GENOME \
+          -targetIntervals $REALIGN_TARGETS \
+          -known $REFERENCE_INDELS \
+          -known $REFERENCE_MILLS_INDELS \
+          -rf NotPrimaryAlignment \
+          -I $LEFT_ALIGNED_BAM \
+          -o $REALIGN_BAM"
 	
 echo $CMD
 eval $CMD
@@ -224,35 +231,35 @@ fi
 
 # by BQSR by default turned off, as it takes too long time
 if [[ $VARIANT_TYPE == "SOMATIC" ]]; then
-        echo
+  echo
 	echo "[$(date)] This BAM is for SOMATIC project. Calculating target sites that need base quality score recalibration (BQSR)..."
-	CMD="java -Xmx16g -jar $GATK               \
-		-T BaseRecalibrator              \
-		-R $REFERENCE_GENOME             \
-		-knownSites $REFERENCE_SNPS2      \
-		-knownSites $REFERENCE_MILLS_INDELS      \
-		-knownSites $REFERENCE_INDELS    \
-		-I $REALIGN_BAM                  \
-		-o $BQSR_TARGETS"
-        echo $CMD
-        eval $CMD
+	CMD="java -Xmx16g -jar $GATK \
+            -T BaseRecalibrator \
+            -R $REFERENCE_GENOME \
+            -knownSites $REFERENCE_SNPS2 \
+            -knownSites $REFERENCE_MILLS_INDELS \
+            -knownSites $REFERENCE_INDELS \
+            -I $REALIGN_BAM \
+            -o $BQSR_TARGETS"
+  echo $CMD
+  eval $CMD
 
 	if [[ $? -ne 0 ]]; then
 	  echo "Error: failed in BQSR!"
 	  exit 1
 	fi
-        echo
+  echo
 	echo "[$(date)] BQSR Target sites calculation is done."
 
 	echo "[$(date)] Carrying out base quality score recalibration (BQSR)..."
-	CMD="java  -Xmx16g -jar $GATK             \
-		-T PrintReads                   \
-		-R $REFERENCE_GENOME            \
-		-BQSR $BQSR_TARGETS             \
-		-I $REALIGN_BAM                 \
-		-o $BQSR_BAM"
-        echo $CMD
-        eval $CMD
+	CMD="java -Xmx16g -jar $GATK \
+            -T PrintReads \
+            -R $REFERENCE_GENOME \
+            -BQSR $BQSR_TARGETS \
+            -I $REALIGN_BAM \
+            -o $BQSR_BAM"
+  echo $CMD
+  eval $CMD
 
 	if [[ $? -ne 0 ]]; then
 	  echo "Error: failed in BQSR!"
@@ -265,67 +272,75 @@ if [[ $VARIANT_TYPE == "SOMATIC" ]]; then
 	# Convert the realigned query-name-sorted BAM to coordinate-sorted bams
         echo
 	echo "[$(date)] Converting BAM to coordinate-sorted format..."
-           
         
-        CMD="samtools sort -T ${OUT_BAM_PREFIX_SOMATIC}_sorted_tmp -o ${OUT_BAM_PREFIX_SOMATIC}_sorted.bam $BQSR_BAM" 
-        echo $CMD
-        eval $CMD
-        if [[ $? -ne 0 ]]; then
-            echo "Error: samtools sort is failed!"
-            exit 1
-        fi
+  CMD="samtools sort -T ${OUT_BAM_PREFIX_SOMATIC}_sorted_tmp -o ${OUT_BAM_PREFIX_SOMATIC}_sorted.bam $BQSR_BAM"
+  echo $CMD
+  eval $CMD
+  if [[ $? -ne 0 ]]; then
+      echo "Error: samtools sort is failed!"
+      exit 1
+  fi
+
 	if [[ ! -f ${OUT_BAM_PREFIX_SOMATIC}_sorted.bam ]] ; then
 	    echo "Error: Expected output ${OUT_BAM_PREFIX_SOMATIC}_sorted.bam is missing."
 	    exit 1
 	fi
 	
-        CMD="samtools index ${OUT_BAM_PREFIX_SOMATIC}_sorted.bam ${OUT_BAM_PREFIX_SOMATIC}_sorted.bam.bai"
-        echo $CMD
-        eval $CMD
-        if [[ $? -ne 0 ]]; then
-            echo "Error: samtools index is failed!"
-            exit 1
-        fi
-        if [[ ! -f ${OUT_BAM_PREFIX_SOMATIC}_sorted.bam.bai ]] ; then
-            echo "Error: Expected output ${OUT_BAM_PREFIX_SOMATIC}_sorted.bam.bai is missing."
-            exit 1
-        fi
+  CMD="samtools index ${OUT_BAM_PREFIX_SOMATIC}_sorted.bam ${OUT_BAM_PREFIX_SOMATIC}_sorted.bam.bai"
+  echo $CMD
+  eval $CMD
+  if [[ $? -ne 0 ]]; then
+      echo "Error: samtools index is failed!"
+      exit 1
+  fi
+  if [[ ! -f ${OUT_BAM_PREFIX_SOMATIC}_sorted.bam.bai ]] ; then
+      echo "Error: Expected output ${OUT_BAM_PREFIX_SOMATIC}_sorted.bam.bai is missing."
+      exit 1
+  fi
 
-        echo 
+  echo
 	CMD="rm -rf $BQSR_TARGETS $BQSR_BAM $BQSR_BAI ${OUT_BAM_PREFIX_SOMATIC}_sorted_tmp*"
-        echo $CMD
-        eval $CMD
+  echo $CMD
+  eval $CMD
 
-        
-        echo
 
-        CMD="mv ${OUT_BAM_PREFIX_SOMATIC}_sorted.bam $OUT_BAM_SOMATIC"
-        echo $CMD
-        eval $CMD
-        echo
-        CMD="mv ${OUT_BAM_PREFIX_SOMATIC}_sorted.bam.bai $OUT_BAI_SOMATIC" 
-        echo $CMD
-        eval $CMD
+  echo
 
-        echo "[$(date)] doing the last piece of housekeeping for $OUT_BAM_SOMATIC ..."
-        CMD="rm -f ${OUT_BAM_PREFIX_SOMATIC}_sorted*"
-        echo $CMD
-        eval $CMD     
-        chgrp ncicgf_dceg_exome $OUT_BAM_SOMATIC 2>/dev/null && chmod g+r $OUT_BAM_SOMATIC
-        chgrp ncicgf_dceg_exome $OUT_BAI_SOMATIC 2>/dev/null && chmod g+r $OUT_BAI_SOMATIC
-        echo "[$(date)] $OUT_BAM_SOMATIC is done!"
+  CMD="mv ${OUT_BAM_PREFIX_SOMATIC}_sorted.bam $OUT_BAM_SOMATIC"
+  echo $CMD
+  eval $CMD
+  echo
+  CMD="mv ${OUT_BAM_PREFIX_SOMATIC}_sorted.bam.bai $OUT_BAI_SOMATIC"
+  echo $CMD
+  eval $CMD
 
+  echo "[$(date)] doing the last piece of housekeeping for $OUT_BAM_SOMATIC ..."
+  CMD="rm -f ${OUT_BAM_PREFIX_SOMATIC}_sorted*"
+  echo $CMD
+  eval $CMD
+#  chgrp ncicgf_dceg_exome $OUT_BAM_SOMATIC 2>/dev/null && chmod g+r $OUT_BAM_SOMATIC
+#  chgrp ncicgf_dceg_exome $OUT_BAI_SOMATIC 2>/dev/null && chmod g+r $OUT_BAI_SOMATIC
+  chmod o+r $OUT_BAM_SOMATIC
+  chmod o+r $OUT_BAI_SOMATIC
+  echo "[$(date)] $OUT_BAM_SOMATIC is done!"
 fi
 
 
 echo
 echo "[$(date)] Doing the last piece of housekeeping..." 
-chgrp ncicgf_dceg_exome $OUT_BAM && chmod g+r $OUT_BAM 2>/dev/null
-chgrp ncicgf_dceg_exome $OUT_BAI && chmod g+r $OUT_BAI 2>/dev/null
+
+#chgrp ncicgf_dceg_exome $OUT_BAM && chmod g+r $OUT_BAM 2>/dev/null
+#chgrp ncicgf_dceg_exome $OUT_BAI && chmod g+r $OUT_BAI 2>/dev/null
+chmod o+r $OUT_BAM 2>/dev/null
+chmod o+r $OUT_BAI 2>/dev/null
+
 CMD="rm -f $REALIGN_BAM $REALIGN_BAI"
 echo $CMD
 eval $CMD
 CMD="rm -f $FLG_WORKING"
+echo $CMD
+eval $CMD
+CMD="touch ${FLG_DONE}"
 echo $CMD
 eval $CMD
 

@@ -1,0 +1,264 @@
+ 1008  ~/cgemsiii_nci_nih_hpc.sh 
+ 1009  cd ~/Documents/Prototype/
+ 1010  ls -l
+ 1011  cd ./PythonProject/
+ 1012  ls -l
+ 1013  cd ./C
+ 1014  cd ./CustomizedQC/
+ 1015  ls -l
+ 1016  ls -lht
+ 1017  cd ./ObjectStorage/
+ 1018  ls -l
+ 1019  cat ~/biowulf_nih_hpc.sh 
+ 1020  ls -l
+ 1021  scp -r ./ lix33@biowulf.nih.gov:/home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode/ObjectStorage
+ 1022  ls -l
+ 1023  ~/biowulf_nih_hpc.sh 
+ 1024  exit
+ 1025  ~/biowulf_nih_hpc.sh 
+ 1026  exit
+ 1027  du -sh ./Downloads/
+ 1028  du -sh ./igv/
+ 1029  python3
+ 1030  ls -l
+ 1031  cd ~/Documents/Prototype/
+ 1032  ls -l
+ 1033  cd ./
+ 1034  cd ./PythonProject/
+ 1035  ls -l
+ 1036  cd ./CustomizedQC/
+ 1037  ls -l
+ 1038  ls -lht
+ 1039  cat ~/biowulf_nih_hpc.sh 
+ 1040  scp ./CustomizedQC.py lix33@biowulf.nih.gov:/home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode
+ 1041  ~/cgemsiii_nci_nih_hpc.sh 
+ 1042  exit
+ 1043  ~/cgemsiii_nci_nih_hpc.sh 
+ 1044  exit
+ 1045  ~/cgemsiii_nci_nih_hpc.sh 
+ 1046  cd ~/b
+ 1047  ~/biowulf_nih_hpc.sh 
+ 1048  ~/biowulf_nih_hpc.sh 
+ 1049  cd ~/Documents/Prototype/PythonProject/
+ 1050  ls -l
+ 1051  cd ./CustomizedQC/
+ 1052  ls -l
+ 1053  cd ./ob
+ 1054  cd ./ObjectStorage/
+ 1055  ls -l
+ 1056  cd ..
+ 1057  ls -l
+ 1058  cat ~/biowulf_nih_hpc.sh 
+ 1059  scp -r ./ObjectStorage/ lix33@biowulf.nih.gov:/home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode
+ 1060  ~/biowulf_nih_hpc.sh 
+ 1061  ~/cgemsiii_nci_nih_hpc.sh 
+ 1062  cat ~/biowulf_nih_hpc.sh 
+ 1063  cd ~/Documents/Prototype/
+ 1064  ls -l
+ 1065  cd ./
+ 1066  cd ./PythonProject/
+ 1067  ls -l
+ 1068  cd ./CustomizedQC/
+ 1069  ls -l
+ 1070  cd ./ObjectStorage/
+ 1071  ls -l
+ 1072  cd ..
+ 1073  ls -l
+ 1074  ls -lht
+ 1075  cat ~/biowulf_nih_hpc.sh 
+ 1076  scp ./CustomizedQC.py lix33@biowulf.nih.gov:/home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode
+ 1077  ~/biowulf_nih_hpc.sh 
+ 1078  exit
+ 1079  cd ~/Documents/Prototype/
+ 1080  ls -l
+ 1081  cd ./
+ 1082  cd ./PythonProject/
+ 1083  ls -l
+ 1084  cd ./CustomizedQC/
+ 1085  ls -l
+ 1086  ls -lht
+ 1087  cat ~/biowulf_nih_hpc.sh 
+ 1088  scp ./CustomizedQC.py lix33@biowulf.nih.gov:/home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode
+ 1089  ~/biowulf_nih_hpc.sh 
+ 1090  ~/biowulf_nih_hpc.sh 
+ 1091  cat ~/biowulf_nih_hpc.sh 
+ 1092  ~/biowulf_nih_hpc.sh 
+ 1093  ~/biowulf_nih_hpc.sh 
+ 1094  cd ~/Documents/Prototype/PythonProject/CustomizedQC/
+ 1095  ls -l
+ 1096  cat ~/biowulf_nih_hpc.sh 
+ 1097  ls -l
+ 1098  scp ./CustomizedQC.py lix33@biowulf.nih.gov:/home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode
+ 1099  sjobs
+ 1100  scp ./CustomizedQC.py lix33@biowulf.nih.gov:/home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode
+ 1101  ls -l
+ 1102  git pull
+ 1103  ls -l
+ 1104  sjobs
+ 1105  scp ./CustomizedQC.py lix33@biowulf.nih.gov:/home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode
+ 1106  scp ./MergeQCReport.py lix33@biowulf.nih.gov:/home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode
+ 1107  ls -l
+ 1108  ~/biowulf_nih_hpc.sh 
+ 1109  ls -l
+ 1110  ~/lxwg/
+ 1111  cd ~/Documents/
+ 1112  kls -l
+ 1113  ls -l
+ 1114  cd ./Prototype/
+ 1115  ls -l
+ 1116  cd ./
+ 1117  cd ./PythonProject/
+ 1118  ls -l
+ 1119  cd ./CustomizedQC/
+ 1120  ls -l
+ 1121  cat ~/biowulf_nih_hpc.sh 
+ 1122  ls -l
+ 1123  ls -lht
+ 1124  scp ./CustomizedQC.py lix33@biowulf.nih.gov:/home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode
+ 1125  ls -l
+ 1126  ls -lht
+ 1127  scp ./DataReconstruct.py lix33@biowulf.nih.gov:/home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode
+ 1128  scp -r ./ObjectStorage lix33@biowulf.nih.gov:/home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode
+ 1129  scp ./CustomizedQC.py lix33@biowulf.nih.gov:/home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode
+ 1130  ~/biowulf_nih_hpc.sh 
+ 1131  ~/cgemsiii_nci_nih_hpc.sh 
+ 1132  ~/biowulf_nih_hpc.sh 
+ 1133  exit
+ 1134  ~/biowulf_nih_hpc.sh 
+ 1135  exit
+ 1136  ~/biowulf_nih_hpc.sh 
+ 1137  ~/cgemsiii_nci_nih_hpc.sh 
+ 1138  ~/biowulf_nih_hpc.sh 
+ 1139  ls -l
+ 1140  ~/biowulf_nih_hpc.sh 
+ 1141  exit
+ 1142  cd ~/Documents/Prototype/
+ 1143  ls -l
+ 1144  cd ./Pr
+ 1145  cd ./PythonProject
+ 1146  ls -l
+ 1147  cd ./CustomizedQC/
+ 1148  ls -l
+ 1149  cd ./ObjectStorage/
+ 1150  ls -l
+ 1151  cd ..
+ 1152  ls -l
+ 1153  cd ./ObjectStorage/
+ 1154  ls -l
+ 1155  cat ~/biowulf_nih_hpc.sh 
+ 1156  scp ./Backup2S3.py lix33@biowulf.nih.gov:/home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode/ObjectStorage
+ 1157  ~/biowulf_nih_hpc.sh 
+ 1158  exit
+ 1159  ls -l
+ 1160  cd ..
+ 1161  ls -l
+ 1162  cd ..
+ 1163  ls -l
+ 1164  cd ./LowInput/
+ 1165  ls -l
+ 1166  cd ./Processed/
+ 1167  ls -l
+ 1168  find ./ -iname 'Sample_*'
+ 1169  ls -l
+ 1170  less ./pI8.tagmentation.N96.keytable.jul.23.2021.low_input.Sum_QC_Report.csv 
+ 1171  ls -l
+ 1172  cd ..
+ 1173  ls -l
+ 1174  less ./README.txt 
+ 1175  cd ..
+ 1176  ls -l
+ 1177  cd ./StdInput/
+ 1178  ls -l
+ 1179  cd ..
+ 1180  ls -l
+ 1181  cd ./Keytable/
+ 1182  ls -l
+ 1183  cd ./NCI-USU_COVNET_docs/
+ 1184  ls -l
+ 1185  cd ./Sample_Manifests-QC_Information/
+ 1186  ls -l
+ 1187  cd ./Batch_
+ 1188  cd ./Batch_1_Standard_WGS/
+ 1189  ls -l
+ 1190  cd ./k
+ 1191  ls -l
+ 1192  cd ./k
+ 1193  cd ./Keytable_and_file_inventory_from_USU/
+ 1194  ks 0-k
+ 1195  ls -l
+ 1196  cat ./*.csv >> pI3.COVNET.N361.keytable.june.3.2021+pI3.COVNET.N18.15topoff.keytable.june.30.2021.csv
+ 1197  ls -l
+ 1198  less ./pI3.COVNET.N361.keytable.june.3.2021+pI3.COVNET.N18.15topoff.keytable.june.30.2021.csv 
+ 1199  vim ./pI3.COVNET.N361.keytable.june.3.2021+pI3.COVNET.N18.15topoff.keytable.june.30.2021.csv 
+ 1200  ls -l
+ 1201  less ./pI3.COVNET.N361.keytable.june.3.2021+pI3.COVNET.N18.15topoff.keytable.june.30.2021.csv
+ 1202  wc -l ./pI3.COVNET.N361.keytable.june.3.2021+pI3.COVNET.N18.15topoff.keytable.june.30.2021.csv
+ 1203  wc -l ./pI3.COVNET.N18.15topoff.keytable.june.30.2021.csv
+ 1204  wc -l pI3.COVNET.N361.keytable.june.3.2021.csv
+ 1205  wc -l pI3.COVNET.N361.keytable.june.3.2021+pI3.COVNET.N18.15topoff.keytable.june.30.2021.csv
+ 1206  less ./pI3.COVNET.N361.keytable.june.3.2021+pI3.COVNET.N18.15topoff.keytable.june.30.2021.csv
+ 1207  less pI3.COVNET.N361.keytable.june.3.2021.csv
+ 1208  less pI3.COVNET.N18.15topoff.keytable.june.30.2021.csv
+ 1209  less pI3.COVNET.N18.15topoff.keytable.june.30.2021.csv | wc -l
+ 1210  less ./pI3.COVNET.N361.keytable.june.3.2021+pI3.COVNET.N18.15topoff.keytable.june.30.2021.csv
+ 1211  cd ..
+ 1212  ls -l
+ 1213  cd ..
+ 1214  ls -l
+ 1215  cd ..
+ 1216  ls -l
+ 1217  cd ..
+ 1218  ls -l
+ 1219  cd ./StdInput/
+ 1220  ls -l
+ 1221  cd ./Processed/
+ 1222  ls -l
+ 1223  pwd
+ 1224  ls -l
+ 1225  less ./pI3.COVNET.N361.keytable.june.3.2021+pI3.COVNET.N18.15topoff.keytable.june.30.2021.low_input.Sum_QC_Report.csv 
+ 1226  rm pI3.COVNET.N361.keytable.june.3.2021+pI3.COVNET.N18.15topoff.keytable.june.30.2021.low_input.Sum_QC_Report.csv
+ 1227  ls -l
+ 1228  cd ..
+ 1229  ls -l
+ 1230  cd. .
+ 1231  ls -l
+ 1232  cd ..
+ 1233  ls -l
+ 1234  cd ..
+ 1235  ls -l
+ 1236  zip low_std_input_USU_QC_Report.zip ./08_14_2021
+ 1237  ls -l
+ 1238  zip -r low_std_input_USU_QC_Report.zip ./08_14_2021
+ 1239  ls -l
+ 1240  ls -lht
+ 1241  ls -l
+ 1242  cd ./lxwg/
+ 1243  ls -l
+ 1244  cd ./Git/
+ 1245  l;s =;
+ 1246  l -l
+ 1247  man git
+ 1248  git pull -R git@github.com:NCI-CGR/IlluminaSequencingAnalysis.git
+ 1249  git clone -R git@github.com:NCI-CGR/IlluminaSequencingAnalysis.git
+ 1250  git clone git@github.com:NCI-CGR/IlluminaSequencingAnalysis.git
+ 1251  ls -l
+ 1252  cd ..
+ 1253  ls -l
+ 1254  git clone git@github.com:NCI-CGR/IlluminaSequencingAnalysis.git
+ 1255  ls -l
+ 1256  ~/biowulf_nih_hpc.sh 
+ 1257  exit
+ 1258  ~/biowulf_nih_hpc.sh 
+ 1259  ~/cgemsiii_nci_nih_hpc.sh 
+ 1260  ~/biowulf_nih_hpc.sh 
+ 1261  ~/helix_nih_hpc.gov 
+ 1262  ~/biowulf_nih_hpc.sh 
+ 1263  ~/cgemsiii_nci_nih_hpc.sh 
+ 1264  ~/biowulf_nih_hpc.sh 
+ 1265  ~/cgemsiii_nci_nih_hpc.sh 
+ 1266  ~/biowulf_nih_hpc.sh 
+ 1267  cat ~/cgemsiii_nci_nih_hpc.sh 
+ 1268  cd ~/Downloads/
+ 1269  ls
+ 1270  ls -lht
+ 1271  scp ./low_std_input_USU_QC_Report.zip lix33@cgemsiii.nci.nih.gov:/CGF/Sequencing/Illumina/

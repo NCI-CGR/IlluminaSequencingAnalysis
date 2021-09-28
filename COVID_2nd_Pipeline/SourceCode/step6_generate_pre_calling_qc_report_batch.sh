@@ -1,17 +1,29 @@
 #!/bin/sh
 
-#SCRIPT=$(readlink -f "$0")
-#DCEG_SEQ_POOL_SCRIPT_DIR=$(dirname "$SCRIPT")
-#. ${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/global_config_bash.rc
-. ./global_config_bash.rc
+SCRIPT=$(readlink -f "$0")
+DCEG_SEQ_POOL_SCRIPT_DIR=$(dirname "$SCRIPT")
+. ${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/global_config_bash.rc
+#. ./global_config_bash.rc
+
+#2 or 3 input (MANIFEST_FILE, dirBuildBAM and (PREQC_REPORT_FILE -- option))
 
 DATE=`echo $(date +%m%d%Y)`
 LOG_DIR=${CLUSTER_JOB_LOG_DIR}/${DATE}
 mkdir -p $LOG_DIR 2>/dev/null
-rm ./nohup100.out
+if [ -f ${BUFFER_DIR}/nohup100.out ]; then
+  rm ${BUFFER_DIR}/nohup100.out
+fi
 
 MANIFEST_FILE=$1
-shift
+dirBuildBAM=$2
+
+#create BAM list file
+strBAMList=${dirBuildBAM}/bam.lst
+if [ -f "${strBAMList}" ]; then
+  rm ${strBAMList}
+fi
+# Create bam.list
+find ${dirBuildBAM} -iname '*.bam' > ${strBAMList}
 
 if [[ $MANIFEST_FILE == "" ]];then
 	echo "Please provide manifest file!"
@@ -33,10 +45,10 @@ fi
 # the IDs that are NOT in <my_last_report.txt> and then submit the cluster job accordingly.
 # All IDs that are already in <my_last_report.txt> will then be skipped
 
-if [[ $# == 1 ]]; then
+if [[ $# == 3 ]]; then
 	# if there is an argument, enter patch mode
 	PATCH_MODE=true
-	PREQC_REPORT_FILE=$1
+	PREQC_REPORT_FILE=$3
 	echo "Entering patch mode to fill up the \"holes\" in existing coverage report file $PREQC_REPORT_FILE"
 else
 	# otherwise automatically generate the report file name
@@ -60,10 +72,14 @@ GROUP_COL=$(awk -F "\t" -v col='GROUP' '{for (i=1;i<=NF;i++) if ($i==col) print 
 echo $GROUP_COL
 ANALYSISID_COL=$(awk -F "\t" -v col='ANALYSIS ID' '{for (i=1;i<=NF;i++) if ($i~col) print i; exit}' $MANIFEST_FILE)
 echo $ANALYSISID_COL
-BAM_DIR=$(dirname ${MANIFEST_FILE})/../bam_location
+#BAM_DIR=$(dirname ${MANIFEST_FILE})/../bam_location
+BAM_DIR=${dirBuildBAM}
 cd $BAM_DIR
-for BAM in $(awk -F "\t" -v group=$GROUP_COL -v analysisid=$ANALYSISID_COL '{if(NR>1){print $group"/"$group"_"$analysisid".bam"}}' $MANIFEST_FILE | sort | uniq); do	
-		echo $BAM
+
+#for BAM in $(awk -F "\t" -v group=$GROUP_COL -v analysisid=$ANALYSISID_COL '{if(NR>1){print $group"/"$group"_"$analysisid".bam"}}' $MANIFEST_FILE | sort | uniq); do
+#		echo $BAM
+for BAM in `cat ${strBAMList}`; do
+  echo $BAM
 #for BAM in $(cat GIAB.lst); do
 # in case we may have forgotten to generate this pre-calling qc report
 # before we move incoming BAM files to original BAM folder
@@ -91,13 +107,25 @@ for BAM in $(awk -F "\t" -v group=$GROUP_COL -v analysisid=$ANALYSISID_COL '{if(
 	fi
 
 	if [[ ($DO_THIS_BAM == "true") || ($PATCH_MODE == "false") ]] ; then
-		CMD="qsub -q $QUEUE -cwd \
-			-o ${LOG_DIR}/_pre_calling_qc_report_${NAME}.stdout -e ${LOG_DIR}/_pre_calling_qc_report_${NAME}.stderr \
-			-N PRECALLING_QC.$NAME \
-			-S /bin/sh ${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/pre_calling_qc_single.sh $BAM $PREQC_REPORT_FILE $MANIFEST_FILE"
+#		CMD="qsub -q $QUEUE -cwd \
+#			-o ${LOG_DIR}/_pre_calling_qc_report_${NAME}.stdout -e ${LOG_DIR}/_pre_calling_qc_report_${NAME}.stderr \
+#			-N PRECALLING_QC.$NAME \
+#			-S /bin/sh ${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/pre_calling_qc_single.sh $BAM $PREQC_REPORT_FILE $MANIFEST_FILE"
+
+    CMD="sbatch --ntasks=1 \
+                --nodes=1 \
+                --job-name=PRECALLING_QC.${NAME} \
+                --time=10-00:00:00 \
+                --mem=20G \
+                --output=${LOG_DIR}/_pre_calling_qc_report_${NAME}.stdout \
+                --error=${LOG_DIR}/_pre_calling_qc_report_${NAME}.stderr \
+                --wrap=\"bash ${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/pre_calling_qc_single.sh \
+                          $BAM \
+                          $PREQC_REPORT_FILE \
+                          $MANIFEST_FILE\""
+
 		echo $CMD
-		
-		echo $CMD >> ./nohup100.out
+		echo $CMD >> ${BUFFER_DIR}/nohup100.out
 		eval $CMD
 	fi
 done

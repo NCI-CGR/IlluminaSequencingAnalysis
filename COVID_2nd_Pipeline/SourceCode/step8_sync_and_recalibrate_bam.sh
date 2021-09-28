@@ -77,7 +77,7 @@ else
 fi
 
 
-echo $DISEASE_GROUPS
+echo "DISEASE_GROUPS: "${DISEASE_GROUPS}
 # exit 1
 # for GROUP in $BAM_ORIGINAL_DIR/* ; do
 for GROUP in $(echo $DISEASE_GROUPS); do
@@ -85,9 +85,9 @@ for GROUP in $(echo $DISEASE_GROUPS); do
   echo $GROUP_NAME
   if [[ -d $GROUP ]]; then  
     for IN_BAM in $GROUP/*.bam; do
-      
+
       if [[ ! -f $IN_BAM ]]; then
-	continue
+	      continue
       fi
 
       BAM_NAME=`basename $IN_BAM`
@@ -104,25 +104,35 @@ for GROUP in $(echo $DISEASE_GROUPS); do
       # echo "Flg_inqueue:$FLG_INQUEUE"
 
       if [[ $HAS_NEWER -eq 0 ]] && [[  ! -f $FLG_WORKING ]] && [[  ! -f $FLG_INQUEUE ]]; then
-             echo
-             echo "Launching recalibration job for $BAM_NAME ..."
-             if [[ ! -d ${BAM_REFORMATTED_RECALIBRATED_DIR}/${GROUP_NAME} ]]; then
-               mkdir -p ${BAM_REFORMATTED_RECALIBRATED_DIR}/${GROUP_NAME}
-             fi
-             touch $FLG_INQUEUE
+        echo
+        echo "Launching recalibration job for $BAM_NAME ..."
+        if [[ ! -d ${BAM_REFORMATTED_RECALIBRATED_DIR}/${GROUP_NAME} ]]; then
+          mkdir -p ${BAM_REFORMATTED_RECALIBRATED_DIR}/${GROUP_NAME}
+        fi
+        touch $FLG_INQUEUE
 
-	     DATE=`echo $(date +%Y%m%d)`
-	     LOG_DIR=${CLUSTER_JOB_LOG_DIR}/${DATE}
-             if [[ ! -d $LOG_DIR ]]; then
-	       mkdir -p $LOG_DIR
-             fi
- 	     cd $SCRIPT_DIR 
- 	     CMD="qsub -q $QUEUE \
-              -o ${LOG_DIR}/_recalibration_${BAM_NAME}.stdout -e ${LOG_DIR}/_recalibration_${BAM_NAME}.stderr \
-              -N RECAL.$BAM_NAME -v SCRIPT_DIR=$SCRIPT_DIR \
-              -S /bin/sh ${SCRIPT_DIR}/recalibrate_bam.sh $IN_BAM ${BAM_REFORMATTED_RECALIBRATED_DIR}/${GROUP_NAME}/${BAM_NAME} $VARIANT_TYPE"
-	     echo $CMD
-	     eval $CMD
+	      DATE=`echo $(date +%Y%m%d)`
+	      LOG_DIR=${CLUSTER_JOB_LOG_DIR}/${DATE}
+        if [[ ! -d $LOG_DIR ]]; then
+	        mkdir -p $LOG_DIR
+        fi
+ 	      cd $SCRIPT_DIR
+# 	     CMD="qsub -q $QUEUE \
+#              -o ${LOG_DIR}/_recalibration_${BAM_NAME}.stdout -e ${LOG_DIR}/_recalibration_${BAM_NAME}.stderr \
+#              -N RECAL.$BAM_NAME -v SCRIPT_DIR=$SCRIPT_DIR \
+#              -S /bin/sh ${SCRIPT_DIR}/recalibrate_bam.sh $IN_BAM ${BAM_REFORMATTED_RECALIBRATED_DIR}/${GROUP_NAME}/${BAM_NAME} $VARIANT_TYPE"
+
+	      #Job Script in Biowulf -->
+        CMD="sbatch --time=10-00:00:00 \
+                    --mem=20G \
+                    --job-name=RECAL.${BAM_NAME} \
+                    --export=SCRIPT_DIR='${SCRIPT_DIR}' \
+                    --output=${LOG_DIR}/_recalibration_${BAM_NAME}.stdout \
+                    --error=${LOG_DIR}/_recalibration_${BAM_NAME}.stderr \
+                    --wrap=\"bash ${SCRIPT_DIR}/recalibrate_bam.sh ${IN_BAM} ${BAM_REFORMATTED_RECALIBRATED_DIR}/${GROUP_NAME}/${BAM_NAME} ${VARIANT_TYPE}\""
+        #<--
+	      echo $CMD
+	      eval $CMD
       fi
     done
   fi

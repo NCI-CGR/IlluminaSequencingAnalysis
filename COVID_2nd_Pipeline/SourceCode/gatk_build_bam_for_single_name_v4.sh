@@ -8,7 +8,7 @@
 . ${SCRIPT_HOME}/global_config_bash.rc
 set -o pipefail
 # set -e
-module load samtools jdk
+module load samtools/1.8 java/1.8.0_211
 ANALYSIS_ID=$1
 DOWNSAMPLE_RATIO=$2
 MANIFEST=$3
@@ -35,7 +35,7 @@ OUT_IDX=${BAM_INCOMING_DIR}/${SUB_DIR}/${ANALYSIS_ID}.bai
 OUT_METRICS=${BAM_INCOMING_DIR}/${SUB_DIR}/${ANALYSIS_ID}_dedup_metrics.txt
 
 if [[ -f $OUT ]] && [[ -f $OUT_IDX ]] && [[ -f $OUT_METRICS ]]; then
-  echo "The merged BAM file of this subject $ANALYSIS_ID exists under /DCEG/Projects/Exome/SequencingData/BAM_new_incoming, skip merging."
+  echo "The merged BAM file of this subject $ANALYSIS_ID exists under ${BAM_INCOMING_DIR}, skip merging."
   exit 1
 fi
 
@@ -220,9 +220,9 @@ for bam in $INPUT_LIST; do
            if [[ "$DOWNSAMPLE_RATIO" != "1" ]]; then
                echo "[$(date)] Downsample for $bam"
                CMD="java -Xmx8g -jar $PICARD DownsampleSam \
-                     INPUT=$bam          \
-                     OUTPUT=${TMP_DIR}/${ANALYSIS_ID}.downsample.bam \
-                     PROBABILITY=$DOWNSAMPLE_RATIO"
+                        --INPUT $bam \
+                        --OUTPUT ${TMP_DIR}/${ANALYSIS_ID}.downsample.bam \
+                        --PROBABILITY $DOWNSAMPLE_RATIO"
                echo $CMD
                eval $CMD
                if [[ $? -ne 0 ]]; then
@@ -285,11 +285,21 @@ else
    fi
    echo "[$(date)]: Merging is done!"
 fi
+
+echo
+echo "Copy INPUT_LIST finished!"
+
 MERGED_COUNT=`samtools view -c ${OUT_TMP_PREFIX}1.bam`
 
 echo
 echo "[$(date)]: Starting reordersam using Picard ..."
-CMD="java -Xmx16g -jar $PICARD ReorderSam I=${OUT_TMP_PREFIX}1.bam O=${OUT_TMP_PREFIX}.bam reference=$REFERENCE_GENOME VALIDATION_STRINGENCY=STRICT TMP_DIR=$TMP_DIR"
+CMD="java -Xmx16g -jar $PICARD ReorderSam \
+          --INPUT ${OUT_TMP_PREFIX}1.bam \
+          --OUTPUT ${OUT_TMP_PREFIX}.bam \
+          --SEQUENCE_DICTIONARY ${REFERENCE_GENOME} \
+          --REFERENCE_SEQUENCE ${REFERENCE_GENOME} \
+          --VALIDATION_STRINGENCY STRICT \
+          --TMP_DIR $TMP_DIR"
 echo $CMD
 eval $CMD
 if [[ $? -ne 0 ]]; then
@@ -375,7 +385,7 @@ fi
 echo
 echo "The second checkpoint: check if the PU and LB are consistent with MANIFEST (in case the error in flowcell folernames or file names)"
 A_ID=`echo $ANALYSIS_ID | cut -d_ -f2-`
-echo $A_ID
+echo "A_ID: "${A_ID}
 RG=`awk -F"," -v analysis_id=$A_ID 'BEGIN{i=0}
  {
   if ($13==analysis_id){
@@ -432,6 +442,10 @@ IFS='; ' read -r -a RG_M <<< "$RG"
 IFS='; ' read -r -a RG_B <<< "$BAM_RG"
 M_LEN=${#RG_M[@]}
 B_LEN=${#RG_B[@]}
+echo
+echo "M_LEN: "${M_LEN}
+echo "B_LEN: "${B_LEN}
+echo
 if [[ $B_LEN -ne $M_LEN ]]; then
    HISEQ_NUM=`awk -F"," -v analysis_id=$A_ID 'BEGIN{dd=0; hiseq_num=0; i=0}
    {
@@ -445,6 +459,7 @@ if [[ $B_LEN -ne $M_LEN ]]; then
       if (dd>=60)
         printf hiseq_num
       else
+        printf dd
         printf "Err"
    }' $MANIFEST` 
    echo "HiSeq Lane Numbers: $HISEQ_NUM"
@@ -503,13 +518,13 @@ echo
 
 echo "[$(date)]: Remove duplicates for '$ANALYSIS_ID'..."
 CMD="java -Xmx8g -jar $PICARD MarkDuplicates \
-        INPUT=${OUT_TMP_PREFIX}_SM_renamed_sorted.bam \
-        OUTPUT=$OUT_TMP_DEDUP \
-        METRICS_FILE=$OUT_TMP_DEDUP_metrics
-        ASSUME_SORTED=true \
-        REMOVE_DUPLICATES=true \
-        VALIDATION_STRINGENCY=STRICT \
-        CREATE_INDEX=true"
+          --INPUT ${OUT_TMP_PREFIX}_SM_renamed_sorted.bam \
+          --OUTPUT $OUT_TMP_DEDUP \
+          --METRICS_FILE $OUT_TMP_DEDUP_metrics
+          --ASSUME_SORTED true \
+          --REMOVE_DUPLICATES true \
+          --VALIDATION_STRINGENCY STRICT \
+          --CREATE_INDEX true"
 echo $CMD
 eval $CMD
 

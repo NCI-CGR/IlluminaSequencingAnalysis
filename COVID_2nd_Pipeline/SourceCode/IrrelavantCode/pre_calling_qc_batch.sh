@@ -1,5 +1,7 @@
 #!/bin/sh
 
+SCRIPT=$(readlink -f "$0")
+DCEG_SEQ_POOL_SCRIPT_DIR=$(dirname "$SCRIPT")
 . ${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/global_config_bash.rc
 
 DATE=`echo $(date +%m%d%Y)`
@@ -85,8 +87,10 @@ for BAM in $(cat ${BAM_LIST}); do
 			-N PRECALLING_QC.$NAME \
 			-S /bin/sh ${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/pre_calling_qc_single.sh $BAM $PREQC_REPORT_FILE $MANIFEST_FILE"
 		echo $CMD
-		rm ./nohup100.out
-		echo $CMD >> ./nohup100.out
+		if [ -f ${BUFFER_DIR}/nohup100.out ]; then
+		  rm ${BUFFER_DIR}/nohup100.out
+		fi
+		echo $CMD >> ${BUFFER_DIR}/nohup100.out
 		eval $CMD
 	fi
 done

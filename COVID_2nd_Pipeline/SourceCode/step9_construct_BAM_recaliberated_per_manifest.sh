@@ -17,8 +17,8 @@ if [[ ! -f $MANIFEST ]] ; then
   echo "Error: cannot find manifest file, please check the directory of manifest file."
   exit 1
 fi
-BAM_BUILD=/DCEG/Projects/Exome/builds/${BUILD_NAME}/bam_location
-BAM_MISSING_LIST=/DCEG/Projects/Exome/builds/${BUILD_NAME}/missing_bam_file.txt
+BAM_BUILD=${DIRBuild}/${BUILD_NAME}/bam_location
+BAM_MISSING_LIST=${DIRBuild}/${BUILD_NAME}/missing_bam_file.txt
 rm -f $BAM_MISSING_LIST
 mkdir -p $BAM_BUILD
 total_samples=0

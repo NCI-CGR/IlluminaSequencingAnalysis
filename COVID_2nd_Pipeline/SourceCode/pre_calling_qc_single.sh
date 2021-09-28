@@ -4,16 +4,22 @@
 # DCEG_SEQ_POOL_SCRIPT_DIR=$(dirname "$SCRIPT")
 # echo ${DCEG_SEQ_POOL_SCRIPT_DIR:-.} #this one doesn't work and print out to be this path /cm/local/apps/sge/var/spool/node115/job_scripts
 # . ${DCEG_SEQ_POOL_SCRIPT_DIR}/global_config_bash.rc
-. ./global_config_bash.rc
-module load R/3.4.3
-module load jdk/1.8.0_111
+
+SCRIPT=$(readlink -f "$0")
+DCEG_SEQ_POOL_SCRIPT_DIR=$(dirname "$SCRIPT")
+. ${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/global_config_bash.rc
+
+#. ./global_config_bash.rc
+
+module load R/4.1
+module load java/1.8.0_211
 which java
 IN_BAM=$1
 OUT_REPORT=$2
 MANIFEST=$3
 
 OUT_DIR=${BUFFER_DIR}/PRE_QC
-CUSTOMIZED_BED_DIR=/DCEG/Projects/Exome/SequencingData/BED_FILES/customized_capturekit
+#CUSTOMIZED_BED_DIR=/DCEG/Projects/Exome/SequencingData/BED_FILES/customized_capturekit
 REF_DICT=$(echo $REFERENCE_GENOME | cut -f1 -d.).dict
 
 NAME=$(basename $IN_BAM .bam)
@@ -34,59 +40,59 @@ echo $MANIFEST
 CAPTUREKIT=`echo $CAPTUREKIT | cut -d" " -f1`
 echo $CAPTUREKIT
 if [[ $CAPTUREKIT == *3.0* ]]; then
-	PICARD_BAIT_INTERVALS=${BUFFER_DIR}/INTERVAL_FILES/SeqCap_EZ_Exome_v3_capture.interval_list
-	PICARD_TARGET_INTERVALS=${BUFFER_DIR}/INTERVAL_FILES/SeqCap_EZ_Exome_v3_primary.interval_list
-	GATK_INTERVALS=${BUFFER_DIR}/INTERVAL_FILES/SeqCap_EZ_Exome_v3_capture.intervals
+	PICARD_BAIT_INTERVALS=${INTERVALFilesDir}/SeqCap_EZ_Exome_v3_capture.interval_list
+	PICARD_TARGET_INTERVALS=${INTERVALFilesDir}/SeqCap_EZ_Exome_v3_primary.interval_list
+	GATK_INTERVALS=${INTERVALFilesDir}/SeqCap_EZ_Exome_v3_capture.intervals
 	TOTAL_BASE=$EXOME_TARGETS_TOTAL_BASES_v3
 	EXOME_TARGETS=$EXOME_TARGETS_v3
 elif [[ $CAPTUREKIT == *UTR* ]]; then
-    PICARD_BAIT_INTERVALS=${BUFFER_DIR}/INTERVAL_FILES/120430_HG19_ExomeV3_UTR_EZ_HX1_capture.interval_list
-	PICARD_TARGET_INTERVALS=${BUFFER_DIR}/INTERVAL_FILES/120430_HG19_ExomeV3_UTR_EZ_HX1_primary.interval_list
-	GATK_INTERVALS=${BUFFER_DIR}/INTERVAL_FILES/120430_HG19_ExomeV3_UTR_EZ_HX1_capture.intervals
+  PICARD_BAIT_INTERVALS=${INTERVALFilesDir}/120430_HG19_ExomeV3_UTR_EZ_HX1_capture.interval_list
+	PICARD_TARGET_INTERVALS=${INTERVALFilesDir}/120430_HG19_ExomeV3_UTR_EZ_HX1_primary.interval_list
+	GATK_INTERVALS=${INTERVALFilesDir}/120430_HG19_ExomeV3_UTR_EZ_HX1_capture.intervals
 	TOTAL_BASE=$EXOME_TARGETS_TOTAL_BASES_v3plusUTR
 	EXOME_TARGETS=$EXOME_TARGETS_v3plusUTR
 elif [[ $CAPTUREKIT == *2.0* ]]; then
-	PICARD_BAIT_INTERVALS=${BUFFER_DIR}/INTERVAL_FILES/SeqCap_EZ_Exome_v3_capture.interval_list
-	PICARD_TARGET_INTERVALS=${BUFFER_DIR}/INTERVAL_FILES/SeqCap_EZ_Exome_v3_primary.interval_list
-	GATK_INTERVALS=${BUFFER_DIR}/INTERVAL_FILES/SeqCap_EZ_Exome_v3_capture.intervals
+	PICARD_BAIT_INTERVALS=${INTERVALFilesDir}/SeqCap_EZ_Exome_v3_capture.interval_list
+	PICARD_TARGET_INTERVALS=${INTERVALFilesDir}/SeqCap_EZ_Exome_v3_primary.interval_list
+	GATK_INTERVALS=${INTERVALFilesDir}/SeqCap_EZ_Exome_v3_capture.intervals
 	TOTAL_BASE=$EXOME_TARGETS_TOTAL_BASES_v3
 	EXOME_TARGETS=$EXOME_TARGETS_v3
 elif [[ $CAPTUREKIT == *EZ_Choice_Kid-Lung-Extra* ]]; then
-    PICARD_BAIT_INTERVALS=${BUFFER_DIR}/INTERVAL_FILES/161006_HG19_Kid-Lung-Extra_EZ_HX3_capture_targets.interval_list
-	PICARD_TARGET_INTERVALS=${BUFFER_DIR}/INTERVAL_FILES/161006_HG19_Kid-Lung-Extra_EZ_HX3_primary_targets.interval_list
-	GATK_INTERVALS=${BUFFER_DIR}/INTERVAL_FILES/161006_HG19_Kid-Lung-Extra_EZ_HX3_primary_targets.intervals
+  PICARD_BAIT_INTERVALS=${INTERVALFilesDir}/161006_HG19_Kid-Lung-Extra_EZ_HX3_capture_targets.interval_list
+	PICARD_TARGET_INTERVALS=${INTERVALFilesDir}/161006_HG19_Kid-Lung-Extra_EZ_HX3_primary_targets.interval_list
+	GATK_INTERVALS=${INTERVALFilesDir}/161006_HG19_Kid-Lung-Extra_EZ_HX3_primary_targets.intervals
 	TOTAL_BASE=1780492
 	EXOME_TARGETS=${CUSTOMIZED_BED_DIR}/161006_HG19_Kid-Lung-Extra_EZ_HX3_primary_targets.bed
 elif [[ $CAPTUREKIT == *Karina-XP* ]]; then
-        PICARD_BAIT_INTERVALS=${BUFFER_DIR}/INTERVAL_FILES/Karina-XP_capture_targets.interval_list
-	PICARD_TARGET_INTERVALS=${BUFFER_DIR}/INTERVAL_FILES/Karina-XP_primary_targets.interval_list
-	GATK_INTERVALS=${BUFFER_DIR}/INTERVAL_FILES/Karina-XP_primary_targets.intervals
+        PICARD_BAIT_INTERVALS=${INTERVALFilesDir}/Karina-XP_capture_targets.interval_list
+	PICARD_TARGET_INTERVALS=${INTERVALFilesDir}/Karina-XP_primary_targets.interval_list
+	GATK_INTERVALS=${INTERVALFilesDir}/Karina-XP_primary_targets.intervals
 	TOTAL_BASE=941427
 	EXOME_TARGETS=${CUSTOMIZED_BED_DIR}/Karina-XP_primary_targets.bed	
 elif [[ $CAPTUREKIT == *Dean-Koshiol-4* ]]; then
-    PICARD_BAIT_INTERVALS=${BUFFER_DIR}/INTERVAL_FILES/Dean-Koshiol-4_capture.interval_list
-	PICARD_TARGET_INTERVALS=${BUFFER_DIR}/INTERVAL_FILES/Dean-Koshiol-4_primary.interval_list
-	GATK_INTERVALS=${BUFFER_DIR}/INTERVAL_FILES/Dean-Koshiol-4_capture.intervals
+    PICARD_BAIT_INTERVALS=${INTERVALFilesDir}/Dean-Koshiol-4_capture.interval_list
+	PICARD_TARGET_INTERVALS=${INTERVALFilesDir}/Dean-Koshiol-4_primary.interval_list
+	GATK_INTERVALS=${INTERVALFilesDir}/Dean-Koshiol-4_capture.intervals
 	TOTAL_BASE=2956332
-	EXOME_TARGETS=/DCEG/CGF/Laboratory/LIMS/Oligo_Orders/NimblegenCapture/Dean-Koshiol-4/Selection_Results/Dean-Koshiol-4_capture_targets.bed
+	EXOME_TARGETS=${CUSTOMIZED_BED_DIR}/Oligo_Orders/NimblegenCapture/Dean-Koshiol-4/Selection_Results/Dean-Koshiol-4_capture_targets.bed
 elif [[ $CAPTUREKIT == *Agilent_exome_test* ]]; then
-    PICARD_BAIT_INTERVALS=/DCEG/Projects/Exome/SequencingData/BED_FILES/customized_capturekit/S31285117_Regions.interval_list
-	PICARD_TARGET_INTERVALS=/DCEG/Projects/Exome/SequencingData/BED_FILES/customized_capturekit/S31285117_Regions.interval_list
-	GATK_INTERVALS=/DCEG/Projects/Exome/SequencingData/BED_FILES/customized_capturekit/S31285117_Regions.intervals
+  PICARD_BAIT_INTERVALS=${CUSTOMIZED_BED_DIR}/S31285117_Regions.interval_list
+	PICARD_TARGET_INTERVALS=${CUSTOMIZED_BED_DIR}/S31285117_Regions.interval_list
+	GATK_INTERVALS=${CUSTOMIZED_BED_DIR}/S31285117_Regions.intervals
 	TOTAL_BASE=35804808
-	EXOME_TARGETS=/DCEG/Projects/Exome/SequencingData/BED_FILES/customized_capturekit/S31285117_Regions.bed
+	EXOME_TARGETS=${CUSTOMIZED_BED_DIR}/S31285117_Regions.bed
 elif [[ $CAPTUREKIT == *Roche_exome_test* ]]; then
-    PICARD_BAIT_INTERVALS=/DCEG/Projects/Exome/SequencingData/BED_FILES/customized_capturekit/New_RSSExome_capture_targets.hg19.interval_list
-	PICARD_TARGET_INTERVALS=/DCEG/Projects/Exome/SequencingData/BED_FILES/customized_capturekit/New_RSSExome_primary_targets.hg19.interval_list
-	GATK_INTERVALS=/DCEG/Projects/Exome/SequencingData/BED_FILES/customized_capturekit/New_RSSExome_capture_targets.hg19.intervals
+    PICARD_BAIT_INTERVALS=${CUSTOMIZED_BED_DIR}/New_RSSExome_capture_targets.hg19.interval_list
+	PICARD_TARGET_INTERVALS=${CUSTOMIZED_BED_DIR}/New_RSSExome_primary_targets.hg19.interval_list
+	GATK_INTERVALS=${CUSTOMIZED_BED_DIR}/New_RSSExome_capture_targets.hg19.intervals
 	TOTAL_BASE=42836424
-	EXOME_TARGETS=/DCEG/Projects/Exome/SequencingData/BED_FILES/customized_capturekit/New_RSSExome_capture_targets.hg19.bed
+	EXOME_TARGETS=${CUSTOMIZED_BED_DIR}/New_RSSExome_capture_targets.hg19.bed
 elif [[ $CAPTUREKIT == *IDT_exome_test* ]]; then
-    PICARD_BAIT_INTERVALS=/DCEG/Projects/Exome/SequencingData/BED_FILES/customized_capturekit/xgen-exome-research-panel-targets.interval_list
-	PICARD_TARGET_INTERVALS=/DCEG/Projects/Exome/SequencingData/BED_FILES/customized_capturekit/xgen-exome-research-panel-targets.interval_list
-	GATK_INTERVALS=/DCEG/Projects/Exome/SequencingData/BED_FILES/customized_capturekit/xgen-exome-research-panel-targets.intervals
+  PICARD_BAIT_INTERVALS=${CUSTOMIZED_BED_DIR}/xgen-exome-research-panel-targets.interval_list
+	PICARD_TARGET_INTERVALS=${CUSTOMIZED_BED_DIR}/xgen-exome-research-panel-targets.interval_list
+	GATK_INTERVALS=${CUSTOMIZED_BED_DIR}/xgen-exome-research-panel-targets.intervals
 	TOTAL_BASE=39086460
-	EXOME_TARGETS=/DCEG/Projects/Exome/SequencingData/BED_FILES/customized_capturekit/xgen-exome-research-panel-targets.bed
+	EXOME_TARGETS=${CUSTOMIZED_BED_DIR}/xgen-exome-research-panel-targets.bed
 else
 	EXOME_TARGETS=$(ls ${CUSTOMIZED_BED_DIR}/*${CAPTUREKIT}*_capture.bed)
 	PRIMARY_BED=$(ls ${CUSTOMIZED_BED_DIR}/*${CAPTUREKIT}*_primary.bed)
@@ -96,21 +102,29 @@ else
 	    exit 0
 	fi
 	TOTAL_BASE=$( awk '{print $3-$2}' ${EXOME_TARGETS} | awk '{sum+=$1} END {print sum}')
-    PICARD_BAIT_INTERVALS=${BUFFER_DIR}/INTERVAL_FILES/${CAPTUREKIT}_capture.interval_list
-	PICARD_TARGET_INTERVALS=${BUFFER_DIR}/INTERVAL_FILES/${CAPTUREKIT}_primary.interval_list
+    PICARD_BAIT_INTERVALS=${INTERVALFilesDir}/${CAPTUREKIT}_capture.interval_list
+	PICARD_TARGET_INTERVALS=${INTERVALFilesDir}/${CAPTUREKIT}_primary.interval_list
 	GATK_INTERVALS=${BUFFER_DIR}/INTERVAL_FILES/${CAPTUREKIT}_capture.intervals
 	if [[ ! -f ${PICARD_BAIT_INTERVALS} ]]; then
-	    CMD="java -jar $PICARD BedToIntervalList I=${EXOME_TARGETS} O=${BUFFER_DIR}/INTERVAL_FILES/${CAPTUREKIT}_capture.interval_list SD=${REF_DICT}"
-	    echo $CMD
-	    eval $CMD
-	    awk -F"\t" '{print $1":"$2+1"-"$3}' ${EXOME_TARGETS} > ${GATK_INTERVALS}
-    fi
-    if [[ ! -f ${PICARD_TARGET_INTERVALS} ]]; then
-	    
-	    CMD="java -jar $PICARD BedToIntervalList I=${PRIMARY_BED} O=${BUFFER_DIR}/INTERVAL_FILES/${CAPTUREKIT}_primary.interval_list SD=${REF_DICT}"
-	    echo $CMD
-	    eval $CMD
-    fi
+    CMD="java -jar $PICARD BedToIntervalList \
+                            --INPUT ${EXOME_TARGETS} \
+                            --OUTPUT ${INTERVALFilesDir}/${CAPTUREKIT}_capture.interval_list \
+                            --SEQUENCE_DICTIONARY ${REF_DICT}"
+    echo $CMD
+    echo
+    eval $CMD
+    awk -F"\t" '{print $1":"$2+1"-"$3}' ${EXOME_TARGETS} > ${GATK_INTERVALS}
+  fi
+
+  if [[ ! -f ${PICARD_TARGET_INTERVALS} ]]; then
+    CMD="java -jar $PICARD BedToIntervalList \
+                            --INPUT ${PRIMARY_BED} \
+                            --OUTPUT ${INTERVALFilesDir}/${CAPTUREKIT}_primary.interval_list \
+                            --SEQUENCE_DICTIONARY ${REF_DICT}"
+    echo $CMD
+    echo
+    eval $CMD
+  fi
 fi
 echo $EXOME_TARGETS
 
@@ -135,7 +149,15 @@ date
 echo Running all tools to collect qc metrics.  
 echo ====================
 
-CMD="java -Xmx16g -jar $PICARD CollectMultipleMetrics I=${TMP_DIR}/${NAME}.bam O=${BUFFER_DIR}/PRE_QC/${NAME}/multiple_metrics R=$REFERENCE_GENOME PROGRAM=null PROGRAM=CollectSequencingArtifactMetrics PROGRAM=CollectAlignmentSummaryMetrics PROGRAM=CollectGcBiasMetrics VALIDATION_STRINGENCY=LENIENT"
+CMD="java -Xmx16g -jar ${PICARD} CollectMultipleMetrics \
+                                  --INPUT ${TMP_DIR}/${NAME}.bam \
+                                  --OUTPUT ${BUFFER_DIR}/PRE_QC/${NAME}/multiple_metrics \
+                                  --REFERENCE_SEQUENCE $REFERENCE_GENOME \
+                                  --PROGRAM null \
+                                  --PROGRAM CollectSequencingArtifactMetrics \
+                                  --PROGRAM CollectAlignmentSummaryMetrics \
+                                  --PROGRAM CollectGcBiasMetrics \
+                                  --VALIDATION_STRINGENCY LENIENT"
 #CollectSequencingArtifactMetrics substitution_rate of the 6 base changes ,pre_adapter_summary_metrics TOTAL_QSCORE <35
 #CollectAlignmentSummaryMetrics %PF_HQ_ALIGNED_READS(mapping quality of >20) %PF_HQ_ALIGNED_Q20_BASES PCT_READS_ALIGNED_IN_PAIRS PCT_PF_READS_IMPROPER_PAIRS PF_MISMATCH_RATE STRAND_BALANCE
 #PF_NOISE_READS: number of PF reads that are composed entirly out of As and/or Ns
@@ -147,13 +169,28 @@ CMD="java -Xmx16g -jar $PICARD CollectMultipleMetrics I=${TMP_DIR}/${NAME}.bam O
 #CollectGcBiasMetrics AT_DROPOUT GC_DROPOUT
 
 if [[ ! -s ${BUFFER_DIR}/PRE_QC/${NAME}/multiple_metrics.gc_bias.summary_metrics ]] || [[ $REPLACE_TABLE != "false" ]]; then
-	echo "java -Xmx16g -jar $PICARD ReorderSam I=$IN_BAM O=${TMP_DIR}/${NAME}.bam reference=$REFERENCE_GENOME CREATE_INDEX=true"
-	java -Xmx16g -jar $PICARD ReorderSam I=$IN_BAM O=${TMP_DIR}/${NAME}.bam reference=$REFERENCE_GENOME CREATE_INDEX=true
+#	echo "java -Xmx16g -jar $PICARD ReorderSam I=$IN_BAM O=${TMP_DIR}/${NAME}.bam reference=$REFERENCE_GENOME CREATE_INDEX=true"
+#	java -Xmx16g -jar $PICARD ReorderSam I=$IN_BAM O=${TMP_DIR}/${NAME}.bam reference=$REFERENCE_GENOME CREATE_INDEX=true
+	subCMD="java -Xmx16g -jar ${PICARD} ReorderSam \
+                                      --INPUT $IN_BAM \
+                                      --OUTPUT ${TMP_DIR}/${NAME}.bam \
+                                      --SEQUENCE_DICTIONARY ${REFERENCE_GENOME} \
+                                      --REFERENCE_SEQUENCE ${REFERENCE_GENOME} \
+                                      --CREATE_INDEX true"
+	echo ${subCMD}
+	echo
+	eval ${subCMD}
+
 	echo $CMD
+	echo
 	eval $CMD
 fi
 
-CMD="java -Xmx16g -jar /DCEG/Resources/Tools/Picard/Picard-2.10.10/picard.jar QualityScoreDistribution I=$IN_BAM O=${BUFFER_DIR}/PRE_QC/${NAME}/qual_score_dist.txt CHART=${BUFFER_DIR}/PRE_QC/${NAME}/qual_score_dist.pdf VALIDATION_STRINGENCY=LENIENT"
+CMD="java -Xmx16g -jar ${PICARD} QualityScoreDistribution \
+                                  --INPUT $IN_BAM \
+                                  --OUTPUT ${BUFFER_DIR}/PRE_QC/${NAME}/qual_score_dist.txt \
+                                  --CHART_OUTPUT ${BUFFER_DIR}/PRE_QC/${NAME}/qual_score_dist.pdf \
+                                  --VALIDATION_STRINGENCY LENIENT"
 #QualityScoreDistribution can get the percentage of bases higher than 30
 
 if [[ ! -s ${BUFFER_DIR}/PRE_QC/${NAME}/qual_score_dist.txt ]] || [[ $REPLACE_TABLE != "false" ]]; then
@@ -174,26 +211,45 @@ fi
 #AT_DROPOUT GC_DROPOUT
 #FOLD_80_BASE_PENALTY: measure of non-uniformity. Number of units of sequencing necessary to raise 80% of the bases to the mean coverage (<5, between 3 and 4 for a good exome set)
 #HS_LIBRARY_SIZE empty...
-CMD="java -Xmx16g -jar $PICARD CollectHsMetrics I=$IN_BAM O=${BUFFER_DIR}/PRE_QC/${NAME}/hs_metrics.txt BAIT_INTERVALS=$PICARD_BAIT_INTERVALS TARGET_INTERVALS=$PICARD_TARGET_INTERVALS R=$REFERENCE_GENOME VALIDATION_STRINGENCY=LENIENT"
+CMD="java -Xmx16g -jar ${PICARD} CollectHsMetrics \
+                                  --INPUT $IN_BAM \
+                                  --OUTPUT ${BUFFER_DIR}/PRE_QC/${NAME}/hs_metrics.txt \
+                                  --BAIT_INTERVALS $PICARD_BAIT_INTERVALS \
+                                  --TARGET_INTERVALS $PICARD_TARGET_INTERVALS \
+                                  --REFERENCE_SEQUENCE $REFERENCE_GENOME \
+                                  --VALIDATION_STRINGENCY LENIENT"
 
 if [[ ! -s ${BUFFER_DIR}/PRE_QC/${NAME}/hs_metrics.txt ]] || [[ $REPLACE_TABLE != "false" ]]; then
 	echo $CMD
+	echo
 	eval $CMD
 fi
 
 #CollectOxoGMetrics #average OXIDATION_Q
 
-CMD="java -Xmx16g -jar $PICARD CollectOxoGMetrics I=$IN_BAM O=${BUFFER_DIR}/PRE_QC/${NAME}/oxoG_metrics.txt R=$REFERENCE_GENOME VALIDATION_STRINGENCY=LENIENT"
+CMD="java -Xmx16g -jar ${PICARD} CollectOxoGMetrics \
+                                  --INPUT $IN_BAM \
+                                  --OUTPUT ${BUFFER_DIR}/PRE_QC/${NAME}/oxoG_metrics.txt \
+                                  --REFERENCE_SEQUENCE $REFERENCE_GENOME \
+                                  --VALIDATION_STRINGENCY=LENIENT"
 
 if [[ ! -s ${BUFFER_DIR}/PRE_QC/${NAME}/oxoG_metrics.txt ]] || [[ $REPLACE_TABLE != "false" ]]; then
 	echo $CMD
+	echo
 	eval $CMD
 fi
 
-CMD="java -Xmx16g -jar $GATK -T CallableLoci -R $REFERENCE_GENOME -I $IN_BAM -summary ${BUFFER_DIR}/PRE_QC/${NAME}/table.txt -o ${BUFFER_DIR}/PRE_QC/${NAME}/callable_status.bed -L $GATK_INTERVALS"
+CMD="java -Xmx16g -jar ${GATK} \
+                        --analysis_type CallableLoci \
+                        --reference_sequence $REFERENCE_GENOME \
+                        --input_file $IN_BAM \
+                        -summary ${BUFFER_DIR}/PRE_QC/${NAME}/table.txt \
+                        -o ${BUFFER_DIR}/PRE_QC/${NAME}/callable_status.bed \
+                        --intervals $GATK_INTERVALS"
 #table.txt POOR_MAPPING_QUALITY (<10),LOW_COVERAGE(<4),NO_COVERAGE,still the callable_status.bed file can serve as a final vcf filter
 if [[ ! -s ${BUFFER_DIR}/PRE_QC/${NAME}/table.txt ]] || [[ $REPLACE_TABLE != "false" ]]; then
 	echo $CMD
+	echo
 	eval $CMD
 fi
 
@@ -205,19 +261,26 @@ fi
 	# eval $CMD
 # fi
 
-CMD="java -Xmx16g -jar $PICARD CollectInsertSizeMetrics \
-  INPUT=$IN_BAM \
-  OUTPUT=${BUFFER_DIR}/PRE_QC/${NAME}/insertsize_metrics.txt \
-  HISTOGRAM_FILE=${BUFFER_DIR}/PRE_QC/${NAME}/InsertSizeHist.pdf \
-  DEVIATIONS=10.0 MINIMUM_PCT=0.05 \
-  VALIDATION_STRINGENCY=LENIENT"
+CMD="java -Xmx16g -jar ${PICARD} CollectInsertSizeMetrics \
+                                  --INPUT ${IN_BAM} \
+                                  --OUTPUT ${BUFFER_DIR}/PRE_QC/${NAME}/insertsize_metrics.txt \
+                                  --Histogram_FILE ${BUFFER_DIR}/PRE_QC/${NAME}/InsertSizeHist.pdf \
+                                  --DEVIATIONS 10.0 \
+                                  --MINIMUM_PCT 0.05 \
+                                  --VALIDATION_STRINGENCY LENIENT"
 if [[ ! -s ${BUFFER_DIR}/PRE_QC/${NAME}/insertsize_metrics.txt ]] || [[ $REPLACE_TABLE != "false" ]];then
 	echo $CMD
+	echo
 	eval $CMD
 fi
 
 
-CMD="java -Xmx16g -jar $GATK -T CountTerminusEvent -R $REFERENCE_GENOME -I ${TMP_DIR}/${NAME}_filtered.bam -o ${BUFFER_DIR}/PRE_QC/${NAME}/output.txt -L $GATK_INTERVALS"
+CMD="java -Xmx16g -jar $GATK \
+                        -T CountTerminusEvent \
+                        -R $REFERENCE_GENOME \
+                        -I ${TMP_DIR}/${NAME}_filtered.bam \
+                        -o ${BUFFER_DIR}/PRE_QC/${NAME}/output.txt \
+                        -L $GATK_INTERVALS"
 #can try to add the two stats to the report
 
 if [[ ! -s ${BUFFER_DIR}/PRE_QC/${NAME}/output.txt ]] || [[ $REPLACE_TABLE != "false" ]]; then
@@ -225,16 +288,22 @@ if [[ ! -s ${BUFFER_DIR}/PRE_QC/${NAME}/output.txt ]] || [[ $REPLACE_TABLE != "f
 	samtools view -f 3 -b $IN_BAM > ${TMP_DIR}/${NAME}_filtered.bam
 	samtools index ${TMP_DIR}/${NAME}_filtered.bam
 	echo $CMD
+	echo
 	eval $CMD
 	rm -rf ${TMP_DIR}/${NAME}_filtered.bam* 2> /dev/null 
 
 fi
 
 
-CMD="java -Xmx16g -jar $GATK -T ReadLengthDistribution  -R $REFERENCE_GENOME -I $IN_BAM -o ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_rld.tbl"
+CMD="java -Xmx16g -jar $GATK \
+                        -T ReadLengthDistribution \
+                        -R $REFERENCE_GENOME \
+                        -I $IN_BAM \
+                        -o ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_rld.tbl"
 
 if [[ ! -s ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_rld.tbl ]] || [[ $REPLACE_TABLE != "false" ]]; then
 	echo $CMD
+	echo
 	eval $CMD
 fi
 
@@ -244,6 +313,7 @@ CMD="samtools depth -d 0 -b  $EXOME_TARGETS $IN_BAM  | awk '{print \$3}' > ${BUF
 
 if [[ ! -s ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}.coverage ]]; then
 	echo $CMD
+	echo
 	samtools depth -d 0 -b $EXOME_TARGETS $IN_BAM  | awk '{print $3}' > ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}.coverage
 fi
 
