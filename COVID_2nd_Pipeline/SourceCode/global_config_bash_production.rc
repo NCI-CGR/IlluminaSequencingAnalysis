@@ -1,0 +1,114 @@
+DATE=`date +%Y%m%d`
+GATK_LOG_BUILD_BAM_DIR_DEDUP=/DCEG/Projects/Exome/SequencingData/variant_scripts/logs/GATK_dedup/patch_build_bam_$DATE
+GATK_LOG_BUILD_BAM_DIR=/DCEG/Projects/Exome/SequencingData/variant_scripts/logs/GATK/patch_build_bam_$DATE
+
+# For the all output/intermedia files
+BUFFER_DIR=/scratch/lix33/Test/2nd_pipeline/Data/secondary_buf
+
+
+# PICARD
+# PICARD=/DCEG/Resources/Tools/Picard/Picard-2.10.10/picard.jar
+PICARD=/DCEG/Resources/Tools/Picard/Picard-2.18.11/picard.jar
+
+# JAVA
+# JAVA_DIR=/usr/local/jdk1.7.0_03/bin
+. /etc/profile.d/modules.sh
+#module load sge jdk
+module load jdk/1.8.0_111
+
+# fix to the PATH environment to ensure our in-house version of qrun in /usr/local/bin will be executed, instead
+# of PBS' version. This is also the place for our local picard wrapper (/usr/local/bin/picard)
+#export PATH=/usr/local/bin:$JAVA_DIR:$PATH:/CGF/Resources/Tools/Samtools/samtools-0.1.18
+module load samtools/1.8
+
+# cluster queue
+QUEUE=seq-*.q
+
+# whether carry out left alignment of indels before any other recalibration
+# turned on by default, unless the value below is "false"
+LEFT_ALIGN_INDELS=true
+
+
+REPLACE_TABLE=false
+
+# upper level result directories
+DATA_ROOT_DIR=/scratch/lix33/Test/2nd_pipeline/Data
+
+# This is the directory of all original BAMs
+BAM_ORIGINAL_DIR=$DATA_ROOT_DIR/BAM_original
+
+
+# This is the directory of new incoming BAMS
+BAM_INCOMING_DIR=$DATA_ROOT_DIR/BAM_new_incoming
+
+
+# This is the directory for old BAM files
+# Before new incoming BAMs are to replace any existing BAMs in the original folder,
+# the original and recalibrated BAMs will be backed-up here
+BAM_BACKUP_DIR=$DATA_ROOT_DIR/BAM_old_backups
+
+# This is the directory of final recalibrated BAMs
+BAM_RECALIBRATED_DIR=$DATA_ROOT_DIR/BAM_recalibrated
+
+BAM_REFORMATTED_DIR=${DATA_ROOT_DIR}/BAM_reformatted
+BAM_REFORMATTED_ORIGINAL_DIR=${DATA_ROOT_DIR}/BAM_reformatted/BAM_original
+BAM_REFORMATTED_RECALIBRATED_DIR=${DATA_ROOT_DIR}/BAM_reformatted/BAM_recalibrated
+
+
+COVERAGE_REPORT_DIR=${BUFFER_DIR}/coverage_report
+
+# Do not edit the two settings below if you don't know what they are
+# These are two very specific settings related to our particular file system
+# This is the "aboslute scratch" space without snapshot
+SCRATCH_DIR=/scratch/lix33/Test/2nd_pipeline/Data/tmp
+# This is the "local temp" space with snapshot
+# use in the last stage of the intermediate files for performance considerations
+TMP_DIR=$SCRATCH_DIR
+
+
+CLUSTER_JOB_LOG_DIR=${BUFFER_DIR}/cluster_job_logs
+
+RECALIBRATION_WORKING_FLAG_EXTENSION=recalibration.working
+RECALIBRATION_INQUEUE_FLAG_EXTENSION=recalibration.inqueue
+
+# GATK location
+#GATK=/CGF/Resources/Tools/GenomeAnalysisTK-2.2-16-g9f648cb/GenomeAnalysisTK.jar
+#GATK=/DCEG/Projects/Exome/SequencingData/GATK_binaries/Latest/GenomeAnalysisTK.jar
+GATK=/DCEG/Projects/Exome/SequencingData/GATK_binaries/GenomeAnalysisTK-3.8-1-0-gf15c1c3ef/GenomeAnalysisTK.jar
+
+
+# common public data sets
+EXOME_TARGETS_v3=/DCEG/Projects/Exome/annotation/Exome_capture_targets/SeqCapEZv3_Exome_targets.bed
+EXOME_TARGETS_TOTAL_BASES_v3=63564965
+EXOME_TARGETS_v3plusUTR=/DCEG/Projects/Exome/annotation/Exome_capture_targets/NimbleGen_v3_plus_UTR/120430_HG19_ExomeV3_UTR_EZ_HX1_capture_annotated.bed
+# this is the total number of bases in the beds, used for calculation of % of exome coverage
+EXOME_TARGETS_TOTAL_BASES_v3plusUTR=98761644
+WGS_BED=/DCEG/Projects/Exome/SequencingData/secondary_buf/INTERVAL_FILES/b37_decoy.bed
+WGS_TOTAL_BASES=3101804739
+
+
+#REFERENCE_CDS=/DCEG/Projects/Exome/annotation/Exome_capture_targets/hg19_cds_new.bed
+#REFERENCE_CDS_TOTAL_BASES=34990773
+REFERENCE_CDS=/DCEG/Projects/Exome/annotation/Exome_capture_targets/hg19_cds_merged.bed
+REFERENCE_CDS_TOTAL_BASES=34990773
+
+###REFERENCE_GENOME=/DCEG/Projects/Exome/annotation/gatk_bundle/2.2/hg19/hg19_canonical_correct_chr_order.fa
+REFERENCE_GENOME=/CGF/Resources/Data/genome/hg19_canonical_correct_chr_order.fa
+#REFERENCE_GENOME=/CGF/Bioinformatics/Production/data/hg38/Homo_sapiens_assembly38.fasta
+###upgrate to dbsnp142 and 1KG phase3
+###REFERENCE_INDELS=/DCEG/Projects/Exome/SequencingData/reference_vcfs/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5a.20130502_INDELS.hg19.vcf
+REFERENCE_INDELS=/DCEG/CGF/Bioinformatics/Analysis/public_v2/1000G_phase1.indels.hg19.vcf
+REFERENCE_MILLS_INDELS=/DCEG/CGF/Bioinformatics/Analysis/public_v2/Mills_and_1000G_gold_standard.indels.hg19.vcf
+REFERENCE_SNPS2=/DCEG/CGF/Bioinformatics/Analysis/public_v2/dbsnp_138.hg19.vcf
+REFERENCE_SNPS=/DCEG/Projects/Exome/SequencingData/reference_vcfs/All_20150415.hg19.reordered.vcf 
+
+#REFERENCE_GENOME=/DCEG/Projects/PopulationExome/EAGLE/b37/human_g1k_v37_decoy.fasta
+#REFERENCE_INDELS=/DCEG/CGF/Bioinformatics/Analysis/public_v2/1000G_phase1.indels.b37.vcf
+#REFERENCE_MILLS_INDELS=/DCEG/CGF/Bioinformatics/Analysis/public_v2/Mills_and_1000G_gold_standard.indels.b37.vcf
+#REFERENCE_SNPS2=/DCEG/CGF/Bioinformatics/Analysis/public_v2/dbsnp_138.b37.vcf
+
+
+# HiSeq and legacy data
+HISEQ_ROOT_DIR=/CGF/Sequencing/Illumina/HiSeq/PostRun_Analysis/Data
+# MiSeq and legacy data
+MISEQ_ROOT_DIR=/CGF/Sequencing/Illumina/MiSeq/PostRun_Analysis/Data
