@@ -6,7 +6,7 @@ import os
 import sys
 import subprocess
 
-DIRRootBuild = "/home/lix33/Test/2ndPipeline/Build/processed"
+DIRRootBuild = "/data/COVID_WGS/lix33/Test/2ndpipeline/Build/processed"
 VCFRef = "/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/refVariant/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites_with_chr.vcf"
 
 class ClsSubject:
