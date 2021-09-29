@@ -22,6 +22,8 @@ DIRRootBuild = "/data/COVID_WGS/lix33/Test/2ndpipeline/Build/tmp"
 
 DECORATEAnalysisIDPrefix = "WGS_"
 
+DIRBAMRoot = "/data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Data/BAM/Batch"
+
 class ClsSample:
     def __init__(self):
         self.strUSUID = ""
@@ -42,14 +44,38 @@ class ClsSample:
         if len(vItem) == 4 and vItem[3] == "topoff":
             self.bTopoff = True
     
-    def GetBAMFile(self):
-        # file BAM file -> need to grab data from S3 storage space
-        print(self.strCGRID)
-        if self.strUSUID == "SC571825":
-            self.strBAM = "/home/lix33/Test/2ndPipeline/BAM/SC571825_CTTCACCA-AAGAGCCA_L001.bam"
+    def GetBAMFile(self, strCurBAMDir):
+        # 1: find related flowcell folder
+        strPatten = "*" + self.strFlowcellID + "*"
+        CMD = "find " + strCurBAMDir + " -maxdepth 1 -type d -iname '" + strPatten + "'"
+        print("CMD:", CMD)
+        strDirList = subprocess.getoutput(CMD)
+        if strDirList == "":
+            print("Error: Do not find its related Flowcell! -->", self.strFlowcellID, self.strUSUID)
+            return
+        else:
+            print("strDirList:", strDirList)
+            print()
+        strFlowcellDir = strDirList.split('\n')[0]
         
-        if self.strUSUID == "SC571826":
-            self.strBAM = "/home/lix33/Test/2ndPipeline/BAM/SC571826_TACCAGGA-GTACTCTC_L001.bam"     
+        # 2: find related file   
+        strPatten = "*" + self.strUSUID + "*dedup_nophix.bam"
+        CMD = "find " + strFlowcellDir + " -type f -iname '" + strPatten + "'"
+        print("CMD:", CMD)
+        strFileList = subprocess.getoutput(CMD)
+        if strFileList == "":
+            print("Error: Do not find its related BAM file! -->", self.strFlowcellID, self.strUSUID)
+        strBAM = strFileList.split('\n')[0]
+        if os.path.exists(strBAM):
+            self.strBAM = strBAM
+        else:
+            print("Error: Invalid BAM! -->", self.strFlowcellID, self.strUSUID) 
+                            
+        # if self.strUSUID == "SC571825":
+        #     self.strBAM = "/home/lix33/Test/2ndPipeline/BAM/SC571825_CTTCACCA-AAGAGCCA_L001.bam"
+        #
+        # if self.strUSUID == "SC571826":
+        #     self.strBAM = "/home/lix33/Test/2ndPipeline/BAM/SC571826_TACCAGGA-GTACTCTC_L001.bam"     
 
     def PrepareManifest(self, vContent, strAnalysisID):
         if not os.path.exists(self.strBAM):
@@ -104,9 +130,9 @@ class ClsSubject:
         self.strAnalysisID = ""
         self.vSample = []
     
-    def GetBAMFile(self):
+    def GetBAMFile(self, strCurBAMDir):
         for sample in self.vSample:
-            sample.GetBAMFile()
+            sample.GetBAMFile(strCurBAMDir)
     
     def PrepareManifest(self, vContent):
         for sample in self.vSample:
@@ -182,7 +208,8 @@ class ClsBuild:
     def __init__(self):
         self.vSubject = []
         self.strRootDir = ""
-        self.strManifestFile = ""        
+        self.strManifestFile = ""
+        self.strCurBAMDir = ""
     
     # it may contain both 1,2,and multiple files for each subject (1 BAM for a single subject is allowed)
     def GetGroupInfo(self, strKeyTable):
@@ -215,13 +242,17 @@ class ClsBuild:
                     self.vSubject.append(objSubject)
                 iIndex += 1
         file.close()
-        #Update Analysis ID
+        
+        # Update Analysis ID
         for subject in self.vSubject:
             subject.GetAnalysisID()
+            
+        # Update strBAMDir
+        self.strCurBAMDir = DIRBAMRoot + "/" + os.path.basename(strKeyTable).split('.')[0]
     
     def GetBAMFile(self):
         for subject in self.vSubject:
-            subject.GetBAMFile()
+            subject.GetBAMFile(self.strCurBAMDir)
     
     def BuidManifestFile(self, strKeyTable):
         print(strKeyTable)
@@ -252,7 +283,16 @@ class ClsBuild:
         f = open(strFile, "w")
         f.writelines(vContent)        
         f.close()
-        self.strManifestFile = strFile 
+        self.strManifestFile = strFile
+        
+        # Create done flag to let people know the manifest has been created!
+        strBAMFlagDir = DIRBAMRoot + "/" + strKeyTableName + "/Flag/BuildManifest"
+        strDoneFlag = strBAMFlagDir + "/" + strKeyTableName + ".build.manifest.done"
+        if not os.path.exists(strBAMFlagDir):
+            CMD = "mkdir -p " + strBAMFlagDir
+            os.system(CMD)
+        CMD = "echo '" + strFile + "' > " + strDoneFlag
+        os.system(CMD)
     
     def SubmitJobs(self):
         if not os.path.exists(self.strManifestFile):
@@ -285,7 +325,7 @@ def main():
     objBuild.BuidManifestFile(strKeyTable)
     
     # 4: Submit jobs
-    objBuild.SubmitJobs()
+    #objBuild.SubmitJobs()
     
     print("All Set!")
 
