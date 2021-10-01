@@ -45,37 +45,37 @@ class ClsSample:
             self.bTopoff = True
     
     def GetBAMFile(self, strCurBAMDir):
-        # # 1: find related flowcell folder
-        # strPatten = "*" + self.strFlowcellID + "*"
-        # CMD = "find " + strCurBAMDir + " -maxdepth 1 -type d -iname '" + strPatten + "'"
-        # print("CMD:", CMD)
-        # strDirList = subprocess.getoutput(CMD)
-        # if strDirList == "":
-        #     print("Error: Do not find its related Flowcell! -->", self.strFlowcellID, self.strUSUID)
-        #     return
-        # else:
-        #     print("strDirList:", strDirList)
-        #     print()
-        # strFlowcellDir = strDirList.split('\n')[0]
-        #
-        # # 2: find related file   
-        # strPatten = "*" + self.strUSUID + "*dedup_nophix.bam"
-        # CMD = "find " + strFlowcellDir + " -type f -iname '" + strPatten + "'"
-        # print("CMD:", CMD)
-        # strFileList = subprocess.getoutput(CMD)
-        # if strFileList == "":
-        #     print("Error: Do not find its related BAM file! -->", self.strFlowcellID, self.strUSUID)
-        # strBAM = strFileList.split('\n')[0]
-        # if os.path.exists(strBAM):
-        #     self.strBAM = strBAM
-        # else:
-        #     print("Error: Invalid BAM! -->", self.strFlowcellID, self.strUSUID) 
-                            
-        if self.strUSUID == "SC571825":
-            self.strBAM = "/home/lix33/Test/2ndPipeline/BAM/SC571825_CTTCACCA-AAGAGCCA_L001.bam"
+        # 1: find related flowcell folder
+        strPatten = "*" + self.strFlowcellID + "*"
+        CMD = "find " + strCurBAMDir + " -maxdepth 1 -type d -iname '" + strPatten + "'"
+        print("CMD:", CMD)
+        strDirList = subprocess.getoutput(CMD)
+        if strDirList == "":
+            print("Error: Do not find its related Flowcell! -->", self.strFlowcellID, self.strUSUID)
+            return
+        else:
+            print("strDirList:", strDirList)
+            print()
+        strFlowcellDir = strDirList.split('\n')[0]
         
-        if self.strUSUID == "SC571826":
-            self.strBAM = "/home/lix33/Test/2ndPipeline/BAM/SC571826_TACCAGGA-GTACTCTC_L001.bam"     
+        # 2: find related file   
+        strPatten = "*" + self.strUSUID + "*dedup_nophix.bam"
+        CMD = "find " + strFlowcellDir + " -type f -iname '" + strPatten + "'"
+        print("CMD:", CMD)
+        strFileList = subprocess.getoutput(CMD)
+        if strFileList == "":
+            print("Error: Do not find its related BAM file! -->", self.strFlowcellID, self.strUSUID)
+        strBAM = strFileList.split('\n')[0]
+        if os.path.exists(strBAM):
+            self.strBAM = strBAM
+        else:
+            print("Error: Invalid BAM! -->", self.strFlowcellID, self.strUSUID) 
+                            
+        # if self.strUSUID == "SC571825":
+        #     self.strBAM = "/home/lix33/Test/2ndPipeline/BAM/SC571825_CTTCACCA-AAGAGCCA_L001.bam"
+        #
+        # if self.strUSUID == "SC571826":
+        #     self.strBAM = "/home/lix33/Test/2ndPipeline/BAM/SC571826_TACCAGGA-GTACTCTC_L001.bam"     
 
     def PrepareManifest(self, vContent, strAnalysisID):
         if not os.path.exists(self.strBAM):

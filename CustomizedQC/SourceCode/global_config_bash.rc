@@ -189,9 +189,12 @@ MIN_COVERAGE_THRESHOLD2=15
 #### JH: Per discussions with Meredith and lab colleagues, we are going to report the coverage in
 #### all UCSC CDS instead of the whole capture kit regions
 ######
-UCSC_CDS_BED_FILE=/DCEG/Projects/Exome/annotation/Exome_capture_targets/hg19_cds_merged.bed
+DIRCDS="/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/CDS"
+UCSC_CDS_BED_FILE=${DIRCDS}/v38/BedFileForRef38_CCDS.MergedOverlap.Brief.bed
+UCSC_CDS_TOTAL_BASES=33155239
+#UCSC_CDS_BED_FILE=/DCEG/Projects/Exome/annotation/Exome_capture_targets/hg19_cds_merged.bed
 #UCSC_CDS_BED_FILE=/DCEG/Projects/Exome/annotation/Exome_capture_targets/hg19_cds_merged_v37.bed
-UCSC_CDS_TOTAL_BASES=34990773
+#UCSC_CDS_TOTAL_BASES=34990773
 UCSC_COVERAGE_PERCENT_WARNING_THRESHOLD=0.80
 
 #############################

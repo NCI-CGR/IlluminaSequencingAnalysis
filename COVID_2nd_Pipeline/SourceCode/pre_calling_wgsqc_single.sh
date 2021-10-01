@@ -11,14 +11,17 @@ which java
 
 IN_BAM=$1
 OUT_REPORT=$2
-#MANIFEST=$3
+MANIFEST=$3
+strFlagWorking=$4
+strFlagDone=$5
 
 OUT_DIR=${BUFFER_DIR}/PRE_QC
 NAME=$(basename $IN_BAM .bam)
-JAVA=/DCEG/Resources/Tools/jdk/7.17/jdk1.7.0_17/bin/java
-#GATK=/DCEG/Projects/Exome/SequencingData/GATK_binaries/Latest/GenomeAnalysisTK.jar
-PICARD=/DCEG/Resources/Tools/Picard/Picard-2.10.10/picard.jar
-REFERENCE_GENOME=/DCEG/Projects/PopulationExome/EAGLE/b37/human_g1k_v37_decoy.fasta
+
+#JAVA=/DCEG/Resources/Tools/jdk/7.17/jdk1.7.0_17/bin/java
+##GATK=/DCEG/Projects/Exome/SequencingData/GATK_binaries/Latest/GenomeAnalysisTK.jar
+#PICARD=/DCEG/Resources/Tools/Picard/Picard-2.10.10/picard.jar
+#REFERENCE_GENOME=/DCEG/Projects/PopulationExome/EAGLE/b37/human_g1k_v37_decoy.fasta
 
 #rm -rf ${BUFFER_DIR}/PRE_QC/${BUFFER_DIR}/
 mkdir -p ${BUFFER_DIR}/PRE_QC/${NAME}/ 2>/dev/null
@@ -72,7 +75,11 @@ if [[ ! -f ${BUFFER_DIR}/PRE_QC/${NAME}/multiple_metrics.alignment_summary_metri
 	eval $CMD
 fi
 
-CMD="java -Xmx16g -jar /DCEG/Resources/Tools/Picard/Picard-2.10.10/picard.jar QualityScoreDistribution I=$IN_BAM O=${BUFFER_DIR}/PRE_QC/${NAME}/qual_score_dist.txt CHART=${BUFFER_DIR}/PRE_QC/${NAME}/qual_score_dist.pdf VALIDATION_STRINGENCY=LENIENT"
+CMD="java -Xmx16g -jar ${PICARD} QualityScoreDistribution \
+                                  --INPUT ${IN_BAM} \
+                                  --OUTPUT ${BUFFER_DIR}/PRE_QC/${NAME}/qual_score_dist.txt \
+                                  --CHART_OUTPUT ${BUFFER_DIR}/PRE_QC/${NAME}/qual_score_dist.pdf \
+                                  --VALIDATION_STRINGENCY LENIENT"
 #QualityScoreDistribution can get the percentage of bases higher than 30
 if [[ ! -f ${BUFFER_DIR}/PRE_QC/${NAME}/qual_score_dist.txt || $REPLACE_TABLE != "false" ]];then
 	echo $CMD
@@ -80,7 +87,10 @@ if [[ ! -f ${BUFFER_DIR}/PRE_QC/${NAME}/qual_score_dist.txt || $REPLACE_TABLE !=
 fi
 
 #Picard markduplicates has to be run before CollectHsMetrics to enable the HS_LIBRARY_SIZE field
-CMD="java -Xmx16g -jar /DCEG/Resources/Tools/Picard/Picard-2.10.10/picard.jar MarkDuplicates I=$IN_BAM O=${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_dedup.bam M=${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_dedup.txt"
+CMD="java -Xmx16g -jar ${PICARD} MarkDuplicates \
+                                  --INPUT ${IN_BAM} \
+                                  --OUTPUT ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_dedup.bam \
+                                  --METRICS_FILE ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_dedup.txt"
 if [[ ! -f ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_dedup.txt || $REPLACE_TABLE != "false" ]];then
 	echo $CMD
 	eval $CMD
@@ -91,7 +101,11 @@ fi
 #AT_DROPOUT GC_DROPOUT
 #FOLD_80_BASE_PENALTY: measure of non-uniformity. Number of units of sequencing necessary to raise 80% of the bases to the mean coverage (<5, between 3 and 4 for a good exome set)
 #HS_LIBRARY_SIZE empty...
-CMD="java -Xmx16g -jar $PICARD CollectWgsMetrics I=${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_dedup.bam O=${BUFFER_DIR}/PRE_QC/${NAME}/wgs_metrics.txt R=$REFERENCE_GENOME VALIDATION_STRINGENCY=LENIENT"
+CMD="java -Xmx16g -jar ${PICARD} CollectWgsMetrics \
+                                  --INPUT ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_dedup.bam \
+                                  --OUTPUT ${BUFFER_DIR}/PRE_QC/${NAME}/wgs_metrics.txt \
+                                  --REFERENCE_SEQUENCE $REFERENCE_GENOME \
+                                  --VALIDATION_STRINGENCY LENIENT"
 if [[ ! -f ${BUFFER_DIR}/PRE_QC/${NAME}/wgs_metrics.txt || $REPLACE_TABLE != "false" ]];then
 	echo $CMD
 	eval $CMD
@@ -99,20 +113,33 @@ fi
 
 #CollectOxoGMetrics #average OXIDATION_Q
 
-CMD="java -Xmx16g -jar $PICARD CollectOxoGMetrics I=$IN_BAM O=${BUFFER_DIR}/PRE_QC/${NAME}/oxoG_metrics.txt R=$REFERENCE_GENOME VALIDATION_STRINGENCY=LENIENT"
+CMD="java -Xmx16g -jar ${PICARD} CollectOxoGMetrics \
+                                  --INPUT $IN_BAM \
+                                  --OUTPUT ${BUFFER_DIR}/PRE_QC/${NAME}/oxoG_metrics.txt \
+                                  --REFERENCE_SEQUENCE $REFERENCE_GENOME \
+                                  --VALIDATION_STRINGENCY LENIENT"
 if [[ ! -f ${BUFFER_DIR}/PRE_QC/${NAME}/oxoG_metrics.txt || $REPLACE_TABLE != "false" ]];then
 	echo $CMD
 	eval $CMD
 fi
 
-CMD="java -Xmx16g -jar $GATK -T CallableLoci -R $REFERENCE_GENOME -I $IN_BAM -summary ${BUFFER_DIR}/PRE_QC/${NAME}/table.txt -o ${BUFFER_DIR}/PRE_QC/${NAME}/callable_status.bed "
+CMD="java -Xmx16g -jar ${GATK} \
+                        --analysis_type CallableLoci \
+                        --reference_sequence $REFERENCE_GENOME \
+                        --input_file $IN_BAM \
+                        -summary ${BUFFER_DIR}/PRE_QC/${NAME}/table.txt \
+                        -o ${BUFFER_DIR}/PRE_QC/${NAME}/callable_status.bed"
 #table.txt POOR_MAPPING_QUALITY (<10),LOW_COVERAGE(<4),NO_COVERAGE,still the callable_status.bed file can serve as a final vcf filter
 if [[ ! -f ${BUFFER_DIR}/PRE_QC/${NAME}/table.txt || $REPLACE_TABLE != "false" ]];then
 	echo $CMD
 	eval $CMD
 fi
 
-CMD="java -Xmx16g -jar $GATK -T ErrorRatePerCycle  -R $REFERENCE_GENOME -I $IN_BAM -o ${BUFFER_DIR}/PRE_QC/${NAME}/error_rates.gatkreport.txt"
+CMD="java -Xmx16g -jar $GATK \
+                        --analysis_type ErrorRatePerCycle \
+                        --reference_sequence $REFERENCE_GENOME \
+                        --input_file $IN_BAM \
+                        -o ${BUFFER_DIR}/PRE_QC/${NAME}/error_rates.gatkreport.txt"
 #not very useful, need to run across more samples to see the trend
 if [[ ! -f ${BUFFER_DIR}/PRE_QC/${NAME}/error_rates.gatkreport.txt || $REPLACE_TABLE != "false" ]];then
 	echo $CMD
@@ -120,29 +147,38 @@ if [[ ! -f ${BUFFER_DIR}/PRE_QC/${NAME}/error_rates.gatkreport.txt || $REPLACE_T
 fi
 
 #filter in bam proper aligned reads first
-samtools view -f 3 -b $IN_BAM > /ttemp/${NAME}_filtered.bam
-samtools index /ttemp/${NAME}_filtered.bam
+samtools view -f 3 -b $IN_BAM > ${TMP_DIR}/${NAME}_filtered.bam
+samtools index ${TMP_DIR}/${NAME}_filtered.bam
 
-CMD="java -Xmx16g -jar $GATK -T CountTerminusEvent -R $REFERENCE_GENOME -I /ttemp/${NAME}_filtered.bam -o ${BUFFER_DIR}/PRE_QC/${NAME}/output.txt "
+CMD="java -Xmx16g -jar $GATK \
+                        --analysis_type CountTerminusEvent \
+                        --reference_sequence $REFERENCE_GENOME \
+                        --input_file ${TMP_DIR}/${NAME}_filtered.bam \
+                        -o ${BUFFER_DIR}/PRE_QC/${NAME}/output.txt "
 #can try to add the two stats to the report
 if [[ ! -f ${BUFFER_DIR}/PRE_QC/${NAME}/output.txt || $REPLACE_TABLE != "false" ]];then
 	echo $CMD
 	eval $CMD
 fi
-rm -rf /ttemp/${NAME}_filtered.bam* 2> /dev/null 
+rm -rf ${TMP_DIR}/${NAME}_filtered.bam* 2> /dev/null
 
-CMD="java -Xmx16g -jar $GATK -T ReadLengthDistribution  -R $REFERENCE_GENOME -I $IN_BAM -o ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_rld.tbl"
+CMD="java -Xmx16g -jar $GATK \
+                        -T ReadLengthDistribution \
+                        -R $REFERENCE_GENOME \
+                        -I $IN_BAM \
+                        -o ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_rld.tbl"
 if [[ ! -f ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_rld.tbl || $REPLACE_TABLE != "false" ]];then
 	echo $CMD
 	eval $CMD
 fi
 
 CMD="java -Xmx16g -jar $PICARD CollectInsertSizeMetrics \
-  INPUT=$IN_BAM \
-  OUTPUT=${BUFFER_DIR}/PRE_QC/${NAME}/insertsize_metrics.txt \
-  HISTOGRAM_FILE=${BUFFER_DIR}/PRE_QC/${NAME}/InsertSizeHist.pdf \
-  DEVIATIONS=10.0 MINIMUM_PCT=0.05 \
-  VALIDATION_STRINGENCY=LENIENT"
+                                --INPUT $IN_BAM \
+                                --OUTPUT ${BUFFER_DIR}/PRE_QC/${NAME}/insertsize_metrics.txt \
+                                --Histogram_FILE ${BUFFER_DIR}/PRE_QC/${NAME}/InsertSizeHist.pdf \
+                                --DEVIATIONS 10.0 \
+                                --MINIMUM_PCT 0.05 \
+                                --VALIDATION_STRINGENCY LENIENT"
 if [[ ! -f ${BUFFER_DIR}/PRE_QC/${NAME}/insertsize_metrics.txt || $REPLACE_TABLE != "false" ]];then
 	echo $CMD
 	eval $CMD
@@ -277,9 +313,12 @@ echo -e $L
 #echo -e $L >> $OUT_REPORT
 
 #remove all intermediate bam file to save space
-rm /ttemp/${NAME}_filtered.bam /ttemp/${NAME}_filtered.bam.bai ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_dedup.bam ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_dedup.bai
+rm ${TMP_DIR}/${NAME}_filtered.bam ${TMP_DIR}/${NAME}_filtered.bam.bai ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_dedup.bam ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_dedup.bai
 echo ====================
 date
 echo Done!
 echo ====================
 
+# update flag
+rm ${strFlagWorking}
+touch ${strFlagDone}

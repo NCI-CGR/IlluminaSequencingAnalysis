@@ -127,6 +127,9 @@ for BAM in `cat ${strBAMList}`; do
       # init working flag
       touch ${strFlagWorking}
 
+      #strBashScript="${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/pre_calling_qc_single.sh"
+      strBashScript="${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/pre_calling_wgsqc_single.sh"
+
       CMD="sbatch --ntasks=1 \
                   --nodes=1 \
                   --job-name=PRECALLING_QC.${NAME} \
@@ -134,7 +137,7 @@ for BAM in `cat ${strBAMList}`; do
                   --mem=20G \
                   --output=${LOG_DIR}/_pre_calling_qc_report_${NAME}.stdout \
                   --error=${LOG_DIR}/_pre_calling_qc_report_${NAME}.stderr \
-                  --wrap=\"bash ${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/pre_calling_qc_single.sh \
+                  --wrap=\"bash ${strBashScript} \
                             $BAM \
                             $PREQC_REPORT_FILE \
                             $MANIFEST_FILE \

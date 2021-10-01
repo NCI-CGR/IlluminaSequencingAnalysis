@@ -7,7 +7,10 @@ import sys
 import subprocess
 
 DIRRootBuild = "/data/COVID_WGS/lix33/Test/2ndpipeline/Build/processed"
-VCFRef = "/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/refVariant/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites_with_chr.vcf"
+# This is for v37
+#VCFRef = "/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/refVariant/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites_with_chr.vcf"
+# This is for v38
+VCFRef = "/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/verityBamID/Omni25_genotypes_1525_samples_v2.b38.PASS.ALL.sites_with_chr.vcf"
 
 class ClsSubject:
     def __init__(self):

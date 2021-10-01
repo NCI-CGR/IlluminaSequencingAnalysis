@@ -4,8 +4,10 @@ GATK_LOG_BUILD_BAM_DIR=/DCEG/Projects/Exome/SequencingData/variant_scripts/logs/
 
 DIRBuild="/data/COVID_WGS/lix33/Test/2ndpipeline/Build/processed"
 DIRRootBed="/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/bed"
+DIRCDS="/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/CDS"
 
 # For the all output/intermedia files
+#BUFFER_DIR=/DCEG/Projects/Exome/SequencingData/secondary_buf
 BUFFER_DIR=/data/COVID_WGS/lix33/Test/2ndpipeline/Data/secondary_buf
 
 # For customized capturekit bed files
@@ -88,34 +90,46 @@ GATK=/usr/local/apps/GATK/3.8-1/GenomeAnalysisTK.jar
 
 
 # common public data sets
-EXOME_TARGETS_v3=/DCEG/Projects/Exome/annotation/Exome_capture_targets/SeqCapEZv3_Exome_targets.bed
+#EXOME_TARGETS_v3=/DCEG/Projects/Exome/annotation/Exome_capture_targets/SeqCapEZv3_Exome_targets.bed
+EXOME_TARGETS_v3=${DIRRootBed}/Exome_capture_targets/SeqCapEZv3_Exome_targets.bed
 EXOME_TARGETS_TOTAL_BASES_v3=63564965
 EXOME_TARGETS_v3plusUTR=${DIRRootBed}/120430_HG19_ExomeV3_UTR_EZ_HX1_capture_annotated.bed
 # this is the total number of bases in the beds, used for calculation of % of exome coverage
 EXOME_TARGETS_TOTAL_BASES_v3plusUTR=98761644
-WGS_BED=/DCEG/Projects/Exome/SequencingData/secondary_buf/INTERVAL_FILES/b37_decoy.bed
+WGS_BED=${BUFFER_DIR}/INTERVAL_FILES/b37_decoy.bed
 WGS_TOTAL_BASES=3101804739
 
 
 #REFERENCE_CDS=/DCEG/Projects/Exome/annotation/Exome_capture_targets/hg19_cds_new.bed
 #REFERENCE_CDS_TOTAL_BASES=34990773
-REFERENCE_CDS=${DIRRootBed}/hg19_cds_merged.bed
-REFERENCE_CDS_TOTAL_BASES=34990773
+#REFERENCE_CDS=${DIRRootBed}/hg19_cds_merged.bed
+#REFERENCE_CDS_TOTAL_BASES=34990773
+REFERENCE_CDS=${DIRCDS}/v38/BedFileForRef38_CCDS.MergedOverlap.Brief.bed
+REFERENCE_CDS_TOTAL_BASES=33155239
 
 # Reference Genome
 #REFERENCE_GENOME=/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/ref38/Homo_sapiens_assembly38.fasta
 #REFERENCE_GENOME=/CGF/Resources/Data/genome/hg19_canonical_correct_chr_order.fa
-REFERENCE_GENOME=/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/hg19/hg19_canonical_correct_chr_order.fa
+# This is the correct one for v37/hg19 ->
+#REFERENCE_GENOME=/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/hg19/hg19_canonical_correct_chr_order.fa
+# <-
 #REFERENCE_GENOME=/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/hg19/hg19_canonical+phiX.fa
+# This is for v38 reference
+REFERENCE_GENOME=/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/ref38/Homo_sapiens_assembly38.fasta
 
 ###upgrate to dbsnp142 and 1KG phase3
 ###REFERENCE_INDELS=/DCEG/Projects/Exome/SequencingData/reference_vcfs/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5a.20130502_INDELS.hg19.vcf
 ROOTDir="/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/refVariant"
 
-REFERENCE_INDELS=${ROOTDir}/1000G_phase1.indels.hg19.vcf
-REFERENCE_MILLS_INDELS=${ROOTDir}/Mills_and_1000G_gold_standard.indels.hg19.vcf
-REFERENCE_SNPS2=${ROOTDir}/dbsnp_138.hg19.vcf
-REFERENCE_SNPS=${ROOTDir}/All_20150415.hg19.reordered.vcf
+# -> For v37/hg19
+#REFERENCE_INDELS=${ROOTDir}/1000G_phase1.indels.hg19.vcf
+#REFERENCE_MILLS_INDELS=${ROOTDir}/Mills_and_1000G_gold_standard.indels.hg19.vcf
+#REFERENCE_SNPS2=${ROOTDir}/dbsnp_138.hg19.vcf
+#REFERENCE_SNPS=${ROOTDir}/All_20150415.hg19.reordered.vcf
+# -> For v38
+REFERENCE_INDELS=/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/ref38/Homo_sapiens_assembly38.known_indels.vcf.gz
+REFERENCE_MILLS_INDELS=/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/ref38/Homo_sapiens_assembly38.known_indels.vcf.gz
+REFERENCE_SNPS2=/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/ref38/Homo_sapiens_assembly38.dbsnp138.vcf
 
 #REFERENCE_GENOME=/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/ref37/human_g1k_v37_decoy.fasta
 #REFERENCE_INDELS=${ROOTDir}/1000G_phase1.indels.b37.vcf
