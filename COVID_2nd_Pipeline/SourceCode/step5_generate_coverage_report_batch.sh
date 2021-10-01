@@ -10,6 +10,9 @@ SCRIPT=$(readlink -f "$0")
 DCEG_SEQ_POOL_SCRIPT_DIR=$(dirname "$SCRIPT")
 . ${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/global_config_bash.rc
 
+DIRBAMRoot="/data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Data/BAM/Batch"
+strKTName="unkown"
+
 DATE=`echo $(date +%m%d%Y)`
 LOG_DIR=${CLUSTER_JOB_LOG_DIR}/${DATE}
 
@@ -17,6 +20,7 @@ LOG_DIR=${CLUSTER_JOB_LOG_DIR}/${DATE}
 #MANIFEST=/DCEG/Projects/Exome/builds/build_SR0407-004_Data_Delivery_2019_23058/Manifest/NP0407-HE9-ANALYSIS-MANIFEST.csv
 MANIFEST=$1
 dirBuildBAM=$2
+strKTName=$3
 #create BAM list file
 strBAMList=${dirBuildBAM}/bam.lst
 if [ -f "${strBAMList}" ]; then
@@ -37,7 +41,7 @@ mkdir -p $LOG_DIR 2>/dev/null
 # the IDs that are NOT in <my_last_report.txt> and then submit the cluster job accordingly.
 # All IDs that are already in <my_last_report.txt> will then be skipped
 
-if [[ $# == 3 ]]; then
+if [[ $# == 4 ]]; then
 	# if there is an argument, enter patch mode
 	PATCH_MODE=true
 	COVERAGE_REPORT_FILE=$3
@@ -76,6 +80,12 @@ else
 	echo -e $REPORT_LINE > $COVERAGE_REPORT_FILE
 fi
 
+#create flag dir
+strFlagDir=${DIRBAMRoot}/${strKTName}/Flag/CoverageReport
+if [ ! -d ${strFlagDir} ]; then
+  mkdir -p ${strFlagDir}
+fi
+
 # all new BAM files are generated under the incoming directory
 # these are typically the files that need coverage report
 #for BAM in $BAM_INCOMING_DIR/*/*.bam; do
@@ -109,24 +119,34 @@ for BAM in `cat ${strBAMList}`; do
 #			      -o ${LOG_DIR}/_coverage_report_${NAME}.stdout -e ${LOG_DIR}/_coverage_report_${NAME}.stderr \
 #			      -N COVREP.$NAME \
 #			      -S /bin/sh ${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/generate_coverage_report_single.sh $BAM $COVERAGE_REPORT_FILE $MANIFEST" #$MERGE_LOG "
-    CMD="cd $DCEG_SEQ_POOL_SCRIPT_DIR; \
-         sbatch --ntasks=1 \
-                --nodes=1 \
-                --job-name=COVREP.${NAME} \
-                --time=10-00:00:00 \
-                --output=${LOG_DIR}/_coverage_report_${NAME}.stdout \
-                --error=${LOG_DIR}/_coverage_report_${NAME}.stderr \
-                --wrap=\"bash ${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/generate_coverage_report_single.sh \
-                  $BAM
-                  $COVERAGE_REPORT_FILE \
-                  $MANIFEST\""
 
-    echo "Current Dir: "$(pwd)
-		echo $CMD
-		if [ -f ${BUFFER_DIR}/nohup100.out ]; then
-		  rm ${BUFFER_DIR}/nohup100.out
-		fi
-		echo $CMD >> ${BUFFER_DIR}/nohup100.out
-		eval $CMD
+    strFlagWorking="${strFlagDir}/_coverage_report_${NAME}.flag.working"
+    strFlagDone="${strFlagDir}/_coverage_report_${NAME}.flag.done"
+    if [[ ! -f ${strFlagWorking} ]] && [[ ! -f ${strFlagDone} ]]; then
+      # init working flag
+      touch ${strFlagWorking}
+
+      CMD="cd $DCEG_SEQ_POOL_SCRIPT_DIR; \
+           sbatch --ntasks=1 \
+                  --nodes=1 \
+                  --job-name=COVREP.${NAME} \
+                  --time=10-00:00:00 \
+                  --output=${LOG_DIR}/_coverage_report_${NAME}.stdout \
+                  --error=${LOG_DIR}/_coverage_report_${NAME}.stderr \
+                  --wrap=\"bash ${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/generate_coverage_report_single.sh \
+                    $BAM
+                    $COVERAGE_REPORT_FILE \
+                    $MANIFEST \
+                    ${strFlagWorking} \
+                    ${strFlagDone}\""
+
+      echo "Current Dir: "$(pwd)
+      echo $CMD
+      if [ -f ${BUFFER_DIR}/nohup100.out ]; then
+        rm ${BUFFER_DIR}/nohup100.out
+      fi
+      echo $CMD >> ${BUFFER_DIR}/nohup100.out
+      eval $CMD
+    fi
 	fi
 done

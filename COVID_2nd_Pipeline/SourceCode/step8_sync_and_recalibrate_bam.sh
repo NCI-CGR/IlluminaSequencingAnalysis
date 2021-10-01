@@ -8,12 +8,13 @@
 
 SCRIPT=$(readlink -f "$0")
 SCRIPT_DIR=$(dirname "$SCRIPT")
-
-
 # source global configuration files
 . ${SCRIPT_DIR:-.}/global_config_bash.rc
 
-if [ $# -eq 1 ]; then
+DIRBAMRoot="/data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Data/BAM/Batch"
+
+strKTName="unkown"
+if [ $# -eq 2 ]; then
      if [[ "$1" == "SOMATIC" ]] || [[ "$1" == "GERMLINE" ]]; then
          VARIANT_TYPE=$1
          MANIFEST=NA
@@ -27,7 +28,7 @@ if [ $# -eq 1 ]; then
          VARIANT_TYPE=GERMLINE
      fi
 fi
-if [ $# -eq 2 ]; then
+if [ $# -eq 3 ]; then
 	# if there is an argument, enter patch mode
 	MANIFEST=$1
         if [[ ! -f $MANIFEST ]]; then
@@ -40,7 +41,7 @@ if [ $# -eq 2 ]; then
             exit 1
         fi
 fi
-if [ $# -gt 2 ]; then
+if [ $# -gt 3 ]; then
         echo "Usage: four forms:"
         echo "1. Only check have any new BAMs in the groups in Manifestsh"
         echo " sh ./step8_sync_and_recalibrate_bam.sh [MANIFEST FILE] GERMLINE|SOMATIC"
@@ -53,8 +54,9 @@ if [ $# -gt 2 ]; then
         echo " If current recalication is for a somatic calling project, will generate additional BAMs with BQSR and without properly paired; If no option specified, will go with GERMLINE"
         exit 1
 fi
-if [ $# -eq 0 ]; then
+if [ $# -eq 1 ]; then
        MANIFEST=NA
+       strKTName=$1
        VARIANT_TYPE=GERMLINE
 fi
 if [[ "$MANIFEST" != "NA" ]]; then
@@ -76,8 +78,14 @@ else
 	DISEASE_GROUPS=`ls -d ${BAM_REFORMATTED_ORIGINAL_DIR}/*`
 fi
 
-
 echo "DISEASE_GROUPS: "${DISEASE_GROUPS}
+
+#create flag dir
+strFlagDir=${DIRBAMRoot}/${strKTName}/Flag/RecalibrateBAM
+if [ ! -d ${strFlagDir} ]; then
+  mkdir -p ${strFlagDir}
+fi
+
 # exit 1
 # for GROUP in $BAM_ORIGINAL_DIR/* ; do
 for GROUP in $(echo $DISEASE_GROUPS); do
@@ -122,17 +130,24 @@ for GROUP in $(echo $DISEASE_GROUPS); do
 #              -N RECAL.$BAM_NAME -v SCRIPT_DIR=$SCRIPT_DIR \
 #              -S /bin/sh ${SCRIPT_DIR}/recalibrate_bam.sh $IN_BAM ${BAM_REFORMATTED_RECALIBRATED_DIR}/${GROUP_NAME}/${BAM_NAME} $VARIANT_TYPE"
 
-	      #Job Script in Biowulf -->
-        CMD="sbatch --time=10-00:00:00 \
-                    --mem=20G \
-                    --job-name=RECAL.${BAM_NAME} \
-                    --export=SCRIPT_DIR='${SCRIPT_DIR}' \
-                    --output=${LOG_DIR}/_recalibration_${BAM_NAME}.stdout \
-                    --error=${LOG_DIR}/_recalibration_${BAM_NAME}.stderr \
-                    --wrap=\"bash ${SCRIPT_DIR}/recalibrate_bam.sh ${IN_BAM} ${BAM_REFORMATTED_RECALIBRATED_DIR}/${GROUP_NAME}/${BAM_NAME} ${VARIANT_TYPE}\""
-        #<--
-	      echo $CMD
-	      eval $CMD
+        strFlagWorking="${strFlagDir}/_recalibration_${BAM_NAME}.flag.working"
+        strFlagDone="${strFlagDir}/_recalibration_${BAM_NAME}.flag.done"
+        if [[ ! -f ${strFlagWorking} ]] && [[ ! -f ${strFlagDone} ]]; then
+          # init working flag
+          touch ${strFlagWorking}
+
+          #Job Script in Biowulf -->
+          CMD="sbatch --time=10-00:00:00 \
+                      --mem=20G \
+                      --job-name=RECAL.${BAM_NAME} \
+                      --export=SCRIPT_DIR='${SCRIPT_DIR}' \
+                      --output=${LOG_DIR}/_recalibration_${BAM_NAME}.stdout \
+                      --error=${LOG_DIR}/_recalibration_${BAM_NAME}.stderr \
+                      --wrap=\"bash ${SCRIPT_DIR}/recalibrate_bam.sh ${IN_BAM} ${BAM_REFORMATTED_RECALIBRATED_DIR}/${GROUP_NAME}/${BAM_NAME} ${VARIANT_TYPE} ${strFlagWorking} ${strFlagDone}\""
+          #<--
+          echo $CMD
+          eval $CMD
+        fi
       fi
     done
   fi

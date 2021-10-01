@@ -5,13 +5,21 @@
 
 # Source global configurations
 # ./global_config_bash.rc
-. ${SCRIPT_HOME}/global_config_bash.rc
+#. ${SCRIPT_HOME}/global_config_bash.rc
+SCRIPT=$(readlink -f "$0")
+DCEG_SEQ_POOL_SCRIPT_DIR=$(dirname "$SCRIPT")
+. ${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/global_config_bash.rc
+
 set -o pipefail
 # set -e
 module load samtools/1.8 java/1.8.0_211
 ANALYSIS_ID=$1
 DOWNSAMPLE_RATIO=$2
 MANIFEST=$3
+strFlagWorking=$4
+strFlagDone=$5
+shift
+shift
 shift
 shift
 shift
@@ -24,6 +32,7 @@ echo "INPUT_LIST: $INPUT_LIST"
 SUB_DIR=`echo $ANALYSIS_ID | cut -f1 -d_`
 #ANALYSIS_ID=`echo $ANALYSIS_ID | sed -e 's/_U//'`
 ANALYSIS_ID=`echo "${ANALYSIS_ID//_NOID}"`
+echo "TMP_DIR: ${TMP_DIR}"
 OUT_TMP_PREFIX=${TMP_DIR}/${ANALYSIS_ID}.copy_or_merge
 
 OUT_TMP_DEDUP=${OUT_TMP_PREFIX}_dedup.bam
@@ -273,7 +282,14 @@ elif [[ $# -eq 1 ]]; then
    CMD="cp $INPUT_LIST ${OUT_TMP_PREFIX}1.bam"
    
    echo $CMD
-   eval $CMD
+   #eval $CMD
+   cp ${INPUT_LIST} ${OUT_TMP_PREFIX}1.bam
+
+   if [[ $? -ne 0 ]]; then
+     echo "Copy Failed!"
+   else
+     echo "Copy Successfully!"
+   fi
 else
    echo "[$(date)]: samtools merging ... "
    CMD="samtools merge -f ${OUT_TMP_PREFIX}1.bam $INPUT_LIST2"
@@ -550,5 +566,6 @@ CMD="rm -f ${OUT_TMP_PREFIX}.bam ${OUT_TMP_PREFIX}.bam.bai $OUT_TMP_DEDUP ${OUT_
 echo $CMD
 eval $CMD
 
-
 echo "[$(date)] Done!"
+rm ${strFlagWorking}
+touch ${strFlagDone}

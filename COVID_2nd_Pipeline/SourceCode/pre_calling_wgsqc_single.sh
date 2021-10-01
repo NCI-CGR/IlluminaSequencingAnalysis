@@ -1,6 +1,13 @@
 #!/bin/sh
 # source global configuration files
-. ${BUFFER_DIR:-.}/global_config_bash.rc
+#. ${BUFFER_DIR:-.}/global_config_bash.rc
+SCRIPT=$(readlink -f "$0")
+DCEG_SEQ_POOL_SCRIPT_DIR=$(dirname "$SCRIPT")
+. ${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/global_config_bash.rc
+
+module load R/4.1
+module load java/1.8.0_211
+which java
 
 IN_BAM=$1
 OUT_REPORT=$2

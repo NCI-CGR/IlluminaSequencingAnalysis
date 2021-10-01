@@ -17,7 +17,7 @@ import os
 import sys
 import subprocess
 
-SCRIPTMergeSample = "/home/lix33/lxwg/Git/sync_script_biowulf/gatk_build_bam_for_single_name_v4.sh"
+SCRIPTMergeSample = "/home/lix33/lxwg/Git/IlluminaSequencingAnalysis/COVID_2nd_Pipeline/SourceCode/gatk_build_bam_for_single_name_v4.sh"
 DIRRootBuild = "/data/COVID_WGS/lix33/Test/2ndpipeline/Build/tmp"
 
 DECORATEAnalysisIDPrefix = "WGS_"
@@ -45,37 +45,37 @@ class ClsSample:
             self.bTopoff = True
     
     def GetBAMFile(self, strCurBAMDir):
-        # 1: find related flowcell folder
-        strPatten = "*" + self.strFlowcellID + "*"
-        CMD = "find " + strCurBAMDir + " -maxdepth 1 -type d -iname '" + strPatten + "'"
-        print("CMD:", CMD)
-        strDirList = subprocess.getoutput(CMD)
-        if strDirList == "":
-            print("Error: Do not find its related Flowcell! -->", self.strFlowcellID, self.strUSUID)
-            return
-        else:
-            print("strDirList:", strDirList)
-            print()
-        strFlowcellDir = strDirList.split('\n')[0]
-        
-        # 2: find related file   
-        strPatten = "*" + self.strUSUID + "*dedup_nophix.bam"
-        CMD = "find " + strFlowcellDir + " -type f -iname '" + strPatten + "'"
-        print("CMD:", CMD)
-        strFileList = subprocess.getoutput(CMD)
-        if strFileList == "":
-            print("Error: Do not find its related BAM file! -->", self.strFlowcellID, self.strUSUID)
-        strBAM = strFileList.split('\n')[0]
-        if os.path.exists(strBAM):
-            self.strBAM = strBAM
-        else:
-            print("Error: Invalid BAM! -->", self.strFlowcellID, self.strUSUID) 
-                            
-        # if self.strUSUID == "SC571825":
-        #     self.strBAM = "/home/lix33/Test/2ndPipeline/BAM/SC571825_CTTCACCA-AAGAGCCA_L001.bam"
+        # # 1: find related flowcell folder
+        # strPatten = "*" + self.strFlowcellID + "*"
+        # CMD = "find " + strCurBAMDir + " -maxdepth 1 -type d -iname '" + strPatten + "'"
+        # print("CMD:", CMD)
+        # strDirList = subprocess.getoutput(CMD)
+        # if strDirList == "":
+        #     print("Error: Do not find its related Flowcell! -->", self.strFlowcellID, self.strUSUID)
+        #     return
+        # else:
+        #     print("strDirList:", strDirList)
+        #     print()
+        # strFlowcellDir = strDirList.split('\n')[0]
         #
-        # if self.strUSUID == "SC571826":
-        #     self.strBAM = "/home/lix33/Test/2ndPipeline/BAM/SC571826_TACCAGGA-GTACTCTC_L001.bam"     
+        # # 2: find related file   
+        # strPatten = "*" + self.strUSUID + "*dedup_nophix.bam"
+        # CMD = "find " + strFlowcellDir + " -type f -iname '" + strPatten + "'"
+        # print("CMD:", CMD)
+        # strFileList = subprocess.getoutput(CMD)
+        # if strFileList == "":
+        #     print("Error: Do not find its related BAM file! -->", self.strFlowcellID, self.strUSUID)
+        # strBAM = strFileList.split('\n')[0]
+        # if os.path.exists(strBAM):
+        #     self.strBAM = strBAM
+        # else:
+        #     print("Error: Invalid BAM! -->", self.strFlowcellID, self.strUSUID) 
+                            
+        if self.strUSUID == "SC571825":
+            self.strBAM = "/home/lix33/Test/2ndPipeline/BAM/SC571825_CTTCACCA-AAGAGCCA_L001.bam"
+        
+        if self.strUSUID == "SC571826":
+            self.strBAM = "/home/lix33/Test/2ndPipeline/BAM/SC571826_TACCAGGA-GTACTCTC_L001.bam"     
 
     def PrepareManifest(self, vContent, strAnalysisID):
         if not os.path.exists(self.strBAM):
@@ -152,6 +152,28 @@ class ClsSubject:
             print("Error: No Sample contained by current subject!")
             return
         
+        # Prepare 2 folders for saving job bash script and flag files
+        strJobBashDir = strCurBuildDir + "/Script/MergeSubject"
+        if not os.path.exists(strJobBashDir):
+            CMD = "mkdir -p " + strJobBashDir
+            os.system(CMD)
+            
+        strFlagDir = DIRBAMRoot + "/" + os.path.basename(strCurBuildDir) + "/Flag/MergeSubject"
+        print("strFlagDir:", strFlagDir)
+        if not os.path.exists(strFlagDir):
+            CMD = "mkdir -p " + strFlagDir
+            os.system(CMD)
+        
+        strFlagWoking = strFlagDir + "/merge_sample_" + self.strAnalysisID + ".flag.working" 
+        strFlagDone = strFlagDir + "/merge_sample_" + self.strAnalysisID + ".flag.done"
+        
+        if os.path.exists(strFlagWoking):
+            print("Current subject is still running! ->", self.strAnalysisID)
+            return
+        if os.path.exists(strFlagDone):
+            print("Current subject has been finished! ->", self.strAnalysisID)
+            return
+        
         # Prepare Bash command line
         print()
         print("strAnalysisID        :", self.strAnalysisID)
@@ -160,13 +182,15 @@ class ClsSubject:
         strCmdBashScript = ("bash " + SCRIPTMergeSample + " " + 
                             strDecorateAnalysisID + " " + 
                             "1" + " " + 
-                            strManifestFile)
+                            strManifestFile + " " +
+                            strFlagWoking + " " +
+                            strFlagDone)
         strSamplelist = ""
         for sample in self.vSample:
             strSamplelist += " " + sample.strBAM
         
-        strCmdBashScript += strSamplelist
-        strJobScript = strCurBuildDir + "/" + self.strAnalysisID + ".run.job"
+        strCmdBashScript += strSamplelist        
+        strJobScript = strJobBashDir + "/" + self.strAnalysisID + ".run.job"
         f = open(strJobScript, "w")
         f.write("#!/bin/bash\n\n")
         f.write(strCmdBashScript)
@@ -202,7 +226,10 @@ class ClsSubject:
                           "--error=" + strStdErr)
         CMD = strSlurmScript + " " + strJobScript
         print(CMD)
-        os.system(CMD) 
+        os.system(CMD)
+        
+        CMD = "touch " + strFlagWoking
+        os.system(CMD)
 
 class ClsBuild:
     def __init__(self):
@@ -293,7 +320,9 @@ class ClsBuild:
             os.system(CMD)
         CMD = "echo '" + strFile + "' > " + strDoneFlag
         os.system(CMD)
-    
+        
+        print("-->\n", "Mimic Manifest file:", strFile, "\n<--")
+            
     def SubmitJobs(self):
         if not os.path.exists(self.strManifestFile):
             print("Can not find Manifest file(Mimic)!")
@@ -314,18 +343,22 @@ def main():
     
     objBuild = ClsBuild()
     
-    # 1: Prepare group info  
+    # 1: Prepare group info 
+    print("\n", "==> GetGroupInfo") 
     objBuild.GetGroupInfo(strKeyTable)
     
     # 2: Get BAM file for each sample
-    objBuild.GetBAMFile()
+    print("\n", "==> GetBAMFile")
+    objBuild.GetBAMFile()    
     #print(len(objBuild.vSubject))
     
     # 3: Build Manifest file -> GO!
+    print("\n", "==> BuidManifestFile")
     objBuild.BuidManifestFile(strKeyTable)
     
     # 4: Submit jobs
-    #objBuild.SubmitJobs()
+    #print("\n", "==> SubmitJobs")
+    objBuild.SubmitJobs()
     
     print("All Set!")
 

@@ -17,6 +17,8 @@ which java
 IN_BAM=$1
 OUT_REPORT=$2
 MANIFEST=$3
+strFlagWorking=$4
+strFlagDone=$5
 
 OUT_DIR=${BUFFER_DIR}/PRE_QC
 #CUSTOMIZED_BED_DIR=/DCEG/Projects/Exome/SequencingData/BED_FILES/customized_capturekit
@@ -460,4 +462,8 @@ echo ====================
 date
 echo Done!
 echo ====================
+
+# update flag
+rm ${strFlagWorking}
+touch ${strFlagDone}
 

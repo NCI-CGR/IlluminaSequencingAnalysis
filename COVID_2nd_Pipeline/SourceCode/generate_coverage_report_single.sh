@@ -9,6 +9,8 @@ DCEG_SEQ_POOL_SCRIPT_DIR=$(dirname "$SCRIPT")
 IN_BAM=$1
 OUT_REPORT=$2
 MANIFEST=$3
+strFlagWorking=$4
+strFlagDone=$5
 #MERGE_LOG=$4
 
 echo ====================
@@ -149,3 +151,7 @@ echo ====================
 date
 echo Done!
 echo ====================
+
+# update flag
+rm ${strFlagWorking}
+touch ${strFlagDone}

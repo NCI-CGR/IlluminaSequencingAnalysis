@@ -5,6 +5,9 @@ DCEG_SEQ_POOL_SCRIPT_DIR=$(dirname "$SCRIPT")
 . ${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/global_config_bash.rc
 #. ./global_config_bash.rc
 
+DIRBAMRoot="/data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Data/BAM/Batch"
+strKTName="unkown"
+
 #2 or 3 input (MANIFEST_FILE, dirBuildBAM and (PREQC_REPORT_FILE -- option))
 
 DATE=`echo $(date +%m%d%Y)`
@@ -16,6 +19,7 @@ fi
 
 MANIFEST_FILE=$1
 dirBuildBAM=$2
+strKTName=$3
 
 #create BAM list file
 strBAMList=${dirBuildBAM}/bam.lst
@@ -45,7 +49,7 @@ fi
 # the IDs that are NOT in <my_last_report.txt> and then submit the cluster job accordingly.
 # All IDs that are already in <my_last_report.txt> will then be skipped
 
-if [[ $# == 3 ]]; then
+if [[ $# == 4 ]]; then
 	# if there is an argument, enter patch mode
 	PATCH_MODE=true
 	PREQC_REPORT_FILE=$3
@@ -75,6 +79,12 @@ echo $ANALYSISID_COL
 #BAM_DIR=$(dirname ${MANIFEST_FILE})/../bam_location
 BAM_DIR=${dirBuildBAM}
 cd $BAM_DIR
+
+#create flag dir
+strFlagDir=${DIRBAMRoot}/${strKTName}/Flag/PreCallingQCReport
+if [ ! -d ${strFlagDir} ]; then
+  mkdir -p ${strFlagDir}
+fi
 
 #for BAM in $(awk -F "\t" -v group=$GROUP_COL -v analysisid=$ANALYSISID_COL '{if(NR>1){print $group"/"$group"_"$analysisid".bam"}}' $MANIFEST_FILE | sort | uniq); do
 #		echo $BAM
@@ -111,21 +121,29 @@ for BAM in `cat ${strBAMList}`; do
 #			-o ${LOG_DIR}/_pre_calling_qc_report_${NAME}.stdout -e ${LOG_DIR}/_pre_calling_qc_report_${NAME}.stderr \
 #			-N PRECALLING_QC.$NAME \
 #			-S /bin/sh ${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/pre_calling_qc_single.sh $BAM $PREQC_REPORT_FILE $MANIFEST_FILE"
+    strFlagWorking="${strFlagDir}/_pre_calling_QC_report_${NAME}.flag.working"
+    strFlagDone="${strFlagDir}/_pre_calling_QC_report_${NAME}.flag.done"
+    if [[ ! -f ${strFlagWorking} ]] && [[ ! -f ${strFlagDone} ]]; then
+      # init working flag
+      touch ${strFlagWorking}
 
-    CMD="sbatch --ntasks=1 \
-                --nodes=1 \
-                --job-name=PRECALLING_QC.${NAME} \
-                --time=10-00:00:00 \
-                --mem=20G \
-                --output=${LOG_DIR}/_pre_calling_qc_report_${NAME}.stdout \
-                --error=${LOG_DIR}/_pre_calling_qc_report_${NAME}.stderr \
-                --wrap=\"bash ${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/pre_calling_qc_single.sh \
-                          $BAM \
-                          $PREQC_REPORT_FILE \
-                          $MANIFEST_FILE\""
+      CMD="sbatch --ntasks=1 \
+                  --nodes=1 \
+                  --job-name=PRECALLING_QC.${NAME} \
+                  --time=10-00:00:00 \
+                  --mem=20G \
+                  --output=${LOG_DIR}/_pre_calling_qc_report_${NAME}.stdout \
+                  --error=${LOG_DIR}/_pre_calling_qc_report_${NAME}.stderr \
+                  --wrap=\"bash ${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/pre_calling_qc_single.sh \
+                            $BAM \
+                            $PREQC_REPORT_FILE \
+                            $MANIFEST_FILE \
+                            ${strFlagWorking} \
+                            ${strFlagDone}\""
 
-		echo $CMD
-		echo $CMD >> ${BUFFER_DIR}/nohup100.out
-		eval $CMD
+      echo $CMD
+      echo $CMD >> ${BUFFER_DIR}/nohup100.out
+      eval $CMD
+    fi
 	fi
 done

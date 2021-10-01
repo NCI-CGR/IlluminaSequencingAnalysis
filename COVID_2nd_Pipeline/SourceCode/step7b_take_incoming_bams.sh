@@ -9,7 +9,19 @@
 SCRIPT=$(readlink -f "$0")
 SCRIPT_HOME=$(dirname "$SCRIPT")
 
-. ${SCRIPT_HOME}/global_config_bash.rc
+#. ${SCRIPT_HOME}/global_config_bash.rc
+SCRIPT=$(readlink -f "$0")
+DCEG_SEQ_POOL_SCRIPT_DIR=$(dirname "$SCRIPT")
+. ${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/global_config_bash.rc
+
+#Get Working flag and done flag
+strFlagWorking=$1
+strFlagDone=$2
+
+echo "strFlagWorking: ${strFlagWorking}"
+echo "strFlagDone   : ${strFlagDone}"
+echo
+
 # . ${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/global_config_bash.rc
 # BAM_REFORMATTED_ORIGINAL_DIR
 # BAM_REFORMATTED_RECALIBRATED_DIR
@@ -189,3 +201,6 @@ for SUBDIR in ${BAM_INCOMING_DIR}/*; do
   done
 done  
 echo "All done!"
+
+rm ${strFlagWorking}
+touch ${strFlagDone}

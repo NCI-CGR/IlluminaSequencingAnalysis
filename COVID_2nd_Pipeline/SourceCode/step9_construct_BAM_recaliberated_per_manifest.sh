@@ -3,7 +3,8 @@
 SCRIPT=$(readlink -f "$0")
 SCRIPT_DIR=$(dirname "$SCRIPT")
 . ${SCRIPT_DIR:-.}/global_config_bash.rc
-if [[ $# -ne 3 ]]; then
+
+if [[ $# -ne 5 ]]; then
    echo "Usage: step9_construct_BAM_recaliberated_per_manifest.sh $Manifest_File $Build_name SOMATIC|GERMLINE"
    echo "Example: step9_construct_BAM_recaliberated_per_manifest.sh  /DCEG/Projects/Exome/builds/build_SR0493-001_Data_Delivery_2019_22641/Manifest/SR0493-001-ANALYSIS-MANIFEST-4-4-2019.csv build_SR0493-001_Data_Delivery_2019_22641 SOMATIC"
    exit 1 
@@ -12,6 +13,8 @@ fi
 MANIFEST=$1
 BUILD_NAME=$2
 TYPE=$3
+strFlagWorking=$4
+strFlagDone=$5
 
 if [[ ! -f $MANIFEST ]] ; then
   echo "Error: cannot find manifest file, please check the directory of manifest file."
@@ -71,3 +74,7 @@ echo "Total missing samples from Bam recaliberated directory = $count_for_missin
 echo "Total samples linked from Bam recaliberated directory = $count_for_present"
 echo
 echo
+
+# update flags
+rm ${strFlagWorking}
+touch ${strFlagDone}

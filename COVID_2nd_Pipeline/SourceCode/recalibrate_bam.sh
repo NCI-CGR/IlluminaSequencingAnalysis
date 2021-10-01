@@ -1,12 +1,19 @@
 #!/bin/sh
 # . ${SCRIPT_DIR:-.}/global_config_bash.rc
-. ${SCRIPT_DIR}/global_config_bash.rc
+#. ${SCRIPT_DIR}/global_config_bash.rc
+
+SCRIPT=$(readlink -f "$0")
+DCEG_SEQ_POOL_SCRIPT_DIR=$(dirname "$SCRIPT")
+. ${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/global_config_bash.rc
+
 #module load jdk/1.8.0_111
 #module load samtools/1.8
 module load samtools/1.8 java/1.8.0_211 GATK/3.8-1
 IN_BAM=$1
 OUT_BAM=$2
 VARIANT_TYPE=$3
+strFlagWorking=$4
+strFlagDone=$5
 
 IN_DIR=`dirname $IN_BAM`
 IN_NAME=`basename $IN_BAM .bam`
@@ -345,4 +352,8 @@ echo $CMD
 eval $CMD
 
 echo "[$(date)] All done!"
+
+# update flag
+rm ${strFlagWorking}
+touch ${strFlagDone}
 
