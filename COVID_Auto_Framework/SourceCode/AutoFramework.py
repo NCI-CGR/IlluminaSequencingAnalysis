@@ -350,11 +350,19 @@ def BAMContaminationCheck(iSubjectNum, strKTName):
     os.system(CMD)
     return 1
             
-def main():
+def main():        
     strKeytable = sys.argv[1]
     if not os.path.exists(strKeytable):
         print("Error: Keytable does not exist! -->", strKeytable)
         return
+    
+    #Print time stamp -->
+    print()
+    print("====== COVID Auto Framework ======", flush=True)
+    print("strKeytable:", strKeytable)
+    os.system("date")
+    print()
+    #<--
     
     # Get the total number of subject in current keytable -> Go after lunch ->
     CMD = "awk 'NR > 1' " + strKeytable + " | grep -v 'topoff' | wc -l"
@@ -409,5 +417,4 @@ def main():
     return 0
     
 
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__"
