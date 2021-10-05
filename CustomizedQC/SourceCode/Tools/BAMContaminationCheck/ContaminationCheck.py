@@ -138,6 +138,9 @@ class ClsBuild:
             print("Waiting for the run be finished!")
             return
         
+        print("iDoneFlagNum:", iDoneFlagNum)
+        print("iReportNum  :", iReportNum)
+        print()
         CMD = "find " + self.strReportDir + " -iname '*selfSM'"
         vReport = subprocess.getoutput(CMD).split('\n')
         

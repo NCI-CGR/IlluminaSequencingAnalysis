@@ -289,7 +289,9 @@ def PreCallingQCReport(iSubjectNum, strKTName):
             strFlagDone = strFlagSumDir + "/pre_calling_qc_report_sum.flag.done"
             if not os.path.exists(strFlagDone):
                 # Find pre calling qc report
-                CMD = "find " + DIRBuffer + "/coverage_report" + " -iname 'pre_calling_qc_report*'"
+                CMD = ("find " + DIRBuffer + "/coverage_report" + " -maxdepth 1 -type f -iname 'pre_calling_qc_report*' " + 
+                       "-printf '%T@ %Tc %p\n' | sort -r | head -n 1 | awk '{print $NF}'")
+                print("CMD", CMD)
                 strFileList = subprocess.getoutput(CMD)
                 if strFileList == "":
                     print("Error: bad pre calling QC list:", strFileList)
@@ -299,15 +301,17 @@ def PreCallingQCReport(iSubjectNum, strKTName):
                                 
                 # Collect Report
                 strScript = DIR2ndPipeline + "/step6_2_generating_pre_calling_qc_report_batch.sh"
-                CMD = "bash " + strScript + " " + strQCReport 
+                CMD = "bash " + strScript + " " + strQCReport
+                #print("CMD:", CMD)
                 os.system(CMD)
                 CMD = "touch " + strFlagDone
-                os.system(CMD)
+                os.system(CMD)                
                 print("Generating pre-calling QC report is All Set!")
+                print("Pre-calling QC report is located in:", "/data/COVID_WGS/lix33/Test/2ndpipeline/Data/secondary_buf/coverage_report/" + strQCReport)
             else:
                 print("Generating pre-calling QC report has been done before!")
+                print("Pre-calling QC report is located in:", "/data/COVID_WGS/lix33/Test/2ndpipeline/Data/secondary_buf/coverage_report/...")
             
-            print("Pre-calling QC report is located in:", "/data/COVID_WGS/lix33/Test/2ndpipeline/Data/secondary_buf/coverage_report/...")    
             #print("Log file is located in            :", "/data/COVID_WGS/lix33/Test/2ndpipeline/Data/secondary_buf/cluster_job_logs/...")
             #print("Coverage report file is located in:", "/data/COVID_WGS/lix33/Test/2ndpipeline/Data/secondary_buf/coverage_report/...")
             return 0
@@ -417,4 +421,5 @@ def main():
     return 0
     
 
-if __name__ == "__main__"
+if __name__ == "__main__":
+    main()
