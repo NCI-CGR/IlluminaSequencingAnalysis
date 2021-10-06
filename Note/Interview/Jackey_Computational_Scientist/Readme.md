@@ -22,3 +22,4 @@ Did you use HPC cluster
 
 - Some questions in CV
   - assistant professor: tenue track? 
+- Machine learning: radom forest, ABA boosting, Naive Bayesian and so on 
