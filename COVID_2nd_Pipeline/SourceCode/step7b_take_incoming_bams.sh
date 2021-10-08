@@ -25,7 +25,7 @@ echo
 # . ${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/global_config_bash.rc
 # BAM_REFORMATTED_ORIGINAL_DIR
 # BAM_REFORMATTED_RECALIBRATED_DIR
-module load samtools
+module load samtools/1.13
 for SUBDIR in ${BAM_INCOMING_DIR}/*; do
   SUBDIR_NAME=$(basename $SUBDIR)
   for BAM in ${BAM_INCOMING_DIR}/${SUBDIR_NAME}/*.bam; do

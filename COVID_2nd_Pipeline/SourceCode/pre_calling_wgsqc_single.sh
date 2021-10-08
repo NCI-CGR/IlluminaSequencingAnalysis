@@ -146,9 +146,9 @@ if [[ ! -f ${BUFFER_DIR}/PRE_QC/${NAME}/error_rates.gatkreport.txt || $REPLACE_T
 	eval $CMD
 fi
 
-#filter in bam proper aligned reads first
-samtools view -f 3 -b $IN_BAM > ${TMP_DIR}/${NAME}_filtered.bam
-samtools index ${TMP_DIR}/${NAME}_filtered.bam
+##filter in bam proper aligned reads first
+#samtools view -@ 8 -f 3 -b $IN_BAM > ${TMP_DIR}/${NAME}_filtered.bam
+#samtools index -@ 8 ${TMP_DIR}/${NAME}_filtered.bam
 
 CMD="java -Xmx16g -jar $GATK \
                         --analysis_type CountTerminusEvent \
@@ -157,10 +157,16 @@ CMD="java -Xmx16g -jar $GATK \
                         -o ${BUFFER_DIR}/PRE_QC/${NAME}/output.txt "
 #can try to add the two stats to the report
 if [[ ! -f ${BUFFER_DIR}/PRE_QC/${NAME}/output.txt || $REPLACE_TABLE != "false" ]];then
+  #filter in bam proper aligned reads first (move samtools command line from outside to inside "if")
+  samtools view -@ 8 -f 3 -b $IN_BAM > ${TMP_DIR}/${NAME}_filtered.bam
+  samtools index -@ 8 ${TMP_DIR}/${NAME}_filtered.bam
+
 	echo $CMD
 	eval $CMD
+
+	rm -rf ${TMP_DIR}/${NAME}_filtered.bam* 2> /dev/null
 fi
-rm -rf ${TMP_DIR}/${NAME}_filtered.bam* 2> /dev/null
+#rm -rf ${TMP_DIR}/${NAME}_filtered.bam* 2> /dev/null
 
 CMD="java -Xmx16g -jar $GATK \
                         -T ReadLengthDistribution \
@@ -247,7 +253,8 @@ GC_DROPOUT=`awk -F "\t" '{if(NR==8){print $7}}' ${BUFFER_DIR}/PRE_QC/${NAME}/mul
 
 #QualityScoreDistribution can get the percentage of bases higher than 32 and lower than 12 of total bases 
 TOTAL_BASES=`awk 'NR>8&&NR<16' ${BUFFER_DIR}/PRE_QC/${NAME}/qual_score_dist.txt | awk -F "\t" '{sum+=$2} END {print sum}'`
-BASES_Q_AVE=`awk -F"\t" '{if(NR>8 && NR<59){sum1+=$2;sum2+=$1*$2}} END{print sum2/sum1}' ${BUFFER_DIR}/PRE_QC/${NAME}/qual_score_dist.txt | awk -F "\t" '{sum+=$2} END {print sum}'`
+#BASES_Q_AVE=`awk -F"\t" '{if(NR>8 && NR<59){sum1+=$2;sum2+=$1*$2}} END{print sum2/sum1}' ${BUFFER_DIR}/PRE_QC/${NAME}/qual_score_dist.txt | awk -F "\t" '{sum+=$2} END {print sum}'`
+BASES_Q_AVE=`awk -F '\t' '{if(NR>8 && NR<59){sum1+=$2;sum2+=$1*$2}} END{print sum2/sum1}' ${BUFFER_DIR}/PRE_QC/${NAME}/qual_score_dist.txt`
 #BASES_Q_12DOWN=`awk 'NR>8&&NR<11' ${BUFFER_DIR}/PRE_QC/${NAME}/qual_score_dist.txt | awk -F "\t" '{sum+=$2} END {print sum}'`
 if [[ ! $TOTAL_BASES -gt 0 ]]; then	
 	echo "Error. TOTAL_BASES is less than 0, something is wrong."
@@ -299,14 +306,13 @@ else
 fi
 
 MEDIAN_INSERT_SIZES=`awk -F '\t' '{ if (NR==8) print $1 }' ${BUFFER_DIR}/PRE_QC/${NAME}/insertsize_metrics.txt`
-MEAN_INSERT_SIZES=`awk -F '\t' '{ if (NR==8) print $5 }' ${BUFFER_DIR}/PRE_QC/${NAME}/insertsize_metrics.txt`
+MEAN_INSERT_SIZES=`awk -F '\t' '{ if (NR==8) print $6 }' ${BUFFER_DIR}/PRE_QC/${NAME}/insertsize_metrics.txt`
 
 L="${NAME}\t${AVERAGE_READ_LENGTH}\t${PERCENT_TOTAL_READS_WITH_3LESS_CUT}\t${PF_HQ_MEDIAN_MISMATCHES}\t${PF_HQ_MISMATCH_RATE_F}\t${PF_HQ_MISMATCH_RATE_R}\t${STRAND_BALANCE_F}\t${STRAND_BALANCE_R}\t${BAD_CYCLES}\t${PCT_CHIMERAS}\t${PCT_ADAPTER}"\
 "\t${PERCENT_PF_HQ_ALIGNED_READS}\t${PERCENT_PF_HQ_ALIGNED_BASES_L}\t${PERCENT_PF_HQ_ALIGNED_Q20_BASES_L}\t${PERCENT_PF_HQ_ALIGNED_BASES_R}\t${PERCENT_PF_HQ_ALIGNED_Q20_BASES_R}\t${BASES_Q_AVE}"\
 "\t${AT_DROPOUT}\t${GC_DROPOUT}\t${MEAN_COVERAGE}\t${SD_COVERAGE}\t${MEDIAN_COVERAGE}\t${PCT_EXC_MAPQ}\t${PCT_EXC_UNPAIRED}\t${PCT_EXC_DUPE}\t${PCT_EXC_OVERLAP}\t${ESTIMATED_LIBRARY_SIZE}"\
 "\t${LOWEST_PREADATPER_TOTAL_QSCORE_BASE}\t${LOWEST_PREADATPER_TOTAL_QSCORE}\t${LOWEST_BAITBIAS_TOTAL_QSCORE_BASE}\t${LOWEST_BAITBIAS_TOTAL_QSCORE}\t${OXIDATION_Q_AVE}"\
 "\t${PERCENT_LOW_COVERAGE_CAPTURE_REGION}\t${PERCENT_NO_COVERAGE_CAPTURE_REGION}\t${PERCENT_POOR_MAPPING_QUALITY}\t${PERCENT_READS_ENDING_IN_INDELS}\t${PERCENT_READS_ENDING_IN_SOFTCLIPS}\t${MEDIAN_INSERT_SIZES}\t${MEAN_INSERT_SIZES}"
-
 
 echo "Contents to be streamed to the flowcell-level report file:"
 echo -e $L

@@ -10,17 +10,19 @@ SCRIPT=$(readlink -f "$0")
 DCEG_SEQ_POOL_SCRIPT_DIR=$(dirname "$SCRIPT")
 . ${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/global_config_bash.rc
 
-DIRBAMRoot="/data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Data/BAM/Batch"
-strKTName="unkown"
-
-DATE=`echo $(date +%m%d%Y)`
-LOG_DIR=${CLUSTER_JOB_LOG_DIR}/${DATE}
-
-# Get two most important arguments -->
-#MANIFEST=/DCEG/Projects/Exome/builds/build_SR0407-004_Data_Delivery_2019_23058/Manifest/NP0407-HE9-ANALYSIS-MANIFEST.csv
 MANIFEST=$1
 dirBuildBAM=$2
 strKTName=$3
+
+DIRBAMRoot="/data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Data/BAM/Batch"
+#strKTName="unkown"
+
+DATE=`echo $(date +%m%d%Y)`
+LOG_DIR=${CLUSTER_JOB_LOG_DIR}/${DATE}_${strKTName}
+
+# Get two most important arguments -->
+#MANIFEST=/DCEG/Projects/Exome/builds/build_SR0407-004_Data_Delivery_2019_23058/Manifest/NP0407-HE9-ANALYSIS-MANIFEST.csv
+
 #create BAM list file
 strBAMList=${dirBuildBAM}/bam.lst
 if [ -f "${strBAMList}" ]; then
@@ -44,7 +46,7 @@ mkdir -p $LOG_DIR 2>/dev/null
 if [[ $# == 4 ]]; then
 	# if there is an argument, enter patch mode
 	PATCH_MODE=true
-	COVERAGE_REPORT_FILE=$3
+	COVERAGE_REPORT_FILE=$4
 	echo "Entering patch mode to fill up the \"holes\" in existing coverage report file $COVERAGE_REPORT_FILE"
 else
 	# otherwise automatically generate the report file name
@@ -56,27 +58,29 @@ else
 	fi
   #<--
 
-	COVERAGE_REPORT_FILE=${COVERAGE_REPORT_DIR}/coverage_report_${DATE}.txt
+	COVERAGE_REPORT_FILE=${COVERAGE_REPORT_DIR}/coverage_report_${DATE}_${strKTName}.txt
 
 	# output report header, note this needs to match the actual numbers generated in ./generate_coverage_report_single.sh
-	 REPORT_LINE="Report Date\tLIMS ID\tSR SUBJECT ID\tAnalysis ID" > $COVERAGE_REPORT_FILE
-	 for REFERENCE in UCSC CaptureKit; do
-		 for THRESHOLD in 1 5 10 15 50; do
+	REPORT_LINE="Report Date\tLIMS ID\tSR SUBJECT ID\tAnalysis ID" #> $COVERAGE_REPORT_FILE
+	for REFERENCE in UCSC CaptureKit; do
+	  for THRESHOLD in 1 5 10 15 50; do
 	#REPORT_LINE="Report Date\tAnalysis ID" > $COVERAGE_REPORT_FILE
 	#for REFERENCE in secondary_analysis_bed_files/*.bed; do
 	#	for THRESHOLD in 15; do
 	#		REFERENCE2=$(basename $REFERENCE .bed)
-			REPORT_LINE="${REPORT_LINE}\tBases ${REFERENCE} >= ${THRESHOLD}X\t% ${REFERENCE} >= ${THRESHOLD}X"
+		  REPORT_LINE="${REPORT_LINE}\tBases ${REFERENCE} >= ${THRESHOLD}X\t% ${REFERENCE} >= ${THRESHOLD}X"
 	#		REPORT_LINE="${REPORT_LINE}\t% ${REFERENCE2} >= ${THRESHOLD}X\t ${REFERENCE2} Avarage Coverage"
-		  done
-	  done
+		done
+    REPORT_LINE="${REPORT_LINE}\t${REFERENCE} Average Coverage"
+	done
 
-	#REPORT_LINE="${REPORT_LINE}\tUCSC Avarage Coverage"
-	REPORT_LINE="${REPORT_LINE}\t% Merge Dup"
-	echo -e $REPORT_LINE > $COVERAGE_REPORT_FILE
-	REPORT_LINE="${REPORT_LINE}\t% Merge Optical Dup"
-	echo -e $REPORT_LINE > $COVERAGE_REPORT_FILE
-	REPORT_LINE="${REPORT_LINE}\tCaptureKit Avarage Coverage"
+#	#REPORT_LINE="${REPORT_LINE}\tUCSC Avarage Coverage"
+#	REPORT_LINE="${REPORT_LINE}\t% Merge Dup"
+#	echo -e $REPORT_LINE > $COVERAGE_REPORT_FILE
+#	REPORT_LINE="${REPORT_LINE}\t% Merge Optical Dup"
+#	echo -e $REPORT_LINE > $COVERAGE_REPORT_FILE
+#	REPORT_LINE="${REPORT_LINE}\tCaptureKit Avarage Coverage"
+
 	echo -e $REPORT_LINE > $COVERAGE_REPORT_FILE
 fi
 
@@ -127,7 +131,7 @@ for BAM in `cat ${strBAMList}`; do
       touch ${strFlagWorking}
 
       CMD="cd $DCEG_SEQ_POOL_SCRIPT_DIR; \
-           sbatch --ntasks=1 \
+           sbatch --ntasks=8 \
                   --nodes=1 \
                   --job-name=COVREP.${NAME} \
                   --time=10-00:00:00 \

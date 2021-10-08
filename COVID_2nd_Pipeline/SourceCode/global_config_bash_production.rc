@@ -28,7 +28,8 @@ module load java/1.8.0_211
 # fix to the PATH environment to ensure our in-house version of qrun in /usr/local/bin will be executed, instead
 # of PBS' version. This is also the place for our local picard wrapper (/usr/local/bin/picard)
 #export PATH=/usr/local/bin:$JAVA_DIR:$PATH:/CGF/Resources/Tools/Samtools/samtools-0.1.18
-module load samtools/1.8
+#module load samtools/1.8
+module load samtools/1.13
 
 # cluster queue
 QUEUE=seq-*.q
@@ -96,9 +97,11 @@ EXOME_TARGETS_TOTAL_BASES_v3=63564965
 EXOME_TARGETS_v3plusUTR=${DIRRootBed}/120430_HG19_ExomeV3_UTR_EZ_HX1_capture_annotated.bed
 # this is the total number of bases in the beds, used for calculation of % of exome coverage
 EXOME_TARGETS_TOTAL_BASES_v3plusUTR=98761644
-WGS_BED=${BUFFER_DIR}/INTERVAL_FILES/b37_decoy.bed
-WGS_TOTAL_BASES=3101804739
 
+#WGS_BED=${BUFFER_DIR}/INTERVAL_FILES/b37_decoy.bed
+#WGS_TOTAL_BASES=3101804739
+WGS_BED=/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/ref38/Homo_sapiens_assembly38.bed
+WGS_TOTAL_BASES=3088286401
 
 #REFERENCE_CDS=/DCEG/Projects/Exome/annotation/Exome_capture_targets/hg19_cds_new.bed
 #REFERENCE_CDS_TOTAL_BASES=34990773

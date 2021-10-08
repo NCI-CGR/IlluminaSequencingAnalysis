@@ -47,7 +47,7 @@ class ClsSample:
     def GetBAMFile(self, strCurBAMDir):
         # 1: find related flowcell folder
         strPatten = "*" + self.strFlowcellID + "*"
-        CMD = "find " + strCurBAMDir + " -maxdepth 1 -type d -iname '" + strPatten + "'"
+        CMD = "find -L " + strCurBAMDir + " -maxdepth 1 -type d -iname '" + strPatten + "'"
         print("CMD:", CMD)
         strDirList = subprocess.getoutput(CMD)
         if strDirList == "":
@@ -60,7 +60,7 @@ class ClsSample:
         
         # 2: find related file   
         strPatten = "*" + self.strUSUID + "*dedup_nophix.bam"
-        CMD = "find " + strFlowcellDir + " -type f -iname '" + strPatten + "'"
+        CMD = "find -L " + strFlowcellDir + " -type f -iname '" + strPatten + "'"
         print("CMD:", CMD)
         strFileList = subprocess.getoutput(CMD)
         if strFileList == "":
@@ -102,7 +102,7 @@ class ClsSample:
         strEXPECTEDGENDER = "M"
         strIDENTIFILERGENDER = "M"
         strUCSCAVGCOV = "99.99"
-        strASSAYID = "EZ_Exome+UTR_PE"
+        strASSAYID = "EZ_WGS_PE" #"EZ_Exome+UTR_PE"
         #strANALYSISID = "NA12878_GDNA_HS4K_KHPL_1"
         
         strLine = (strInstrument + "," + 

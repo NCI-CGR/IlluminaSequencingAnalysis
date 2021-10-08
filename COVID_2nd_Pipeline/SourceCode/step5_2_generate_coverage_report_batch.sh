@@ -5,13 +5,15 @@ DCEG_SEQ_POOL_SCRIPT_DIR=$(dirname "$SCRIPT")
 . ${DCEG_SEQ_POOL_SCRIPT_DIR:-.}/global_config_bash.rc
 #. ./global_config_bash.rc
 
-#find the most recent coverage report file as the coverage report file. There is a potential bug that it only works on the most recently created report file. 
-COVERAGE_REPORT_FILE=`find ${COVERAGE_REPORT_DIR} -name coverage_report_????????.txt  -print0 | xargs -0r ls -ltr | tail -n 1 | awk '{print $9}'`
+strKTName=$1
+
+#find the most recent coverage report file as the coverage report file. There is a potential bug that it only works on the most recently created report file.
+COVERAGE_REPORT_FILE=`find ${COVERAGE_REPORT_DIR} -type f -iname coverage_report*${strKTName}.txt -print0 | xargs -0r ls -ltr | tail -n 1 | awk '{print $9}'`
 echo "COVERAGE_REPORT_FILE: "${COVERAGE_REPORT_FILE}
 
 DATE=$(basename $COVERAGE_REPORT_FILE .txt | cut -f3 -d_)
 
-LOG_DIR=${CLUSTER_JOB_LOG_DIR}/${DATE}
+LOG_DIR=${CLUSTER_JOB_LOG_DIR}/${DATE}_${strKTName}
 echo "LOG_DIR: "${LOG_DIR}
 
 for SINGLE_OUT in ${LOG_DIR}/_coverage_report_*.stdout; do

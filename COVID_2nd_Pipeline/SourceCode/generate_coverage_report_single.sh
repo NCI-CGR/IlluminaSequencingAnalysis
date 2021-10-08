@@ -47,7 +47,7 @@ CAPTUREKIT=`awk -F ',' -v ANALYSISID=$ANALYSIS_ID '{if ($13 == ANALYSISID )  {pr
 CAPTUREKIT=`echo $CAPTUREKIT|sed 's/ //g'`
 
 
-echo $CAPTUREKIT
+echo "CAPTUREKIT: ${CAPTUREKIT}"
 if [[ $CAPTUREKIT == *3.0* ]]; then
 		EXOME_TARGETS=$EXOME_TARGETS_v3
 		EXOME_TARGETS_TOTAL_BASES=$EXOME_TARGETS_TOTAL_BASES_v3
@@ -70,24 +70,26 @@ elif [[ $CAPTUREKIT == EZ_Choice_Dean-Koshiol-4 ]]; then
 		EXOME_TARGETS=/DCEG/CGF/Laboratory/LIMS/Oligo_Orders/NimblegenCapture/Dean-Koshiol-4/Selection_Results/Dean-Koshiol-4_capture_targets.bed
 		EXOME_TARGETS_TOTAL_BASES=2956332
 elif [[ $CAPTUREKIT == EZ_Choice_Karina-XP ]]; then
-        EXOME_TARGETS=/DCEG/Projects/Exome/SequencingData/BED_FILES/customized_capturekit/Karina-XP_primary_targets.bed
+    EXOME_TARGETS=/DCEG/Projects/Exome/SequencingData/BED_FILES/customized_capturekit/Karina-XP_primary_targets.bed
 		EXOME_TARGETS_TOTAL_BASES=941427
 elif [[ $CAPTUREKIT == EZ_Choice_Dean-MexPC ]]; then
-        EXOME_TARGETS=/DCEG/CGF/Laboratory/LIMS/Oligo_Orders/NimblegenCapture/Dean-MexPC/Selection_Results/Dean-MexPC_primary_targets.bed
+    EXOME_TARGETS=/DCEG/CGF/Laboratory/LIMS/Oligo_Orders/NimblegenCapture/Dean-MexPC/Selection_Results/Dean-MexPC_primary_targets.bed
 		EXOME_TARGETS_TOTAL_BASES=2252101
-
+elif [[ $CAPTUREKIT == *_WGS_* ]]; then
+    EXOME_TARGETS=${WGS_BED}
+		EXOME_TARGETS_TOTAL_BASES=${WGS_TOTAL_BASES}
 else
 	echo no bed file found!
 	exit 1
-	EXOME_TARGETS=$EXOME_TARGETS_v3
-	EXOME_TARGETS_TOTAL_BASES=$EXOME_TARGETS_TOTAL_BASES_v3
+#	EXOME_TARGETS=$EXOME_TARGETS_v3
+#	EXOME_TARGETS_TOTAL_BASES=$EXOME_TARGETS_TOTAL_BASES_v3
 fi
 
 # EXOME_TARGETS=/DCEG/Projects/Exome/SequencingData/variant_scripts_V3_in_process/variant_intervals_beds/variant_calling_intervals_NV3UTR_NV3_250padded_corrected_4000parts/NV3UTR_NV3_250padded_corrected.bed
 # EXOME_TARGETS_TOTAL_BASES=208400278
 
-echo $EXOME_TARGETS
-echo $EXOME_TARGETS_TOTAL_BASES
+echo "EXOME_TARGETS            : ${EXOME_TARGETS}"
+echo "EXOME_TARGETS_TOTAL_BASES: ${EXOME_TARGETS_TOTAL_BASES}"
 
 for REFERENCE in $REFERENCE_CDS $EXOME_TARGETS ; do
 #for REFERENCE in /DCEG/Projects/Exome/SequencingData/BED_FILES/customized_capturekit/150911_HG19_DS-Neuro_EZ_HX3_capture_targets.bed;do
@@ -108,7 +110,7 @@ for REFERENCE in $REFERENCE_CDS $EXOME_TARGETS ; do
 	rm -rf $TMP_FILE
 	####
         #use option -A if want to included filtered orphan reads
-	samtools depth -d 0 -q 0 -b $REFERENCE $IN_BAM  > $TMP_FILE
+	samtools depth -@ 8 -d 0 -q 0 -b $REFERENCE $IN_BAM  > $TMP_FILE
 	####
 
 	if [ ! -f $TMP_FILE ]; then
@@ -127,7 +129,7 @@ for REFERENCE in $REFERENCE_CDS $EXOME_TARGETS ; do
 		REPORT_LINE="${REPORT_LINE}\t${TOTAL_BASES_GT}\t${PERCENT_BASES_GT}"
 	done
 	AVG_COVERAGE=`awk -v total=$TOTAL_BASES '{sum+=$3} END {print sum/total}' $TMP_FILE | xargs printf "%2.2f" `
-    REPORT_LINE="${REPORT_LINE}\t${AVG_COVERAGE}"
+  REPORT_LINE="${REPORT_LINE}\t${AVG_COVERAGE}"
 done
 # TOTAL_READS=`grep "pairs never matched" $MERGE_LOG |cut -d" " -f3`
 
