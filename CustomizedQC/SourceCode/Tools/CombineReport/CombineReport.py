@@ -6,6 +6,10 @@ REPORTType = { "1": "Coverage_Report",
                "2": "Pre_Calling_QC_Report",
                "3": "BAM_Contamination_Check_Report"}
 
+REPORTSuffix = {"1": ".txt",
+                "2": ".txt",
+                "3": ".csv"}
+
 def main():
     # Check
     strReportType = sys.argv[1]
@@ -24,7 +28,8 @@ def main():
         print("Error: Report Dir does not exist!")
         return 1
     
-    strFileName = strName.split('.')[0] + "_" + REPORTType[strReportType] + ".csv"
+    suffix = REPORTSuffix[strReportType]
+    strFileName = strName.split('.')[0] + "_" + REPORTType[strReportType] + suffix
     strSumReportFile = strReportDir + "/" + strFileName
     if os.path.exists(strSumReportFile):
         print("Warning: everything was all set! No further action needed!")
