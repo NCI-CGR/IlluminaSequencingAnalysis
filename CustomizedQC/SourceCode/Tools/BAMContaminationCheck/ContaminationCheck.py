@@ -130,16 +130,22 @@ class ClsBuild:
         CMD = "find " + self.strReportDir + " -iname '*selfSM' | wc -l"
         iReportNum = int(subprocess.getoutput(CMD))
         
-        if iDoneFlagNum == 0 or iReportNum == 0 or iDoneFlagNum != iReportNum:
+        if (iDoneFlagNum == 0 or 
+            iReportNum == 0 or 
+            iDoneFlagNum != iReportNum or
+            len(self.vSubject) != iDoneFlagNum or 
+            len(self.vSubject) != iReportNum):
             print("self.strFlagDir  :", self.strFlagDir)
             print("self.strReportDir:", self.strReportDir)
             print("iDoneFlagNum     :", iDoneFlagNum)
             print("iReportNum       :", iReportNum)
+            print("vSubject Size    :", len(self.vSubject))
             print("Waiting for the run be finished!")
             return
         
-        print("iDoneFlagNum:", iDoneFlagNum)
-        print("iReportNum  :", iReportNum)
+        print("iDoneFlagNum :", iDoneFlagNum)
+        print("iReportNum   :", iReportNum)
+        print("vSubject Size:", len(self.vSubject))
         print()
         CMD = "find " + self.strReportDir + " -iname '*selfSM'"
         vReport = subprocess.getoutput(CMD).split('\n')
