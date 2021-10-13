@@ -53,9 +53,12 @@ class ClsDirSet:
                 
         self.arryBiowulfUpstreamFlag = []
         self.arryBiowulfUpstreamLog = []
-        self.arryBiowulfUpstreamReport = []
+        self.arryBiowulfUpstreamReport = []        
         
         self.strBiowulfUpstreamKeyTableDir = ""
+        
+        #-> Use it to remove data from biowulf
+        self.arryBatchDir = []
     
     def Init(self):
         #->S3 root
@@ -77,6 +80,7 @@ class ClsDirSet:
         CMD = "find " + strBiowulfUpstreamBatchDir + " -maxdepth 1 -type d -iname 'low_input*'"
         #print(CMD)
         vDir = subprocess.getoutput(CMD).split('\n')
+        self.arryBatchDir = vDir 
         #print(vDir)
         for strDir in vDir:
             CMD = "find " + strDir + " -mindepth 1 -maxdepth 1 -type d"
@@ -121,8 +125,35 @@ class ClsDirSet:
             BackupDirFromBiowulf2S3(self.strS3Root, strReportDir, "/data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Data/BAM/")
             
         BackupDirFromBiowulf2S3(self.strS3Root, self.strBiowulfUpstreamKeyTableDir, "/data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/")
-                
 
+    def Remove(self):
+        print("Remove data from Biowulf -->", "\n")
+        
+        print("******* Remove BiowulfBuidDir, BiowulfBAMOrgDir and BiowulfBAMRecalibrateDir **********")
+        RemoveDirFromBiowulf(self.strBiowulfBuidDir)
+        RemoveDirFromBiowulf(self.strBiowulfBAMOrgDir)
+        RemoveDirFromBiowulf(self.strBiowulfBAMRecalibrateDir)
+        
+        print("******* Remove BiowulfSecondBufLogsDir, BiowulfSecondBufReportDir and BiowulfSecondBufPreQCDir **********")
+        RemoveDirFromBiowulf(self.strBiowulfSecondBufLogsDir)
+        RemoveDirFromBiowulf(self.strBiowulfSecondBufReportDir)
+        RemoveDirFromBiowulf(self.strBiowulfSecondBufPreQCDir)
+        
+        print("******* Remove UpstreamAnalysisBatchDirs **********")
+        for strDir in self.arryBatchDir:
+            RemoveDirFromBiowulf(strDir)
+        
+
+def RemoveDirFromBiowulf(strDir):
+    if not os.path.exists(strDir):
+        print("Error: Path do not exist!")
+        return 1
+    
+    print("Removing Dir:", strDir)
+    CMD = "rm -r " + strDir
+    os.system(CMD)
+    print("Removing Done!", "\n")
+            
 def BackupDirFromBiowulf2S3(strS3Root, strOrgDir, strCutoffPrefix, bContainSoftLink=False):
     for subdir, dirs, files in os.walk(strOrgDir):
         if len(files) == 0:
@@ -161,14 +192,15 @@ def BackUpToS3(objDirSet):
 
 
 def RemoveFromBiowulf(objDirSet):
-    print("RemoveFromBiowulf is all set! --> Do not implemented!")
+    objDirSet.Remove()
+    print("RemoveFromBiowulf is all set!")
 
 def main():
     objDirSet = ClsDirSet()
     objDirSet.Init()
     
-    BackUpToS3(objDirSet)
-    RemoveFromBiowulf(objDirSet)
+    #BackUpToS3(objDirSet)
+    #RemoveFromBiowulf(objDirSet)
 
 
 if __name__ == "__main__":    
