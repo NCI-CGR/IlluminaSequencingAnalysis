@@ -99,7 +99,7 @@ for GROUP in $(echo $DISEASE_GROUPS); do
       fi
 
       BAM_NAME=`basename $IN_BAM`
-      echo "find ${BAM_REFORMATTED_RECALIBRATED_DIR}/${GROUP_NAME} -name $BAM_NAME -newer $IN_BAM 2>/dev/null | wc -l"
+      #echo "find ${BAM_REFORMATTED_RECALIBRATED_DIR}/${GROUP_NAME} -name $BAM_NAME -newer $IN_BAM 2>/dev/null | wc -l"
       HAS_NEWER=`find ${BAM_REFORMATTED_RECALIBRATED_DIR}/$GROUP_NAME -name $BAM_NAME -newer $IN_BAM 2>/dev/null | wc -l`
       echo "$BAM_NAME $HAS_NEWER"
       
@@ -137,7 +137,9 @@ for GROUP in $(echo $DISEASE_GROUPS); do
           touch ${strFlagWorking}
 
           #Job Script in Biowulf -->
-          CMD="sbatch --time=10-00:00:00 \
+          CMD="sbatch --ntasks=8 \
+                      --nodes=1 \
+                      --time=10-00:00:00 \
                       --mem=20G \
                       --job-name=RECAL.${BAM_NAME} \
                       --export=SCRIPT_DIR='${SCRIPT_DIR}' \

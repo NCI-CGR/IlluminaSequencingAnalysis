@@ -4,8 +4,8 @@
 #SBATCH --nodes=1
 #SBATCH --mail-type=END
 #SBATCH --mail-user=lix33@nih.gov
-#SBATCH --output=std.out
-#SBATCH --error=std.err
+#SBATCH --output=/data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Log/BackupCOVIDPrimaryResults/std.out
+#SBATCH --error=/data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Log/BackupCOVIDPrimaryResults/std.err
 #SBATCH --job-name=ObjStorage
 #SBATCH --time=10-00:00:00
 

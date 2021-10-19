@@ -12,7 +12,7 @@ DCEG_SEQ_POOL_SCRIPT_DIR=$(dirname "$SCRIPT")
 
 set -o pipefail
 # set -e
-module load samtools/1.8 java/1.8.0_211
+module load samtools/1.13 java/1.8.0_211
 ANALYSIS_ID=$1
 DOWNSAMPLE_RATIO=$2
 MANIFEST=$3
@@ -163,7 +163,7 @@ for bam in $INPUT_LIST; do
               exit 1
            fi
            echo
-           CMD="samtools sort -T ${TMP_DIR}/${ANALYSIS_ID}_temp -o ${TMP_DIR}/${ANALYSIS_ID}_sorted.bam ${TMP_DIR}/${ANALYSIS_ID}_tmp2.bam"
+           CMD="samtools sort -@ 8 -T ${TMP_DIR}/${ANALYSIS_ID}_temp -o ${TMP_DIR}/${ANALYSIS_ID}_sorted.bam ${TMP_DIR}/${ANALYSIS_ID}_tmp2.bam"
            echo $CMD
            eval $CMD
            if [[ $? -ne 0 ]]; then
@@ -182,8 +182,8 @@ for bam in $INPUT_LIST; do
            else
              echo "$(date) sam indexing was finished successfully!"
            fi
-           OLD_COUNT=`samtools view -c $bam`
-           NEW_COUNT=`samtools view -c $OUT_BAM`
+           OLD_COUNT=`samtools view -@ 8 -c $bam`
+           NEW_COUNT=`samtools view -@ 8 -c $OUT_BAM`
            echo $OLD_COUNT" "$NEW_COUNT
            if [[ $OLD_COUNT -ne $NEW_COUNT ]]; then
              echo "Error: the count is inconsistent!"
@@ -292,7 +292,7 @@ elif [[ $# -eq 1 ]]; then
    fi
 else
    echo "[$(date)]: samtools merging ... "
-   CMD="samtools merge -f ${OUT_TMP_PREFIX}1.bam $INPUT_LIST2"
+   CMD="samtools merge -@ 8 -f ${OUT_TMP_PREFIX}1.bam $INPUT_LIST2"
    echo $CMD
    eval $CMD
    if [[ $? -ne 0 ]]; then
@@ -305,7 +305,7 @@ fi
 echo
 echo "Copy INPUT_LIST finished!"
 
-MERGED_COUNT=`samtools view -c ${OUT_TMP_PREFIX}1.bam`
+MERGED_COUNT=`samtools view -@ 8 -c ${OUT_TMP_PREFIX}1.bam`
 
 echo
 echo "[$(date)]: Starting reordersam using Picard ..."
@@ -379,7 +379,7 @@ fi
 echo "[$(date)]: Reheader SM is done!"
 echo
 echo "[$(date)]: Sorting the merged file ${OUT_TMP_PREFIX}_SM_renamed.bam ..."
-CMD="samtools sort -T ${OUT_TMP_PREFIX}_SM_renamed_sorted_temp -o ${OUT_TMP_PREFIX}_SM_renamed_sorted.bam ${OUT_TMP_PREFIX}_SM_renamed.bam"
+CMD="samtools sort -@ 8 -T ${OUT_TMP_PREFIX}_SM_renamed_sorted_temp -o ${OUT_TMP_PREFIX}_SM_renamed_sorted.bam ${OUT_TMP_PREFIX}_SM_renamed.bam"
 echo $CMD
 eval $CMD
 if [[ $? -ne 0 ]]; then
@@ -390,7 +390,7 @@ fi
 
 echo
 echo "The first checkpoint: check if the read counts are consistent"
-SECOND_MERGED_COUNT=`samtools view -c ${OUT_TMP_PREFIX}_SM_renamed_sorted.bam`
+SECOND_MERGED_COUNT=`samtools view -@ 8 -c ${OUT_TMP_PREFIX}_SM_renamed_sorted.bam`
 if [[ $SECOND_MERGED_COUNT -ne $MERGED_COUNT ]]; then
    echo "Error: the counts: $SECOND_MERGED_COUNT and $MERGED_COUNT are inconsistent!"
    exit 1

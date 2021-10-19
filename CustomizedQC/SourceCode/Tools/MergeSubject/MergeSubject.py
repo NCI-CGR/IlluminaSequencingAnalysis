@@ -88,7 +88,7 @@ class ClsSample:
                 
         strRGLine = strRGList.split('\n')[0]
         vRG = strRGLine.split('\t')
-        print(vRG)
+        #print(vRG)
         # --> Prepare info for current sample
         strInstrument = "E0180-03"
         strSeqDate = ""
@@ -210,7 +210,7 @@ class ClsSubject:
         # Get Script file
         str2ndPipelineDir = "/home/lix33/lxwg/Git/sync_script_biowulf"
         strRunningTime = "10-00:00:00"
-        strNumCore = "1"
+        strNumCore = "8"
         strNodeNum = "1"
         strMem = "10g"
         strJobName = "MSP." + self.strCGRID # Merge Sample

@@ -21,15 +21,95 @@ DIR2ndPipelineTMP = "/data/COVID_WGS/lix33/Test/2ndpipeline/Build/tmp"
 DIRBuildProcess = "/data/COVID_WGS/lix33/Test/2ndpipeline/Build/processed"
 DIRBuffer = "/data/COVID_WGS/lix33/Test/2ndpipeline/Data/secondary_buf"
 
-
-class ClsPhase:
+# --> Defind the data structure to save the subject info from Keytable
+class ClsSample:
     def __init__(self):
-        self.strCmd = ""
+        self.strUSUID = ""
+        self.strCGRID = ""
+        self.strFlowcellID = ""
+        self.strBarcode = ""
+        self.bTopoff = False
+        self.strQCInfo = ""
+        self.strLaneIndex = ""
+        self.strBAM = ""
+    
+    def InitByKTLine(self, strline):
+        vItem = strline.split(',')
+        #print(vItem)
+        self.strFlowcellID = vItem[0].split('_')[-1][1:]
+        self.strUSUID = vItem[1]
+        self.strCGRID = vItem[2].split('-')[-1]
+        if len(vItem) == 4 and vItem[3] == "topoff":
+            self.bTopoff = True
 
-def MergeBAM(strKeytable, iSubjectNum, strKTName):    
+class ClsSubject:
+    def __init__(self):
+        self.strCGRID = ""
+        self.strAnalysisID = ""
+        self.vSample = []
+        self.bHit = False
+        
+    def GetAnalysisID(self):
+        if len(self.vSample) == 0:
+            return ""
+        strAnalysisID = self.vSample[0].strCGRID
+        for sample in self.vSample:
+            strAnalysisID += "_" + sample.strUSUID
+        self.strAnalysisID = strAnalysisID 
+        return  strAnalysisID
+
+class ClsBuild:
+    def __init__(self):
+        self.vSubject = []
+        self.strRootDir = ""
+        self.strManifestFile = ""
+        self.strCurBAMDir = ""
+    
+    # it may contain both 1,2,and multiple files for each subject (1 BAM for a single subject is allowed)
+    def GetGroupInfo(self, strKeyTable):
+        if not os.path.exists(strKeyTable):
+            return        
+        # 1: Get group info        
+        file = open(strKeyTable, 'r')    
+        iIndex = 0
+        while True:        
+            strline = file.readline()
+            if not strline:
+                break;
+            if iIndex == 0:
+                iIndex += 1
+                continue
+            else:
+                objSample = ClsSample()
+                objSample.InitByKTLine(strline.strip())
+                # Check if the subject has been existed
+                bFind = False
+                for subject in self.vSubject:
+                    if subject.strCGRID == objSample.strCGRID:
+                        subject.vSample.append(objSample)
+                        bFind = True
+                        break
+                if not bFind:
+                    objSubject = ClsSubject()
+                    objSubject.strCGRID = objSample.strCGRID                    
+                    objSubject.vSample.append(objSample)
+                    self.vSubject.append(objSubject)
+                iIndex += 1
+        file.close()
+        
+        # Update Analysis ID
+        for subject in self.vSubject:
+            subject.GetAnalysisID()
+            
+        # Update strBAMDir
+        self.strCurBAMDir = DIRBAMRoot + "/" + os.path.basename(strKeyTable).split('.')[0]
+# <--
+
+def MergeBAM(strKeytable, iSubjectNum, strKTName, objBuild):    
     print("iSubjectNum      :", iSubjectNum)
     # Pre check if everything is all set! -->
-    strFlagDir = DIRBAMRoot + "/" + strKTName + "/Flag/MergeSubject"    
+    strFlagDir = DIRBAMRoot + "/" + strKTName + "/Flag/MergeSubject"
+    #bCallScript = True    
     if os.path.exists(strFlagDir):
         CMD = "find " + strFlagDir + " -iname '*.done' | wc -l"
         print("CMD:", CMD)
@@ -48,7 +128,25 @@ def MergeBAM(strKeytable, iSubjectNum, strKTName):
         if iTotalFlagNum == iSubjectNum:
             print("All jobs in the phase of merge BAM are still running!")
             return 1
-    
+        else:
+            print("****** Merge Project ********")
+            print("Rerun some subjects with missing flags!")
+            print("Re-run Subject Num:", iSubjectNum - iTotalFlagNum)
+            print("****** ************* ********")
+            # Output the file that missing flags -> Go!
+            vFlag = subprocess.getoutput("find " + strFlagDir + " -iname '*.flag.*'").split('\n')
+            print("Size objBuild.vSubject:", len(objBuild.vSubject))
+            for objSubject in objBuild.vSubject:
+                for strFlag in vFlag:
+                    bFind = False                
+                    if(objSubject.vSample[0].strUSUID in strFlag and 
+                       objSubject.vSample[0].strCGRID in strFlag):
+                        objSubject.bHit = True
+                        bFind = True
+                        break                        
+                if not bFind:
+                    print("Warning: Flag does not find ->", objSubject.vSample[0].strUSUID, "-->", objSubject.vSample[0].strCGRID)  
+            
     # if not, go ahead to call 
     print("\n", "Run: MergeSubject.py -->", "\n")
     strScript = DIRCustomizedQC + "/Tools/MergeSubject/MergeSubject.py"
@@ -88,7 +186,7 @@ def ReconstructBAMDir(strKTName):
     strScriptBash = "bash " + DIR2ndPipeline + "/step7b_take_incoming_bams.sh" + " " + strFlagWorking + " " + strFlagDone
     
     #Submit jobs ->
-    strNumCore = "1"
+    strNumCore = "8"
     strNodeNum = "1"
     strJobName = "RBD-" + strKTName
     strRunningTime = "10-00:00:00"
@@ -106,7 +204,7 @@ def ReconstructBAMDir(strKTName):
     return 1                                        
 
 # Step 3
-def RecalibrateBAMFile(iSubjectNum, strKTName):
+def RecalibrateBAMFile(iSubjectNum, strKTName, objBuild):
     print("iSubjectNum      :", iSubjectNum)
     # Pre check if everything is all set! -->
     strFlagDir = DIRBAMRoot + "/" + strKTName + "/Flag/RecalibrateBAM"    
@@ -126,6 +224,24 @@ def RecalibrateBAMFile(iSubjectNum, strKTName):
         if iTotalFlagNum == iSubjectNum:
             print("All jobs in the phase of merge BAM are still running!")
             return 1
+        else:
+            print("****** Recalibrate BAM File ********")
+            print("Rerun some subjects with missing flags!")
+            print("Re-run Subject Num:", iSubjectNum - iTotalFlagNum)
+            print("****** ************* ********")
+            # Output the file that missing flags -> Go!
+            vFlag = subprocess.getoutput("find " + strFlagDir + " -iname '*.flag.*'").split('\n')
+            print("Size objBuild.vSubject:", len(objBuild.vSubject))
+            for objSubject in objBuild.vSubject:
+                for strFlag in vFlag:
+                    bFind = False                
+                    if(objSubject.vSample[0].strUSUID in strFlag and 
+                       objSubject.vSample[0].strCGRID in strFlag):
+                        objSubject.bHit = True
+                        bFind = True
+                        break                        
+                if not bFind:
+                    print("Warning: Flag does not find ->", objSubject.vSample[0].strUSUID, "-->", objSubject.vSample[0].strCGRID)            
     
     # if not, go ahead to call 
     print("\n", "Run: step8_sync_and_recalibrate_bam.sh -->", "\n")
@@ -375,11 +491,18 @@ def main():
     iSubjectNum = int(subprocess.getoutput(CMD))
     
     #Get Keytable Name
-    strKTName = os.path.basename(strKeytable).split('.')[0]    
+    strKTName = os.path.basename(strKeytable).split('.')[0]
+    
+    # --> Get subject info for current build (keytable)
+    objBuild = ClsBuild()    
+    # 0: Prepare group info 
+    print("\n", "==> GetGroupInfo") 
+    objBuild.GetGroupInfo(strKeytable)
+    # <--
          
     # Step 1: Merge BAM file
     print("\n-----\n", "Step 1: Merge BAM file", "\n-----\n")
-    if MergeBAM(strKeytable, iSubjectNum, strKTName) != 0:
+    if MergeBAM(strKeytable, iSubjectNum, strKTName, objBuild) != 0:
         print("The phase of MergeBAM is still running!")
         return 1
     
@@ -391,7 +514,7 @@ def main():
     
     # Step 3:
     print("\n-----\n", "Step 3: Recalibrate BAM file", "\n-----\n")
-    if RecalibrateBAMFile(iSubjectNum, strKTName) != 0:
+    if RecalibrateBAMFile(iSubjectNum, strKTName, objBuild) != 0:
         print("The phase of RecalibrateBAMFile is still running!")
         return 1
     

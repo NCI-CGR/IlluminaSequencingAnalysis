@@ -187,7 +187,7 @@ for SUBDIR in ${BAM_INCOMING_DIR}/*; do
       CMD="mv ${BAM}.bai ${BAM_ORIGINAL}.bai && chmod g+r ${BAM_ORIGINAL}.bai"
     else
       echo "BAM index file (*.bai) not found in incoming folder. Creating one..."
-      CMD="samtools index $BAM_ORIGINAL ${BAM_ORIGINAL}.bai && chmod g+r ${BAM_ORIGINAL}.bai"
+      CMD="samtools index -@ 8 $BAM_ORIGINAL ${BAM_ORIGINAL}.bai && chmod g+r ${BAM_ORIGINAL}.bai"
     fi
     echo $CMD
     eval $CMD
@@ -199,7 +199,17 @@ for SUBDIR in ${BAM_INCOMING_DIR}/*; do
 
     echo 
   done
-done  
+done
+
+# Move all files in back_up to the original folder
+if [[ -e ${BAM_ORIGINAL_BAK_DIR} ]]; then
+  echo "BAM_ORIGINAL_BAK_DIR: ${BAM_ORIGINAL_BAK_DIR}"
+  # Copy file from backup folder into the original folder
+  CMD="mv ${BAM_ORIGINAL_BAK_DIR}/*.* ${BAM_REFORMATTED_ORIGINAL_DIR}/${SUBDIR_NAME}"
+  echo "Move all files in back_up to the original folder: ${CMD}"
+  eval ${CMD}
+fi
+
 echo "All done!"
 
 rm ${strFlagWorking}
