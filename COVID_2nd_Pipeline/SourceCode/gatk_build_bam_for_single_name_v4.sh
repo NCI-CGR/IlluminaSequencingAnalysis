@@ -59,194 +59,206 @@ INPUT_LIST2=""
 # if [[ "$DOWNSAMPLE_RATIO" -ne 1 ]]; then
 
 DATE=`date '+%Y-%m-%d-%H-%M'`
+
+# We do not need to do archive stuff -> simply check if these file are existed will be good enough.
+#for bam in $INPUT_LIST; do
+#  BAM_NAME_ROOT=$(basename $bam .bam)
+#  BAM_RAW_DIR=$(dirname $bam)
+##  BAM_FULL_NAME=$(ls ${BAM_RAW_DIR}/${BAM_NAME_ROOT}_HQ_paired_dedup*.bam)
+##  BAI_FULL_NAME=$(ls ${BAM_RAW_DIR}/${BAM_NAME_ROOT}_HQ_paired_dedup*.bai)
+#  BAM_FULL_NAME=$(ls ${BAM_RAW_DIR}/${BAM_NAME_ROOT}*.bam)
+#  BAI_FULL_NAME=$(ls ${BAM_RAW_DIR}/${BAM_NAME_ROOT}*.bai)
+#
+#  if [[ ! -L $bam ]] && [[ ! -e ${BAM_FULL_NAME} ]]; then
+#    ARCHIVE=$(dirname $bam|cut -d'/' -f4-)
+#	  BAM_ARCHIVE_FILE=$(ls /DCEG_Archive/CGR/${ARCHIVE}/${BAM_NAME_ROOT}_HQ_paired_dedup*.bam)
+#	  BAI_ARCHIVE_FILE=$(ls /DCEG_Archive/CGR/${ARCHIVE}/${BAM_NAME_ROOT}_HQ_paired_dedup*.bai)
+#    if [[ -e $BAM_ARCHIVE_FILE ]] && [[ -e $BAI_ARCHIVE_FILE ]] ; then
+#      echo "the lane level BAM file is under DCEG_Archive, not on T-drive, copy such BAM file and its bai file to its original flowcell directory"
+#      PRE_BAM_DIR=$(ls -d /DCEG_Archive/CGR/${ARCHIVE})
+#      T_DRIVE=$(echo $PRE_BAM_DIR|cut -d'/' -f4-)
+#      BAM_DIR=/DCEG/CGF/${T_DRIVE}
+#	    BAM_TYPE_ROOT=$(echo $BAM_ARCHIVE_FILE|rev|cut -d'/' -f1|cut -d'.' -f2|rev)
+#	    BAI_TYPE_ROOT=$(echo $BAI_ARCHIVE_FILE|rev|cut -d'/' -f1|cut -d'.' -f2|rev)
+#	    mkdir -p $BAM_DIR 2> /dev/null
+#	    cp $BAM_ARCHIVE_FILE ${BAM_DIR}/${BAM_TYPE_ROOT}.bam
+#	    cp $BAI_ARCHIVE_FILE ${BAM_DIR}/${BAI_TYPE_ROOT}.bai
+#	      if [[ $? -ne 0 ]]; then
+#          echo "Error: copy BAM file or bai files from DCEG_Archive to T drive failed!"
+#          exit 1
+#        fi
+#	    ln -s ${BAM_DIR}/${BAM_TYPE_ROOT}.bam ${BAM_DIR}/${BAM_NAME_ROOT}.bam
+#      ln -s ${BAM_DIR}/${BAI_TYPE_ROOT}.bai ${BAM_DIR}/${BAM_NAME_ROOT}.bai
+#	  elif [[ ! -e $BAM_ARCHIVE_FILE ]]; then
+#	    echo "Error: the lane-level file $bam is not on T-drive or under DCEG_Archive, please retrieve the files from the retrieve_bam.lst!"
+#      echo $bam >> /DCEG/Projects/Exome/SequencingData/sync_script_v4/${DATE}_retrieve_bam.lst
+#	  else
+#      echo "Error: $BAI_ARCHIVE_FILE does not exist, something went wrong, please do manual check!"
+#      exit 1
+#    fi
+#  elif [[ ! -L $bam ]] && [[ -e ${BAM_FULL_NAME} ]]; then
+#    echo "The softlink of BAM file is missing on T drive, but the BAM file exists, recreate the softlink of BAM file and its BAI file"
+#    ln -s $BAM_FULL_NAME $bam
+#    ln -s $BAI_FULL_NAME ${BAM_RAW_DIR}/${BAM_NAME_ROOT}.bai
+#  else
+#    echo "the softlink of the $bam exists, proceed further."
+#  fi
+#done
+
 for bam in $INPUT_LIST; do
-  BAM_NAME_ROOT=$(basename $bam .bam)
-  BAM_RAW_DIR=$(dirname $bam)	
-  BAM_FULL_NAME=$(ls ${BAM_RAW_DIR}/${BAM_NAME_ROOT}_HQ_paired_dedup*.bam) 
-  BAI_FULL_NAME=$(ls ${BAM_RAW_DIR}/${BAM_NAME_ROOT}_HQ_paired_dedup*.bai) 
-  if [[ ! -L $bam ]] && [[ ! -e ${BAM_FULL_NAME} ]]; then
-    ARCHIVE=$(dirname $bam|cut -d'/' -f4-)
-	BAM_ARCHIVE_FILE=$(ls /DCEG_Archive/CGR/${ARCHIVE}/${BAM_NAME_ROOT}_HQ_paired_dedup*.bam)
-	BAI_ARCHIVE_FILE=$(ls /DCEG_Archive/CGR/${ARCHIVE}/${BAM_NAME_ROOT}_HQ_paired_dedup*.bai)
-    if [[ -e $BAM_ARCHIVE_FILE ]] && [[ -e $BAI_ARCHIVE_FILE ]] ; then
-      echo "the lane level BAM file is under DCEG_Archive, not on T-drive, copy such BAM file and its bai file to its original flowcell directory"
-      PRE_BAM_DIR=$(ls -d /DCEG_Archive/CGR/${ARCHIVE})
-      T_DRIVE=$(echo $PRE_BAM_DIR|cut -d'/' -f4-)
-      BAM_DIR=/DCEG/CGF/${T_DRIVE}
-	  BAM_TYPE_ROOT=$(echo $BAM_ARCHIVE_FILE|rev|cut -d'/' -f1|cut -d'.' -f2|rev)
-	  BAI_TYPE_ROOT=$(echo $BAI_ARCHIVE_FILE|rev|cut -d'/' -f1|cut -d'.' -f2|rev)
-	  mkdir -p $BAM_DIR 2> /dev/null
-	  cp $BAM_ARCHIVE_FILE ${BAM_DIR}/${BAM_TYPE_ROOT}.bam
-	  cp $BAI_ARCHIVE_FILE ${BAM_DIR}/${BAI_TYPE_ROOT}.bai
-	    if [[ $? -ne 0 ]]; then
-          echo "Error: copy BAM file or bai files from DCEG_Archive to T drive failed!"
-          exit 1
-        fi
-	  ln -s ${BAM_DIR}/${BAM_TYPE_ROOT}.bam ${BAM_DIR}/${BAM_NAME_ROOT}.bam
-      ln -s ${BAM_DIR}/${BAI_TYPE_ROOT}.bai ${BAM_DIR}/${BAM_NAME_ROOT}.bai
-	elif [[ ! -e $BAM_ARCHIVE_FILE ]]; then
-	  echo "Error: the lane-level file $bam is not on T-drive or under DCEG_Archive, please retrieve the files from the retrieve_bam.lst!"
-      echo $bam >> /DCEG/Projects/Exome/SequencingData/sync_script_v4/${DATE}_retrieve_bam.lst
-	else 
-      echo "Error: $BAI_ARCHIVE_FILE does not exist, something went wrong, please do manual check!"
-      exit 1
-    fi
-  elif [[ ! -L $bam ]] && [[ -e ${BAM_FULL_NAME} ]]; then
-    echo "The softlink of BAM file is missing on T drive, but the BAM file exists, recreate the softlink of BAM file and its BAI file"
-    ln -s $BAM_FULL_NAME $bam
-    ln -s $BAI_FULL_NAME ${BAM_RAW_DIR}/${BAM_NAME_ROOT}.bai
-  else
-    echo "the softlink of the $bam exists, proceed further."
+  if [[ ! -e ${bam} ]]; then
+    echo "Error: file does not exist! -> "${bam}
+    exit 1
   fi
 done
 
 for bam in $INPUT_LIST; do
-        echo
-        echo yes $bam
-        # For this BAM, check if the bam in the old version or not; then replace all RG
-        CC=`samtools view -H $bam | awk -F"\t" '$1~/@RG/ {for (i=1;i<=NF;i++) { if ($i=="LB:N/A") {print $i}}}' | wc -l`  
-        if [[ $CC -eq 1 ]]; then
-        # Okd version of lane level BAM 
-           BAM_DIR=`dirname $bam`
-           BASE_NAME=`basename $bam .bam`
-           OUT_BAM=${BAM_DIR}/${BASE_NAME}_reformated.bam
-           OLD_NMs=`samtools view -H $bam | awk -F"\t" '$1~/@RG/ {for (i=1;i<=NF;i++) { if ($i~/^ID/) split($i,aa,":"); if ($i~/^PU/) split($i,bb,":"); }} END {print aa[2]":"bb[2]}'`
-           OLD_ID=`echo $OLD_NMs | cut -d':' -f1`
-           OLD_PU=`echo $OLD_NMs | cut -d':' -f2`
-           FLOWCELL_ID=`echo $bam | rev | cut -d"/" -f 3 | rev | cut -d"_" -f4`
-           LANE=`echo $bam | rev | cut -d"/" -f 1 | cut -d"." -f2 | head -c 1`
-           NEW_ID=$FLOWCELL_ID"."${LANE}
-           SED_CMD="s/\bRG:Z:${OLD_ID}\t\b/RG:Z:${NEW_ID}\t/g; s/\b\tPU:Z:${OLD_PU}\b//g; s/\tLB:Z:N\/A//g;"
-           CMD="samtools view -h $bam | sed '$SED_CMD' | samtools view -S -b - > ${TMP_DIR}/${ANALYSIS_ID}_tmp.bam"
+  echo
+  echo yes $bam
+  # For this BAM, check if the bam in the old version or not; then replace all RG
+  CC=`samtools view -H $bam | awk -F"\t" '$1~/@RG/ {for (i=1;i<=NF;i++) { if ($i=="LB:N/A") {print $i}}}' | wc -l`
+  if [[ $CC -eq 1 ]]; then
+  # Okd version of lane level BAM
+     BAM_DIR=`dirname $bam`
+     BASE_NAME=`basename $bam .bam`
+     OUT_BAM=${BAM_DIR}/${BASE_NAME}_reformated.bam
+     OLD_NMs=`samtools view -H $bam | awk -F"\t" '$1~/@RG/ {for (i=1;i<=NF;i++) { if ($i~/^ID/) split($i,aa,":"); if ($i~/^PU/) split($i,bb,":"); }} END {print aa[2]":"bb[2]}'`
+     OLD_ID=`echo $OLD_NMs | cut -d':' -f1`
+     OLD_PU=`echo $OLD_NMs | cut -d':' -f2`
+     FLOWCELL_ID=`echo $bam | rev | cut -d"/" -f 3 | rev | cut -d"_" -f4`
+     LANE=`echo $bam | rev | cut -d"/" -f 1 | cut -d"." -f2 | head -c 1`
+     NEW_ID=$FLOWCELL_ID"."${LANE}
+     SED_CMD="s/\bRG:Z:${OLD_ID}\t\b/RG:Z:${NEW_ID}\t/g; s/\b\tPU:Z:${OLD_PU}\b//g; s/\tLB:Z:N\/A//g;"
+     CMD="samtools view -h $bam | sed '$SED_CMD' | samtools view -S -b - > ${TMP_DIR}/${ANALYSIS_ID}_tmp.bam"
 
-           echo $CMD
-           eval $CMD
-           if [[ $? -ne 0 ]]; then
-             echo "Error: samtools is failed to modify the body part!"
+     echo $CMD
+     eval $CMD
+     if [[ $? -ne 0 ]]; then
+       echo "Error: samtools is failed to modify the body part!"
+       exit 1
+     fi
+
+     SEQ_DATE=`echo $bam | rev | cut -d"/" -f 3 | rev | cut -d"_" -f1`
+     INDEX=`echo $bam | rev | cut -d"/" -f 1 | cut -d"_" -f2 | rev`
+     # SAMPLE_ID=`echo $bam | rev | cut -d"/" -f 1 | rev | cut -d"_" -f1`
+     SAMPLE_ID=`echo $bam |rev | cut -d"/" -f 1 |cut -d'_' -f3-|rev`
+     NEW_PU=$FLOWCELL_ID"20"$SEQ_DATE"."$LANE"."$INDEX
+     NEW_LB=${SAMPLE_ID}"_"${INDEX}
+
+     CMD="samtools view -H ${TMP_DIR}/${ANALYSIS_ID}_tmp.bam | awk -F\"\t\" -v id=\"$NEW_ID\" -v lb=\"$NEW_LB\" -v pu=\"$NEW_PU\" '{if (\$1~/^@RG/){
+                                          for (i=1;i<=NF;i++) {
+                                               if (\$i~/SM:/){
+                                                 sm=\$i;
+                                                 break;
+                                               }
+                                            }
+                                            print \"@RG\tID:\"id\"\t\"sm\"\tLB:\"lb\"\tPL:ILLUMINA\tPU:\"pu\"\tCN:CGR\";
+                                          }
+                                          else
+                                            print
+                                           }' > ${TMP_DIR}/${ANALYSIS_ID}_header.sam"
+     echo
+     echo $CMD
+     eval $CMD
+     if [[ $? -ne 0 ]]; then
+       echo "Error: samtools is failed to modify the header part!"
+       exit 1
+     fi
+
+     CMD="samtools reheader ${TMP_DIR}/${ANALYSIS_ID}_header.sam ${TMP_DIR}/${ANALYSIS_ID}_tmp.bam >  ${TMP_DIR}/${ANALYSIS_ID}_tmp2.bam"
+     echo
+     echo $CMD
+     eval $CMD
+
+     if [[ $? -ne 0 ]]; then
+        echo "Error: samtools reheader is failed!"
+        exit 1
+     fi
+     echo
+     CMD="samtools sort -@ 8 -T ${TMP_DIR}/${ANALYSIS_ID}_temp -o ${TMP_DIR}/${ANALYSIS_ID}_sorted.bam ${TMP_DIR}/${ANALYSIS_ID}_tmp2.bam"
+     echo $CMD
+     eval $CMD
+     if [[ $? -ne 0 ]]; then
+        echo "Error: samtools sorting is failed!"
+        exit 1
+     fi
+     echo "$(date) samtools sorting bam was finished successfully!"
+     #CMD="mv ${TMP_DIR}/${ANALYSIS_ID}_sorted.bam $OUT_BAM && samtools index $OUT_BAM ${BAM_DIR}/${BASE_NAME}_reformated.bai"
+     CMD="cp ${TMP_DIR}/${ANALYSIS_ID}_sorted.bam $OUT_BAM && samtools index $OUT_BAM ${BAM_DIR}/${BASE_NAME}_reformated.bai"
+     echo
+     echo $CMD
+     eval $CMD
+     if [[ $? -ne 0 ]]; then
+        echo "Error: $(date) sam indexing was failed!"
+        exit 1
+     else
+       echo "$(date) sam indexing was finished successfully!"
+     fi
+     OLD_COUNT=`samtools view -@ 8 -c $bam`
+     NEW_COUNT=`samtools view -@ 8 -c $OUT_BAM`
+     echo $OLD_COUNT" "$NEW_COUNT
+     if [[ $OLD_COUNT -ne $NEW_COUNT ]]; then
+       echo "Error: the count is inconsistent!"
+       echo
+       echo "Cleaning up ..."
+       CMD="rm -f $OUT_BAM ${TMP_DIR}/${ANALYSIS_ID}_header.sam ${TMP_DIR}/${ANALYSIS_ID}_tmp.bam ${TMP_DIR}/${ANALYSIS_ID}_tmp2.bam ${TMP_DIR}/${ANALYSIS_ID}_temp* ${TMP_DIR}/${ANALYSIS_ID}_sorted.bam"
+       echo $CMD
+       eval $CMD
+       exit 1
+     fi
+     echo
+     echo "Cleaning up ..."
+     CMD="rm -f $bam ${BAM_DIR}/${BASE_NAME}.bai ${TMP_DIR}/${ANALYSIS_ID}_header.sam ${TMP_DIR}/${ANALYSIS_ID}_tmp.bam ${TMP_DIR}/${ANALYSIS_ID}_tmp2.bam ${TMP_DIR}/${ANALYSIS_ID}_temp* ${TMP_DIR}/${ANALYSIS_ID}_sorted.bam"
+     echo $CMD
+     eval $CMD
+     if [[ $? -ne 0 ]]; then
+        echo "Error: remove softlink is failed!"
+        exit 1
+     fi
+     CMD="ln -s $OUT_BAM $bam"
+     echo $CMD
+     eval $CMD
+     if [[ $? -ne 0 ]]; then
+        echo "Error: cannot create softlink!"
+        exit 1
+     fi
+     CMD="ln -s ${BAM_DIR}/${BASE_NAME}_reformated.bai ${BAM_DIR}/${BASE_NAME}.bai"
+     echo $CMD
+     eval $CMD
+     if [[ $? -ne 0 ]]; then
+        echo "Error: cannot create softlink!"
+        exit 1
+     fi
+  else
+    # New bam or LB:N/A greater than 1
+    if [[ $CC -gt 1 ]]; then
+      echo "Error: there are more than one LB in the @RG of $bam"
+      exit 1
+    fi
+  fi
+
+  if [[ $bam == *"NextSeq"*  ]]; then
+     if [[ "$DOWNSAMPLE_RATIO" != "1" ]]; then
+         echo "[$(date)] Downsample for $bam"
+         CMD="java -Xmx8g -jar $PICARD DownsampleSam \
+                  --INPUT $bam \
+                  --OUTPUT ${TMP_DIR}/${ANALYSIS_ID}.downsample.bam \
+                  --PROBABILITY $DOWNSAMPLE_RATIO"
+         echo $CMD
+         eval $CMD
+         if [[ $? -ne 0 ]]; then
+             echo "Error: $(date) Downsampling is failed!"
              exit 1
-           fi
-
-           SEQ_DATE=`echo $bam | rev | cut -d"/" -f 3 | rev | cut -d"_" -f1`
-           INDEX=`echo $bam | rev | cut -d"/" -f 1 | cut -d"_" -f2 | rev`
-           # SAMPLE_ID=`echo $bam | rev | cut -d"/" -f 1 | rev | cut -d"_" -f1`
-           SAMPLE_ID=`echo $bam |rev | cut -d"/" -f 1 |cut -d'_' -f3-|rev`
-           NEW_PU=$FLOWCELL_ID"20"$SEQ_DATE"."$LANE"."$INDEX
-           NEW_LB=${SAMPLE_ID}"_"${INDEX}
-           
-           CMD="samtools view -H ${TMP_DIR}/${ANALYSIS_ID}_tmp.bam | awk -F\"\t\" -v id=\"$NEW_ID\" -v lb=\"$NEW_LB\" -v pu=\"$NEW_PU\" '{if (\$1~/^@RG/){ 
-                                                for (i=1;i<=NF;i++) {
-                                                     if (\$i~/SM:/){
-                                                       sm=\$i;
-                                                       break;
-                                                     }
-                                                  }
-                                                  print \"@RG\tID:\"id\"\t\"sm\"\tLB:\"lb\"\tPL:ILLUMINA\tPU:\"pu\"\tCN:CGR\";
-                                                }
-                                                else
-                                                  print
-                                                 }' > ${TMP_DIR}/${ANALYSIS_ID}_header.sam"
-           echo
-           echo $CMD
-           eval $CMD
-           if [[ $? -ne 0 ]]; then
-             echo "Error: samtools is failed to modify the header part!"
-             exit 1
-           fi
-
-           CMD="samtools reheader ${TMP_DIR}/${ANALYSIS_ID}_header.sam ${TMP_DIR}/${ANALYSIS_ID}_tmp.bam >  ${TMP_DIR}/${ANALYSIS_ID}_tmp2.bam"
-           echo
-           echo $CMD
-           eval $CMD
-
-           if [[ $? -ne 0 ]]; then
-              echo "Error: samtools reheader is failed!"
-              exit 1
-           fi
-           echo
-           CMD="samtools sort -@ 8 -T ${TMP_DIR}/${ANALYSIS_ID}_temp -o ${TMP_DIR}/${ANALYSIS_ID}_sorted.bam ${TMP_DIR}/${ANALYSIS_ID}_tmp2.bam"
-           echo $CMD
-           eval $CMD
-           if [[ $? -ne 0 ]]; then
-              echo "Error: samtools sorting is failed!"
-              exit 1
-           fi
-           echo "$(date) samtools sorting bam was finished successfully!"
-           #CMD="mv ${TMP_DIR}/${ANALYSIS_ID}_sorted.bam $OUT_BAM && samtools index $OUT_BAM ${BAM_DIR}/${BASE_NAME}_reformated.bai"
-		   CMD="cp ${TMP_DIR}/${ANALYSIS_ID}_sorted.bam $OUT_BAM && samtools index $OUT_BAM ${BAM_DIR}/${BASE_NAME}_reformated.bai"
-           echo
-           echo $CMD
-           eval $CMD
-           if [[ $? -ne 0 ]]; then
-              echo "Error: $(date) sam indexing was failed!"
-              exit 1
-           else
-             echo "$(date) sam indexing was finished successfully!"
-           fi
-           OLD_COUNT=`samtools view -@ 8 -c $bam`
-           NEW_COUNT=`samtools view -@ 8 -c $OUT_BAM`
-           echo $OLD_COUNT" "$NEW_COUNT
-           if [[ $OLD_COUNT -ne $NEW_COUNT ]]; then
-             echo "Error: the count is inconsistent!"
-             echo
-             echo "Cleaning up ..."
-             CMD="rm -f $OUT_BAM ${TMP_DIR}/${ANALYSIS_ID}_header.sam ${TMP_DIR}/${ANALYSIS_ID}_tmp.bam ${TMP_DIR}/${ANALYSIS_ID}_tmp2.bam ${TMP_DIR}/${ANALYSIS_ID}_temp* ${TMP_DIR}/${ANALYSIS_ID}_sorted.bam"
-             echo $CMD
-             eval $CMD
-             exit 1
-           fi
-           echo 
-           echo "Cleaning up ..." 
-           CMD="rm -f $bam ${BAM_DIR}/${BASE_NAME}.bai ${TMP_DIR}/${ANALYSIS_ID}_header.sam ${TMP_DIR}/${ANALYSIS_ID}_tmp.bam ${TMP_DIR}/${ANALYSIS_ID}_tmp2.bam ${TMP_DIR}/${ANALYSIS_ID}_temp* ${TMP_DIR}/${ANALYSIS_ID}_sorted.bam"
-           echo $CMD
-           eval $CMD
-           if [[ $? -ne 0 ]]; then
-              echo "Error: remove softlink is failed!"
-              exit 1
-           fi 
-           CMD="ln -s $OUT_BAM $bam"
-           echo $CMD
-           eval $CMD
-           if [[ $? -ne 0 ]]; then
-              echo "Error: cannot create softlink!"
-              exit 1
-           fi
-           CMD="ln -s ${BAM_DIR}/${BASE_NAME}_reformated.bai ${BAM_DIR}/${BASE_NAME}.bai"
-           echo $CMD
-           eval $CMD
-           if [[ $? -ne 0 ]]; then
-              echo "Error: cannot create softlink!"
-              exit 1
-           fi
-        else
-          # New bam or LB:N/A greater than 1
-          if [[ $CC -gt 1 ]]; then
-            echo "Error: there are more than one LB in the @RG of $bam"
-            exit 1
-          fi
-        fi
-
-        if [[ $bam == *"NextSeq"*  ]]; then
-           if [[ "$DOWNSAMPLE_RATIO" != "1" ]]; then
-               echo "[$(date)] Downsample for $bam"
-               CMD="java -Xmx8g -jar $PICARD DownsampleSam \
-                        --INPUT $bam \
-                        --OUTPUT ${TMP_DIR}/${ANALYSIS_ID}.downsample.bam \
-                        --PROBABILITY $DOWNSAMPLE_RATIO"
-               echo $CMD
-               eval $CMD
-               if [[ $? -ne 0 ]]; then
-                   echo "Error: $(date) Downsampling is failed!"
-                   exit 1
-               else
-                   echo "[$(date)] Downsampling is done!"
-               fi
-               INPUT_LIST2="$INPUT_LIST2 ${TMP_DIR}/${ANALYSIS_ID}.downsample.bam"
-           else
-                INPUT_LIST2="$INPUT_LIST2 $bam"
-           fi
-        else
-           INPUT_LIST2="$INPUT_LIST2 $bam"
-        fi
+         else
+             echo "[$(date)] Downsampling is done!"
+         fi
+         INPUT_LIST2="$INPUT_LIST2 ${TMP_DIR}/${ANALYSIS_ID}.downsample.bam"
+     else
+          INPUT_LIST2="$INPUT_LIST2 $bam"
+     fi
+  else
+     INPUT_LIST2="$INPUT_LIST2 $bam"
+  fi
 done
 # fi
 

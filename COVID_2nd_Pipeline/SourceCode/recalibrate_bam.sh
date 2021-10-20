@@ -8,7 +8,7 @@ DCEG_SEQ_POOL_SCRIPT_DIR=$(dirname "$SCRIPT")
 
 #module load jdk/1.8.0_111
 #module load samtools/1.8
-module load samtools/1.8 java/1.8.0_211 GATK/3.8-1
+module load samtools/1.13 java/1.8.0_211 GATK/3.8-1
 IN_BAM=$1
 OUT_BAM=$2
 VARIANT_TYPE=$3
@@ -180,7 +180,7 @@ eval $CMD
 
 echo
 echo "[$(date)] Doing the properly paired filtering ..."
-CMD="samtools view -b -f 3 $REALIGN_BAM > $OUT_TMP_BAM"
+CMD="samtools view -@ 8 -b -f 3 $REALIGN_BAM > $OUT_TMP_BAM"
 echo $CMD
 eval $CMD
 if [[ $? -ne 0 ]]; then
@@ -189,7 +189,7 @@ if [[ $? -ne 0 ]]; then
 fi
 echo "[$(date)] properly-paried filtering is done!"
 echo
-CMD="samtools sort -T ${OUT_TMP_BAM_PREFIX}_sorted_tmp -o ${OUT_TMP_BAM_PREFIX}_sorted.bam $OUT_TMP_BAM"
+CMD="samtools sort -@ 8 -T ${OUT_TMP_BAM_PREFIX}_sorted_tmp -o ${OUT_TMP_BAM_PREFIX}_sorted.bam $OUT_TMP_BAM"
 echo $CMD
 eval $CMD
 if [[ $? -ne 0 ]]; then
@@ -198,7 +198,7 @@ if [[ $? -ne 0 ]]; then
 fi
 echo
 echo "[$(date)] Doing indexing ..."
-CMD="samtools index ${OUT_TMP_BAM_PREFIX}_sorted.bam ${OUT_TMP_BAM_PREFIX}_sorted.bai" 
+CMD="samtools index -@ 8 ${OUT_TMP_BAM_PREFIX}_sorted.bam ${OUT_TMP_BAM_PREFIX}_sorted.bai"
 echo $CMD
 eval $CMD
 if [[ $? -ne 0 ]]; then
@@ -280,7 +280,7 @@ if [[ $VARIANT_TYPE == "SOMATIC" ]]; then
         echo
 	echo "[$(date)] Converting BAM to coordinate-sorted format..."
         
-  CMD="samtools sort -T ${OUT_BAM_PREFIX_SOMATIC}_sorted_tmp -o ${OUT_BAM_PREFIX_SOMATIC}_sorted.bam $BQSR_BAM"
+  CMD="samtools sort -@ 8 -T ${OUT_BAM_PREFIX_SOMATIC}_sorted_tmp -o ${OUT_BAM_PREFIX_SOMATIC}_sorted.bam $BQSR_BAM"
   echo $CMD
   eval $CMD
   if [[ $? -ne 0 ]]; then
@@ -293,7 +293,7 @@ if [[ $VARIANT_TYPE == "SOMATIC" ]]; then
 	    exit 1
 	fi
 	
-  CMD="samtools index ${OUT_BAM_PREFIX_SOMATIC}_sorted.bam ${OUT_BAM_PREFIX_SOMATIC}_sorted.bam.bai"
+  CMD="samtools index -@ 8 ${OUT_BAM_PREFIX_SOMATIC}_sorted.bam ${OUT_BAM_PREFIX_SOMATIC}_sorted.bam.bai"
   echo $CMD
   eval $CMD
   if [[ $? -ne 0 ]]; then
