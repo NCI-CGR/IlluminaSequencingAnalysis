@@ -142,3 +142,38 @@ For details please check the sections below
 - Tool 1: Backup COVID 2nd results from biowulf to S3 
 - Tool 2: Retrieve BAM from S3 to biowulf 
 - Tool 3: Backup COVID primary results from biowulf to S3
+
+# How to run the whole pipeline and tools sequentially to finish  the whole 2nd analysis
+1: Copy original Keytable to the specific folder (one time)
+- Example
+   - /data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Keytable/std_input
+
+2: Decide how many can be run for one build and get the subset of subject from the original keytable file (one time)
+- Example:
+   - /data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Keytable/std_input/sub_keytable
+
+3: Retrieve subjects defined in the sub_keytable file from S3 to biowulf
+- How to run it:
+   - RetrieveBAMFromS3.py {keytable}
+- Example
+   - /home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode/ObjectStorage/RetrieveBAMFromS3.py /data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Keytable/std_input/sub_keytable/std_input_01_200_keytable.csv
+- Result will be located in
+   -  /data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Data/BAM/Batch
+   -  Example: /data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Data/BAM/Batch/std_input_01_200_keytable
+
+4: Run 2nd-pipeline 
+- Use crontab job 
+- How to run it: 
+   - COVID_Auto_Framework/SourceCode/Run.sh {keytable}
+- Example
+   - @hourly . /etc/bashrc && source /home/lix33/lxwg/Git/IlluminaSequencingAnalysis/COVID_Auto_Framework/SourceCode/Run.sh /data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Keytable/std_input/sub_keytable/std_input_01_200_keytable.csv >> /data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Log/$(date +\%Y\%m).txt 2>&1
+
+5: Backup 2nd analysis results from biowulf to S3
+- How to do it
+   - python BackupCovid2ndPipelineResults.py
+- PLEASE pay attention: 
+   -  need to change two global variable
+      -  DATE
+      -  KEYTABLEName
+- Example: 
+   - sbatch /home/lix33/lxwg/Git/IlluminaSequencingAnalysis/CustomizedQC/SourceCode/ObjectStorage/BackupCOVID2ndResults/job.sh
