@@ -20,6 +20,16 @@ DIR2ndPipelineTMP = "/data/COVID_WGS/lix33/Test/2ndpipeline/Build/tmp"
 
 DIRBuildProcess = "/data/COVID_WGS/lix33/Test/2ndpipeline/Build/processed"
 DIRBuffer = "/data/COVID_WGS/lix33/Test/2ndpipeline/Data/secondary_buf"
+DIRBAMReformat = "/data/COVID_WGS/lix33/Test/2ndpipeline/Data/BAM_reformatted"
+
+# Email notification List
+#EMAILReceiverEnd = "xin.li4@nih.gov,kristine.jones@nih.gov,dongjing.wu@nih.gov,wen.luo@nih.gov,hicksbel@mail.nih.gov"
+EMAILReceiverEnd = "xin.li4@nih.gov"
+EMAILSender = "xin.li4@nih.gov"
+
+DONEFlagEmail = "flag_email_sent_done"
+DONEFlagWarningEmail = "flag_email_warning_sent_done"
+
 
 # --> Defind the data structure to save the subject info from Keytable
 class ClsSample:
@@ -471,6 +481,52 @@ def BAMContaminationCheck(iSubjectNum, strKTName):
     CMD = "python3 " + strScript
     os.system(CMD)
     return 1
+
+def SendEmailNotification(iSubjectNum, strKTName):
+    strCurBuildFolder = DIRBAMRoot + "/" + strKTName
+    strFlag = strCurBuildFolder + "/Flag/" + DONEFlagEmail
+    
+    #if True:
+    if not os.path.exists(strFlag):    
+        #Send email & add new email done flag
+        strMsg = "============ " + strKTName + " ============ \\n\\n"
+        strMsg += ("Good News              : The keytable " + strKTName + " IS ALL SET (COVID 2nd Analysis Pipeline) \\n\\n" +
+                   "Total Number of Subject: " + str(iSubjectNum) + "\\n\\n" +
+                   "\\n\\n" + 
+                   "======== Please Check the Results Below (Biowulf) ========  \\n\\n" + 
+                   "Re-calibrated BAM File Path        : " + DIRBAMReformat + "/BAM_recalibrated/WGS" + "\\n\\n" + 
+                   "Coverage Report Path               : " + DIRBuffer + "/coverage_report/{contain keywords coverage}" + "\\n\\n" +
+                   "Pre-calling QC Report Path         : " + DIRBuffer + "/coverage_report/{contain keywords pre-calling QC}" + "\\n\\n" +
+                   "BAM Contamination Check Report Path: " +  DIRBuildProcess + "/build_CGR_" + strKTName + "/Report" + "\\n\\n" +
+                   "\\n\\n" + 
+                   "======== Some Useful Directories are also listed below (Biowulf) ========  \\n\\n" +                   
+                   "Build Dir                     : " + DIRBuildProcess + "/build_CGR_" + strKTName + "\\n\\n" +
+                   "Original BAM Dir (after Merge): " + DIRBAMReformat + "/ BAM_original/WGS" + "\\n\\n" +
+                   "Retrieved Flowcell (From S3)  : " + DIRBAMRoot + "/" + strKTName + "\\n\\n" + 
+                   "Flag Dir                      : " + DIRBAMReformat + "/BAM_recalibrated/Flag" + "\\n\\n" +
+                   "      >>>>>>>>>>>>>>>>>>>>>>> : " + DIRBAMRoot + "/" + strKTName + "/Flag" + "\\n\\n" +
+                   "      >>>>>>>>>>>>>>>>>>>>>>> : " + DIRBuildProcess + "/build_CGR_" + strKTName + "/Flag" + "\\n\\n" +
+                   "Log Dir:                      : " + DIRBuffer + "/cluster_job_logs" + "\\n\\n" +
+                   "      >>>>>>>>>>>>>>>>>>>>>>> : " + DIR2ndPipelineTMP + "/" + strKTName + "/Log" + "\\n\\n" +
+                   "      >>>>>>>>>>>>>>>>>>>>>>> : " + DIRBAMRoot + "/" + strKTName + "/Flag" + "\\n\\n" +
+                   "      >>>>>>>>>>>>>>>>>>>>>>> : " + DIR2ndPipelineTMP + "/" + strKTName + "/Script" + "\\n\\n" +
+                   "      >>>>>>>>>>>>>>>>>>>>>>> : " + DIRBuildProcess + "/build_CGR_" + strKTName + "/Log" + "\\n\\n" +
+                   "Report Dir                    : " + DIRBuffer + "/coverage_report" + "\\n\\n" +
+                   "Pre-QC Tmp Result Dir         : " + DIRBuffer + "/PRE_QC" + "\\n\\n" + 
+                   "BAM Contamination Check Dir   : " + DIRBuildProcess + "/build_CGR_" + strKTName + "/Report,Log,Flag" + "\\n\\n" +                   
+                   "Mimic Manifest Dir            : " + DIR2ndPipelineTMP + "/" + strKTName + "/Manifest_Mimic.csv") 
+                                                                            
+        strSubject = strKTName + " is all Set (COVID 2nd Analysis Pipeline)"                
+        CMD = "echo -e \"" + strMsg + "\" | mail -r " + EMAILSender + " -s \"" + strSubject + "\" " + EMAILReceiverEnd            
+        print(CMD)               
+        os.system(CMD)                 
+        #2: Set working flag to done and                
+        CMD = "touch " + strFlag
+        os.system(CMD)
+        print("Email has been sent successfully! -->", strKTName)
+    else:
+        print("No action needed! Analysis has been finished! -->", strKTName)
+    
             
 def main():        
     strKeytable = sys.argv[1]
@@ -499,6 +555,8 @@ def main():
     print("\n", "==> GetGroupInfo") 
     objBuild.GetGroupInfo(strKeytable)
     # <--
+    
+    SendEmailNotification(iSubjectNum, strKTName)
          
     # Step 1: Merge BAM file
     print("\n-----\n", "Step 1: Merge BAM file", "\n-----\n")
@@ -541,6 +599,9 @@ def main():
     if BAMContaminationCheck(iSubjectNum, strKTName) != 0:
         print("The phase of BAMContaminationCheck is still running!")
         return 1
+    
+    # Step 8: 
+    SendEmailNotification(iSubjectNum, strKTName)
     
     print("Enjoy the day!")
     return 0
