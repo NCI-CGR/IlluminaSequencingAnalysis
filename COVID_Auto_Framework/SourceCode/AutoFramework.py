@@ -590,13 +590,17 @@ def main():
     
     # Step 6:
     print("\n-----\n", "Step 6: generate pre-calling qc report", "\n-----\n")
-    if PreCallingQCReport(iSubjectNum, strKTName) != 0:
-        print("The phase of PreCallingQCReport is still running!")
-        return 1
+    iReturnPreQC = PreCallingQCReport(iSubjectNum, strKTName)
     
     # Step 7:
     print("\n-----\n", "Step 7: BAM contamination check", "\n-----\n")
-    if BAMContaminationCheck(iSubjectNum, strKTName) != 0:
+    iReturnBAMContamCheck = BAMContaminationCheck(iSubjectNum, strKTName)
+    
+    #Step 6 and step 7 can be run simutaniously
+    if iReturnPreQC != 0:
+        print("The phase of PreCallingQCReport is still running!")
+        return 1
+    if iReturnBAMContamCheck != 0:
         print("The phase of BAMContaminationCheck is still running!")
         return 1
     
