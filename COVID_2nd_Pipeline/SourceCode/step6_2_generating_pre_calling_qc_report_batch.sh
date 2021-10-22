@@ -10,6 +10,11 @@ DCEG_SEQ_POOL_SCRIPT_DIR=$(dirname "$SCRIPT")
 PREQC_REPORT_FILE=$1
 strKTName=$2
 
+strBackupDir="/data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Data/BAM/Batch/${strKTName}/Report"
+if [ ! -d "${strBackupDir}" ]; then
+  mkdir -p "${strBackupDir}"
+fi
+
 DATE=$(basename $PREQC_REPORT_FILE .txt | cut -f5 -d_)
 
 LOG_DIR=${CLUSTER_JOB_LOG_DIR}/${DATE}_${strKTName}
@@ -20,3 +25,9 @@ for SINGLE_OUT in ${LOG_DIR}/_pre_calling_qc_report_*.stdout;do
 	grep -A 1 "Contents to be streamed to the flowcell-level report file" $SINGLE_OUT | tail -n 1 >> $PREQC_REPORT_FILE
 done
 
+# Back Report file into UpstreamAnalysis PostPrimaryRun Dir
+strFileName=$(basename "${PREQC_REPORT_FILE}")
+strBackupReportFile=${strBackupDir}/${strFileName}
+if [ ! -f "${strBackupReportFile}" ]; then
+  cp "${PREQC_REPORT_FILE}" "${strBackupDir}"
+fi

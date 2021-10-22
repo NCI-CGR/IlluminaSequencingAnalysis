@@ -7,6 +7,8 @@ import sys
 import subprocess
 
 DIRRootBuild = "/data/COVID_WGS/lix33/Test/2ndpipeline/Build/processed"
+DIRBAMRoot = "/data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Data/BAM/Batch"
+
 # This is for v37
 #VCFRef = "/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/refVariant/Omni25_genotypes_1525_samples_v2.b37.PASS.ALL.sites_with_chr.vcf"
 # This is for v38
@@ -31,10 +33,10 @@ class ClsSubject:
         strFlagDone = self.strFlagDir + "/" + strBAMName + ".flag.done"
         
         if os.path.exists(strFlagDone):
-            return 1
+            return 0
         
         if os.path.exists(strFlagWorking):
-            return 0
+            return 1
         
         # Nothing -> try to submit jobs
         CMD = "touch " + strFlagWorking
@@ -67,8 +69,9 @@ class ClsSubject:
                            "--error=" + strStdErr + " " + 
                            "--wrap=\"" + scriptBash + "\"")
         print(CMD)
-        os.system(CMD)
+        os.system(CMD)        
         #<- 
+        return 1
 
 class ClsBuild:
     def __init__(self):
@@ -121,7 +124,7 @@ class ClsBuild:
         for subject in self.vSubject:
             subject.Run()
     
-    def BuildReport(self):
+    def BuildReport(self, strKeyTableName):
         #Check the number of "done" flag
         CMD = "find " + self.strFlagDir + " -iname '*done' | wc -l"
         iDoneFlagNum = int(subprocess.getoutput(CMD))        
@@ -169,6 +172,21 @@ class ClsBuild:
             fs.write(strLine)
         fs.close()        
         print("Report location:", strSumReport)
+        
+        # Backup SumReport to UpstreamAnalysis PostPrimaryRun Directory -> Go
+        strBackupReportDir = DIRBAMRoot + "/" + strKeyTableName + "/Report"
+        
+        if not os.path.exists(strBackupReportDir):
+            CMD = "mkdir -p " + strBackupReportDir
+            os.system(CMD)
+            
+        strReportFileName = os.path.basename(strSumReport)
+        strBackupReportFile = strBackupReportDir + "/" + strReportFileName
+        if not os.path.exists(strBackupReportFile):
+            CMD = "cp " + strSumReport + " " + strBackupReportDir
+            os.system(CMD)
+        # <-  
+        
         print("Report All Set!")
 
 def GetBuildInfo(vBuild):
@@ -188,11 +206,13 @@ def RunContaminationCheck(vBuild):
     for build in vBuild:
         build.Run()
 
-def BuildReport(vBuild):
+def BuildReport(vBuild, strKeyTableName):
     for build in vBuild:
-        build.BuildReport()    
+        build.BuildReport(strKeyTableName)    
 
-def main():    
+def main():
+    strKeyTableName = sys.argv[1]
+    
     vBuild = []
     
     # Check each sub-sub folder
@@ -202,7 +222,7 @@ def main():
     RunContaminationCheck(vBuild)
     
     # Build BAM Contamination Report
-    BuildReport(vBuild)  
+    BuildReport(vBuild, strKeyTableName)  
     
     print("Main Finished!")
     

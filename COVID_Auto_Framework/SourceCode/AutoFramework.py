@@ -477,7 +477,7 @@ def BAMContaminationCheck(iSubjectNum, strKTName):
             return 0
         
     #If not, run python script
-    strScript = DIRCustomizedQC + "/Tools/BAMContaminationCheck/ContaminationCheck.py"
+    strScript = DIRCustomizedQC + "/Tools/BAMContaminationCheck/ContaminationCheck.py " + strKTName
     CMD = "python3 " + strScript
     os.system(CMD)
     return 1
