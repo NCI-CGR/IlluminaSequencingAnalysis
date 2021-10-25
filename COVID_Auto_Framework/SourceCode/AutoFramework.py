@@ -556,7 +556,7 @@ def main():
     objBuild.GetGroupInfo(strKeytable)
     # <--
     
-    SendEmailNotification(iSubjectNum, strKTName)
+    #SendEmailNotification(iSubjectNum, strKTName)
          
     # Step 1: Merge BAM file
     print("\n-----\n", "Step 1: Merge BAM file", "\n-----\n")
