@@ -1,4 +1,5 @@
 #!/bin/sh
+set -o pipefail
 
 SCRIPT=$(readlink -f "$0")
 SCRIPT_DIR=$(dirname "$SCRIPT")

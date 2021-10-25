@@ -1,4 +1,5 @@
 #!/bin/sh
+set -o pipefail
 
 # Copy new incoming BAM files (from BAM_new_incoming) to the original BAM files folder (BAM_original)
 # so that they can be recalibrated (into BAM_recalibrated) for future builds

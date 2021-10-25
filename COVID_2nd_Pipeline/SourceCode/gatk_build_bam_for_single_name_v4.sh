@@ -1,5 +1,5 @@
 #!/bin/sh
-
+set -o pipefail
 # Build the BAM file for analysis ID according to list of sample-level BAM file(s)
 # The 1st argument shall be the analysis ID, and the rest argument(s) shall be the full paths of the sample-level BAM files
 

@@ -1,5 +1,5 @@
 #!/bin/sh
-
+set -o pipefail
 
 if [[ $# -lt 2 ]]; then
   echo "Error: please run it with a least 2 argument (Manifest file, and build_BAM dir)!"

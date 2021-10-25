@@ -1,4 +1,5 @@
 #!/bin/sh
+set -o pipefail
 # source global configuration files
 #. ${BUFFER_DIR:-.}/global_config_bash.rc
 SCRIPT=$(readlink -f "$0")
@@ -58,8 +59,16 @@ echo ====================
 date
 echo Running all tools to collect qc metrics. 
 echo ====================
-
-CMD="java -Xmx16g -jar $PICARD CollectMultipleMetrics I=$IN_BAM O=${BUFFER_DIR}/PRE_QC/${NAME}/multiple_metrics R=$REFERENCE_GENOME PROGRAM=null PROGRAM=CollectSequencingArtifactMetrics PROGRAM=CollectAlignmentSummaryMetrics PROGRAM=CollectGcBiasMetrics PROGRAM=QualityScoreDistribution VALIDATION_STRINGENCY=LENIENT"
+CMD="java -Xmx16g -jar $PICARD CollectMultipleMetrics \
+                                    --INPUT $IN_BAM \
+                                    --OUTPUT ${BUFFER_DIR}/PRE_QC/${NAME}/multiple_metrics \
+                                    --REFERENCE_SEQUENCE $REFERENCE_GENOME \
+                                    --PROGRAM null \
+                                    --PROGRAM CollectSequencingArtifactMetrics \
+                                    --PROGRAM CollectAlignmentSummaryMetrics \
+                                    --PROGRAM CollectGcBiasMetrics \
+                                    --PROGRAM QualityScoreDistribution \
+                                    --VALIDATION_STRINGENCY LENIENT"
 #CollectSequencingArtifactMetrics substitution_rate of the 6 base changes ,pre_adapter_summary_metrics TOTAL_QSCORE <35
 #CollectAlignmentSummaryMetrics %PF_HQ_ALIGNED_READS(mapping quality of >20) %PF_HQ_ALIGNED_Q20_BASES PCT_READS_ALIGNED_IN_PAIRS PCT_PF_READS_IMPROPER_PAIRS PF_MISMATCH_RATE STRAND_BALANCE
 #PF_NOISE_READS: number of PF reads that are composed entirly out of As and/or Ns
@@ -319,7 +328,27 @@ echo -e $L
 #echo -e $L >> $OUT_REPORT
 
 #remove all intermediate bam file to save space
-rm ${TMP_DIR}/${NAME}_filtered.bam ${TMP_DIR}/${NAME}_filtered.bam.bai ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_dedup.bam ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_dedup.bai
+strFile="${TMP_DIR}/${NAME}_filtered.bam"
+if [ -f ${strFile} ]; then
+  rm ${strFile}
+fi
+
+strFile="${TMP_DIR}/${NAME}_filtered.bam.bai"
+if [ -f ${strFile} ]; then
+  rm ${strFile}
+fi
+
+strFile="${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_dedup.bam"
+if [ -f ${strFile} ]; then
+  rm ${strFile}
+fi
+
+strFile="${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_dedup.bai"
+if [ -f ${strFile} ]; then
+  rm ${strFile}
+fi
+
+#rm ${TMP_DIR}/${NAME}_filtered.bam ${TMP_DIR}/${NAME}_filtered.bam.bai ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_dedup.bam ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_dedup.bai
 echo ====================
 date
 echo Done!

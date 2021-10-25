@@ -1,4 +1,5 @@
 #!/bin/sh
+set -o pipefail
 
 SCRIPT=$(readlink -f "$0")
 DCEG_SEQ_POOL_SCRIPT_DIR=$(dirname "$SCRIPT")

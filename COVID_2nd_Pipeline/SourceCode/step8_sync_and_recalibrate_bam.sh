@@ -1,4 +1,5 @@
 #!/bin/sh
+set -o pipefail
 
 # This script scans and syncronizes the BAM and the BAM_recalibrated folders
 # If a BAM file in the BAM folder is newer than the same file in the BAM_recalibrated folder,
