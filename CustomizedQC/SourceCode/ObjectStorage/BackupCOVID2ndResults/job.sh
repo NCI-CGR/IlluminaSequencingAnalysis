@@ -7,7 +7,7 @@
 #SBATCH --output=/data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Log/BackupCOVID2ndResults/std_10_27_2021_01_200_std_output.out
 #SBATCH --error=/data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Log/BackupCOVID2ndResults/std_10_27_2021_01_200_std_output.err
 #SBATCH --job-name=BackupCOVID2ndResults
-#SBATCH --time=10-00:00:00
+#SBATCH --time=4-00:00:00
 
 module load python/3.7
 

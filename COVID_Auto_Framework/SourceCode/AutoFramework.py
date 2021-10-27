@@ -486,6 +486,7 @@ def SendEmailNotification(iSubjectNum, strKTName):
     strCurBuildFolder = DIRBAMRoot + "/" + strKTName
     strFlag = strCurBuildFolder + "/Flag/" + DONEFlagEmail
     
+    strReportDir = strCurBuildFolder + "/Report"
     #if True:
     if not os.path.exists(strFlag):    
         #Send email & add new email done flag
@@ -516,8 +517,18 @@ def SendEmailNotification(iSubjectNum, strKTName):
                    "BAM Contamination Check Dir   : " + DIRBuildProcess + "/build_CGR_" + strKTName + "/Report,Log,Flag" + "\\n\\n" +                   
                    "Mimic Manifest Dir            : " + DIR2ndPipelineTMP + "/" + strKTName + "/Manifest_Mimic.csv") 
                                                                             
-        strSubject = strKTName + " is all Set (COVID 2nd Analysis Pipeline)"                
-        CMD = "echo -e \"" + strMsg + "\" | mail -r " + EMAILSender + " -s \"" + strSubject + "\" " + EMAILReceiverEnd            
+        strSubject = strKTName + " is all Set (COVID 2nd Analysis Pipeline)"
+        
+        # ---> Prepare Attachment
+        CMD = "find " + strReportDir + " -maxdepth 1 -type f"
+        vFileList = subprocess.getoutput(CMD).split('\n')
+        print("vFileList:", vFileList)
+        strAttach = ""
+        for file in vFileList:
+            strAttach += " -a " + file
+        # <---
+                        
+        CMD = "echo -e \"" + strMsg + "\" | mail -r " + EMAILSender + strAttach + " -s \"" + strSubject + "\" " + EMAILReceiverEnd            
         print(CMD)               
         os.system(CMD)                 
         #2: Set working flag to done and                
