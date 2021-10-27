@@ -212,7 +212,7 @@ class ClsSubject:
         strRunningTime = "10-00:00:00"
         strNumCore = "8"
         strNodeNum = "1"
-        strMem = "10g"
+        strMem = "16g"
         strJobName = "MSP." + self.strCGRID # Merge Sample
         
         strSlurmScript = ("sbatch " + 

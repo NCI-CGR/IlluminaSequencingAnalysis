@@ -107,12 +107,13 @@ for GROUP in $(echo $DISEASE_GROUPS); do
       # this is a working flag indicating that an existing process
       # is already on this BAM file
       # Move flag files to a up level ${BAM_RECALIBRATED_DIR}  to avoid processing same BAM in different GROUP
-      FLG_WORKING=${BAM_REFORMATTED_RECALIBRATED_DIR}/${BAM_NAME}.$RECALIBRATION_WORKING_FLAG_EXTENSION     
-      FLG_INQUEUE=${BAM_REFORMATTED_RECALIBRATED_DIR}/${BAM_NAME}.$RECALIBRATION_INQUEUE_FLAG_EXTENSION
+      #FLG_WORKING="${BAM_REFORMATTED_RECALIBRATED_DIR}/${BAM_NAME}.$RECALIBRATION_WORKING_FLAG_EXTENSION"
+      FLG_INQUEUE="${BAM_REFORMATTED_RECALIBRATED_DIR}/InQueue/${BAM_NAME}.$RECALIBRATION_INQUEUE_FLAG_EXTENSION"
       # echo "Flg_working:$FLG_WORKING"
       # echo "Flg_inqueue:$FLG_INQUEUE"
 
-      if [[ $HAS_NEWER -eq 0 ]] && [[  ! -f $FLG_WORKING ]] && [[  ! -f $FLG_INQUEUE ]]; then
+      #if [[ $HAS_NEWER -eq 0 ]] && [[  ! -f $FLG_WORKING ]] && [[  ! -f $FLG_INQUEUE ]]; then
+      if [[ $HAS_NEWER -eq 0 ]] && [[  ! -f $FLG_INQUEUE ]]; then
         echo
         echo "Launching recalibration job for $BAM_NAME ..."
         if [[ ! -d ${BAM_REFORMATTED_RECALIBRATED_DIR}/${GROUP_NAME} ]]; then
@@ -120,8 +121,10 @@ for GROUP in $(echo $DISEASE_GROUPS); do
         fi
         touch $FLG_INQUEUE
 
-	      DATE=`echo $(date +%Y%m%d)`
-	      LOG_DIR=${CLUSTER_JOB_LOG_DIR}/${DATE}
+	      #DATE=`echo $(date +%Y%m%d)`
+	      #LOG_DIR=${CLUSTER_JOB_LOG_DIR}/${DATE}
+	      LOG_DIR=${CLUSTER_JOB_LOG_DIR}/${LOGTypeRecaliBAM}_${strKTName}
+
         if [[ ! -d $LOG_DIR ]]; then
 	        mkdir -p $LOG_DIR
         fi

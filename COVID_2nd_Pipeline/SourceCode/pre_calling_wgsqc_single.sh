@@ -101,6 +101,9 @@ CMD="java -Xmx16g -jar ${PICARD} MarkDuplicates \
                                   --OUTPUT ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_dedup.bam \
                                   --METRICS_FILE ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_dedup.txt"
 if [[ ! -f ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_dedup.txt || $REPLACE_TABLE != "false" ]];then
+  echo
+  echo "Output: ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_dedup.txt"
+  echo "CMD ->"
 	echo $CMD
 	eval $CMD
 fi
@@ -116,6 +119,9 @@ CMD="java -Xmx16g -jar ${PICARD} CollectWgsMetrics \
                                   --REFERENCE_SEQUENCE $REFERENCE_GENOME \
                                   --VALIDATION_STRINGENCY LENIENT"
 if [[ ! -f ${BUFFER_DIR}/PRE_QC/${NAME}/wgs_metrics.txt || $REPLACE_TABLE != "false" ]];then
+  echo
+  echo "Output: ${BUFFER_DIR}/PRE_QC/${NAME}/wgs_metrics.txt"
+  echo "CMD ->"
 	echo $CMD
 	eval $CMD
 fi
@@ -128,6 +134,9 @@ CMD="java -Xmx16g -jar ${PICARD} CollectOxoGMetrics \
                                   --REFERENCE_SEQUENCE $REFERENCE_GENOME \
                                   --VALIDATION_STRINGENCY LENIENT"
 if [[ ! -f ${BUFFER_DIR}/PRE_QC/${NAME}/oxoG_metrics.txt || $REPLACE_TABLE != "false" ]];then
+  echo
+  echo "Output: ${BUFFER_DIR}/PRE_QC/${NAME}/oxoG_metrics.txt"
+  echo "CMD ->"
 	echo $CMD
 	eval $CMD
 fi
@@ -140,6 +149,9 @@ CMD="java -Xmx16g -jar ${GATK} \
                         -o ${BUFFER_DIR}/PRE_QC/${NAME}/callable_status.bed"
 #table.txt POOR_MAPPING_QUALITY (<10),LOW_COVERAGE(<4),NO_COVERAGE,still the callable_status.bed file can serve as a final vcf filter
 if [[ ! -f ${BUFFER_DIR}/PRE_QC/${NAME}/table.txt || $REPLACE_TABLE != "false" ]];then
+  echo
+  echo "Output: ${BUFFER_DIR}/PRE_QC/${NAME}/table.txt"
+  echo "CMD ->"
 	echo $CMD
 	eval $CMD
 fi
@@ -151,6 +163,9 @@ CMD="java -Xmx16g -jar $GATK \
                         -o ${BUFFER_DIR}/PRE_QC/${NAME}/error_rates.gatkreport.txt"
 #not very useful, need to run across more samples to see the trend
 if [[ ! -f ${BUFFER_DIR}/PRE_QC/${NAME}/error_rates.gatkreport.txt || $REPLACE_TABLE != "false" ]];then
+  echo
+  echo "Output: ${BUFFER_DIR}/PRE_QC/${NAME}/error_rates.gatkreport.txt"
+  echo "CMD ->"
 	echo $CMD
 	eval $CMD
 fi
@@ -166,6 +181,10 @@ CMD="java -Xmx16g -jar $GATK \
                         -o ${BUFFER_DIR}/PRE_QC/${NAME}/output.txt "
 #can try to add the two stats to the report
 if [[ ! -f ${BUFFER_DIR}/PRE_QC/${NAME}/output.txt || $REPLACE_TABLE != "false" ]];then
+  echo
+  echo "Output: ${BUFFER_DIR}/PRE_QC/${NAME}/output.txt"
+  echo "CMD ->"
+
   #filter in bam proper aligned reads first (move samtools command line from outside to inside "if")
   samtools view -@ 8 -f 3 -b $IN_BAM > ${TMP_DIR}/${NAME}_filtered.bam
   samtools index -@ 8 ${TMP_DIR}/${NAME}_filtered.bam
@@ -183,6 +202,9 @@ CMD="java -Xmx16g -jar $GATK \
                         -I $IN_BAM \
                         -o ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_rld.tbl"
 if [[ ! -f ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_rld.tbl || $REPLACE_TABLE != "false" ]];then
+  echo
+  echo "Output: ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_rld.tbl"
+  echo "CMD ->"
 	echo $CMD
 	eval $CMD
 fi
@@ -195,6 +217,9 @@ CMD="java -Xmx16g -jar $PICARD CollectInsertSizeMetrics \
                                 --MINIMUM_PCT 0.05 \
                                 --VALIDATION_STRINGENCY LENIENT"
 if [[ ! -f ${BUFFER_DIR}/PRE_QC/${NAME}/insertsize_metrics.txt || $REPLACE_TABLE != "false" ]];then
+  echo
+  echo "Output: ${BUFFER_DIR}/PRE_QC/${NAME}/insertsize_metrics.txt"
+  echo "CMD ->"
 	echo $CMD
 	eval $CMD
 fi

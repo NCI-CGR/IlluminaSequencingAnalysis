@@ -15,7 +15,8 @@ DIRBAMRoot="/data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Data/BAM/Batch"
 #2 or 3 input (MANIFEST_FILE, dirBuildBAM and (PREQC_REPORT_FILE -- option))
 
 DATE=`echo $(date +%m%d%Y)`
-LOG_DIR=${CLUSTER_JOB_LOG_DIR}/${DATE}_${strKTName}
+#LOG_DIR=${CLUSTER_JOB_LOG_DIR}/${DATE}_${strKTName}
+LOG_DIR=${CLUSTER_JOB_LOG_DIR}/${LOGTypePreQC}_${strKTName}
 
 mkdir -p $LOG_DIR 2>/dev/null
 if [ -f ${BUFFER_DIR}/nohup100.out ]; then

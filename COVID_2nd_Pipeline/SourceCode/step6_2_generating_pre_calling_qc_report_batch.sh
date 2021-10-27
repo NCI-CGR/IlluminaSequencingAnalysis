@@ -16,9 +16,9 @@ if [ ! -d "${strBackupDir}" ]; then
   mkdir -p "${strBackupDir}"
 fi
 
-DATE=$(basename $PREQC_REPORT_FILE .txt | cut -f5 -d_)
-
-LOG_DIR=${CLUSTER_JOB_LOG_DIR}/${DATE}_${strKTName}
+#DATE=$(basename $PREQC_REPORT_FILE .txt | cut -f5 -d_)
+#LOG_DIR=${CLUSTER_JOB_LOG_DIR}/${DATE}_${strKTName}
+LOG_DIR=${CLUSTER_JOB_LOG_DIR}/${LOGTypePreQC}_${strKTName}
 
 for SINGLE_OUT in ${LOG_DIR}/_pre_calling_qc_report_*.stdout;do
 #	REPORT_LINE=$(grep -A 1 "Total Exome Bases >= 50x" $SINGLE_OUT | tail -n 1)

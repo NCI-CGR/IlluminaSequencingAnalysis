@@ -36,8 +36,9 @@ import time
 import subprocess
 
 
-DATE = "10_12_2021"
-KEYTABLEName = "low_input_01_96_keytable"
+DATE = "10_27_2021"
+KEYTABLEName = "std_input_01_361_keytable"
+KEYWORD = "std_input"
 
 class ClsDirSet:
     def __init__(self):
@@ -77,7 +78,7 @@ class ClsDirSet:
         
         
         strBiowulfUpstreamBatchDir = "/data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Data/BAM/Batch"
-        CMD = "find " + strBiowulfUpstreamBatchDir + " -maxdepth 1 -type d -iname 'low_input*'"
+        CMD = "find " + strBiowulfUpstreamBatchDir + " -maxdepth 1 -type d -iname '" + KEYWORD + "*'"
         #print(CMD)
         vDir = subprocess.getoutput(CMD).split('\n')
         self.arryBatchDir = vDir 
@@ -101,7 +102,7 @@ class ClsDirSet:
         print(self.arryBiowulfUpstreamReport)
         print(self.arryBiowulfUpstreamLog)        
 
-        self.strBiowulfUpstreamKeyTableDir = "/data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Keytable/low_input"     
+        self.strBiowulfUpstreamKeyTableDir = "/data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Keytable/" + KEYWORD     
         
         print("DirSet Init has been finished!")
         print()        
@@ -199,7 +200,7 @@ def main():
     objDirSet = ClsDirSet()
     objDirSet.Init()
     
-    #BackUpToS3(objDirSet)
+    BackUpToS3(objDirSet)
     #RemoveFromBiowulf(objDirSet)
 
 

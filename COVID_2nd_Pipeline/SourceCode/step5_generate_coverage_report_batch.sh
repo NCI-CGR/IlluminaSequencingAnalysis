@@ -18,7 +18,8 @@ DIRBAMRoot="/data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Data/BAM/Batch"
 #strKTName="unkown"
 
 DATE=`echo $(date +%m%d%Y)`
-LOG_DIR=${CLUSTER_JOB_LOG_DIR}/${DATE}_${strKTName}
+#LOG_DIR=${CLUSTER_JOB_LOG_DIR}/${DATE}_${strKTName}
+LOG_DIR=${CLUSTER_JOB_LOG_DIR}/${LOGTypeCoverage}_${strKTName}
 
 # Get two most important arguments -->
 #MANIFEST=/DCEG/Projects/Exome/builds/build_SR0407-004_Data_Delivery_2019_23058/Manifest/NP0407-HE9-ANALYSIS-MANIFEST.csv

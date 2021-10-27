@@ -143,3 +143,9 @@ REFERENCE_SNPS2=/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/re
 HISEQ_ROOT_DIR=/CGF/Sequencing/Illumina/HiSeq/PostRun_Analysis/Data
 # MiSeq and legacy data
 MISEQ_ROOT_DIR=/CGF/Sequencing/Illumina/MiSeq/PostRun_Analysis/Data
+
+# Define the name of 3 Log Types
+LOGTypeCoverage="CoverageReport"
+LOGTypePreQC="PreCallingQC"
+LOGTypeRecaliBAM="RecalibrateBAM"
+
