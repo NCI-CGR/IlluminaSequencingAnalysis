@@ -1,0 +1,37 @@
+### This is the crontab job backup
+
+```
+#For RNA Auto QC Pipeline ---->
+#HiSeq
+@hourly . ~/.bashrc && /bin/sh /DCEG/Projects/Exome/SequencingData/Xin/RNA_QC_Auto_Launcher/Run/HiSeq/run.sh >> /DCEG/Projects/Exome/SequencingData/Xin/RNA_QC_Auto_Launcher/Run/HiSeq/Log/crontab/crontab.log 2>&1
+
+#MiSeq
+@hourly . ~/.bashrc && /bin/sh /DCEG/Projects/Exome/SequencingData/Xin/RNA_QC_Auto_Launcher/Run/MiSeq/run.sh >> /DCEG/Projects/Exome/SequencingData/Xin/RNA_QC_Auto_Launcher/Run/MiSeq/Log/crontab/crontab.log 2>&1
+
+#NextSeq
+@hourly . ~/.bashrc && /bin/sh /DCEG/Projects/Exome/SequencingData/Xin/RNA_QC_Auto_Launcher/Run/NextSeq/run.sh >> /DCEG/Projects/Exome/SequencingData/Xin/RNA_QC_Auto_Launcher/Run/NextSeq/Log/crontab/crontab.log 2>&1
+#<---------
+
+#Testing case: run scratch folder (use source code in production folder)
+#45 * * * * SEQUENCING_PLATFORM=HiSeq QUEUE=seq-calling.q QUEUE2=seq-calling.q ILLUMINA_OUTPUT_DIR=/scratch/lix33/CGR/Pipeline/Primary_Pipeline/Data/Illumina ILLUMINA_DATE_THRESHOLD=201911210000.00 . ~/.bashrc && /bin/sh /DCEG/Projects/Exome/SequencingData/primary_analysis_scripts_v2/cronjob_primary_analysis.sh >> /scratch/lix33/CGR/Pipeline/Primary_Pipeline/JobScript/run_directly/production_scratch/hiseq/$(date +\%Y\%m).txt 2>&1
+
+#For Customized Alignment
+#@hourly /scratch/lix33/CGR/Pipeline/Primary_Pipeline/JobScript/test/RunCustomizedAlignCtrSample/FileList/07_21_BWA/run.sh
+#@hourly /scratch/lix33/CGR/Pipeline/Primary_Pipeline/JobScript/test/RunCustomizedAlignCtrSample/FileList/07_21_NovoAlign/run.sh
+
+#Testing case: run scratch folder (use source code in home dir)
+#@hourly SEQUENCING_PLATFORM=HiSeq QUEUE=all.q QUEUE2=all.q ILLUMINA_OUTPUT_DIR=/scratch/lix33/CGR/Pipeline/Primary_Pipeline/Data/Illumina ILLUMINA_DATE_THRESHOLD=201911210000.00 . ~/.bashrc && /bin/bash /home/lix33/lxwg/Git/CGR/primary_analysis_pipeline/cronjob_primary_analysis.sh >> /scratch/lix33/CGR/Pipeline/Primary_Pipeline/JobScript/run_directly/production_scratch/HiSeq_$(date +\%Y\%m).txt 2>&1
+
+#@hourly SEQUENCING_PLATFORM=MiSeq QUEUE=long.q QUEUE2=long.q ILLUMINA_OUTPUT_DIR=/scratch/lix33/CGR/Pipeline/Primary_Pipeline/Data/Illumina ILLUMINA_DATE_THRESHOLD=201911210000.00 . ~/.bashrc && /bin/bash /home/lix33/lxwg/Git/CGR/primary_analysis_pipeline/cronjob_primary_analysis.sh >> /scratch/lix33/CGR/Pipeline/Primary_Pipeline/JobScript/run_directly/production_scratch/MiSeq_$(date +\%Y\%m).txt 2>&1
+
+#@hourly SEQUENCING_PLATFORM=NextSeq QUEUE=long.q QUEUE2=long.q ILLUMINA_OUTPUT_DIR=/scratch/lix33/CGR/Pipeline/Primary_Pipeline/Data/Illumina ILLUMINA_DATE_THRESHOLD=201911210000.00 . ~/.bashrc && /bin/bash /home/lix33/lxwg/Git/CGR/primary_analysis_pipeline/cronjob_primary_analysis.sh >> /scratch/lix33/CGR/Pipeline/Primary_Pipeline/JobScript/run_directly/production_scratch/NextSeq_$(date +\%Y\%m).txt 2>&1
+
+#1: Process HiSeq flowcells
+#@hourly SEQUENCING_PLATFORM=HiSeq QUEUE=seq-calling.q ILLUMINA_OUTPUT_DIR=/DCEG/CGF/Sequencing/Illumina ILLUMINA_DATE_THRESHOLD=201911210000.00 . ~/.bashrc && /bin/sh /DCEG/Projects/Exome/SequencingData/primary_analysis_scripts_v2/cronjob_primary_analysis.sh >> /DCEG/CGF/Sequencing/Illumina/Primary_Analysis_Scripts/hiseq_logs/$(date +\%Y\%m).txt 2>&1
+
+#2: Process MiSeq flowcells
+#@hourly SEQUENCING_PLATFORM=MiSeq QUEUE=seq-calling.q ILLUMINA_OUTPUT_DIR=/DCEG/CGF/Sequencing/Illumina ILLUMINA_DATE_THRESHOLD=201911010000.00 . ~/.bashrc && /bin/sh /DCEG/Projects/Exome/SequencingData/primary_analysis_scripts_v2/cronjob_primary_analysis.sh >> /DCEG/CGF/Sequencing/Illumina/Primary_Analysis_Scripts/miseq_logs/$(date +\%Y\%m).txt 2>&1
+
+#3: Process NextSeq flowcells
+#@hourly SEQUENCING_PLATFORM=NextSeq QUEUE=bigmem.q ILLUMINA_OUTPUT_DIR=/DCEG/CGF/Sequencing/Illumina ILLUMINA_DATE_THRESHOLD=201911010000.00 . ~/.bashrc && /bin/sh /DCEG/Projects/Exome/SequencingData/primary_analysis_scripts_v2/cronjob_primary_analysis.sh >> /DCEG/CGF/Sequencing/Illumina/Primary_Analysis_Scripts/nextseq_logs/$(date +\%Y\%m).txt 2>&1
+```
