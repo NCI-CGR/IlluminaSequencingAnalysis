@@ -1,5 +1,7 @@
 #/bin/bash
 
+set -o pipefail
+
 argIndex=1
 for arg in "$@"
 do

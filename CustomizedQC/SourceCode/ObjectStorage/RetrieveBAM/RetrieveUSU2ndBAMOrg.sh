@@ -1,5 +1,9 @@
 #!/bin/bash
 
+set -o pipefail
+
+keyword="low_input_01_96_keytable"
+
 argIndex=1
 for arg in "$@"
 do
@@ -8,23 +12,24 @@ do
     elif [[ ${argIndex} == 2 ]]; then
         strUSUSampleID=${arg}    
     elif [[ ${argIndex} == 3 ]]; then
-        strDir=${arg}
+        strCGRID=${arg}     
     elif [[ ${argIndex} == 4 ]]; then
-        strFlagWorking=${arg}
+        strDir=${arg}
     elif [[ ${argIndex} == 5 ]]; then
+        strFlagWorking=${arg}
+    elif [[ ${argIndex} == 6 ]]; then
         strFlagDone=${arg}
     fi
     argIndex=$((argIndex + 1))
 done
 
-
 CMD="obj_ls -v DCEG_COVID_WGS \
             -h \
-            -m *${strFlowcellName}*${strUSUSampleID}*dedup_nophix.???  
+            -m *${keyword}*BAM_reformatted*BAM_original*${strCGRID}*${strUSUSampleID}*.bam*  
             |awk 'NR>1 {print \$8}' |  
             while read line; do obj_get -v DCEG_COVID_WGS ${line} 
                                         -D ${strDir} 
-                                        -p -V --strip 6 --dry-run; done"
+                                        -p -V --strip 8 --dry-run; done"
                                     
 echo ${CMD}
 echo "---"
@@ -32,9 +37,9 @@ SECONDS=0
 
 echo -e "Run Command line \n >>>>>"
 
-obj_ls -v DCEG_COVID_WGS -h -m *${strFlowcellName}*${strUSUSampleID}*dedup_nophix.??? \
+obj_ls -v DCEG_COVID_WGS -h -m *${keyword}*BAM_reformatted*BAM_original*${strCGRID}*${strUSUSampleID}*.bam* \
 | awk 'NR>1 {print $8}' \
-| while read line; do obj_get -v DCEG_COVID_WGS ${line} -D ${strDir} -p -V --strip 6; done
+| while read line; do obj_get -v DCEG_COVID_WGS ${line} -D ${strDir} -p -V --strip 8; done
 
 echo -e "<<<<<< \n End!" 
        

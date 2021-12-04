@@ -17,7 +17,7 @@ import os
 import sys
 import subprocess
 from datetime import datetime
-TMPFolder = "/scratch/lix33/TmpSequencing/"
+TMPFolder = "/data/COVID_WGS/lix33/scratch/lix33/TmpSequencing"
 REFSeq = "/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/ref38/Homo_sapiens_assembly38.fasta"
 REFSamIndex = "/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/ref38/Homo_sapiens_assembly38.fasta.fai"
 
@@ -695,18 +695,27 @@ def GetMaxParallelFlowcellNum(vFlowcellDir):
     # print(vQuota)
     # iFreeSpace = int(vQuota[1]) - int(vQuota[0])    
     iSize = 0
-    iMaxQuota = 81
+    iMaxQuota = 65
+    
+    # Collect the used space
     strDir = "/data/COVID_WGS/COVNET_Data_Delivery"     
     CMD = "du -sB 1T " + strDir + " | awk '{print $1}'"
-    iSize += int(subprocess.getoutput(CMD))
+    iSize += int(subprocess.getoutput(CMD).split('\n')[-1])
     strDir = "/data/COVID_WGS/primary_analysis"
     CMD = "du -sB 1T " + strDir + " | awk '{print $1}'"
-    iSize += int(subprocess.getoutput(CMD))
+    iSize += int(subprocess.getoutput(CMD).split('\n')[-1])
+    strDir = "/data/COVID_WGS/UpstreamAnalysis"
+    iSize += int(subprocess.getoutput(CMD).split('\n')[-1])
+    strDir = "/data/COVID_WGS/DownstreamAnalysis"
+    iSize += int(subprocess.getoutput(CMD).split('\n')[-1])
+    strDir = "/data/COVID_WGS/lix33"
+    iSize += int(subprocess.getoutput(CMD).split('\n')[-1])
+    
     iFreeSpace = iMaxQuota - iSize   
     print("Current Free space:", iFreeSpace, "T")
     #Get the number of parallel jobs
     # 1: get the run number which can support run alignment (require big size ROM)
-    iROMPerSample = 0.7  # Each sample need max 0.7TB to be finished (SAM and fastq)
+    iROMPerSample = 1  # Each sample need max 0.7TB to be finished (SAM and fastq)
     iMaxSupportSample = iFreeSpace // iROMPerSample     
     iRunNum = 0 #iFreeSpace // iROMPerJob #zheng chu!!!
     bOverFlow = False

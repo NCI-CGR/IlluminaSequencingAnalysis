@@ -10,6 +10,10 @@ REPORTSuffix = {"1": ".txt",
                 "2": ".txt",
                 "3": ".csv"}
 
+REPORTKeywords = { "1": "coverage_report",
+                   "2": "pre_calling_qc_report",
+                   "3": "ContaminationReport"}
+
 def main():
     # Check
     strReportType = sys.argv[1]
@@ -37,7 +41,7 @@ def main():
         return 1
     
     # Find all files
-    CMD = "find " + strReportDir + " -maxdepth 1 -type f"
+    CMD = "find " + strReportDir + " -maxdepth 2 -type f -iname " + "'*" + REPORTKeywords[strReportType] + "*'" 
     strFileList = subprocess.getoutput(CMD)
     if strFileList == "":
         print("Warning: No file detected! No further action needed!")        
@@ -54,6 +58,10 @@ def main():
         else:
             CMD = "awk 'NR > 1' " + strFile + " >> " + strSumReportFile
             os.system(CMD)
+    
+    # remove x permission 
+    CMD = "chmod -x " + strSumReportFile
+    os.system(CMD)
     
     print("Good: Everythign is all set!")
     print("Report type  :", REPORTType[strReportType])

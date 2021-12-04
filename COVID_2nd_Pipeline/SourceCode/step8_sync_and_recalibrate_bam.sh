@@ -16,50 +16,57 @@ DIRBAMRoot="/data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Data/BAM/Batch"
 
 strKTName="unkown"
 if [ $# -eq 2 ]; then
-     if [[ "$1" == "SOMATIC" ]] || [[ "$1" == "GERMLINE" ]]; then
-         VARIANT_TYPE=$1
-         MANIFEST=NA
-     else
-         MANIFEST=$1
-         if [[ ! -f $MANIFEST ]]; then
-            echo "Error: $MANIFEST is not existed or please specify GERMLINE or SOMATIC as the project type!"
-            exit 1
-         fi
-
-         VARIANT_TYPE=GERMLINE
-     fi
-fi
-if [ $# -eq 3 ]; then
-	# if there is an argument, enter patch mode
-	MANIFEST=$1
-        if [[ ! -f $MANIFEST ]]; then
-            echo "Error: $MANIFEST is not existed!"
-            exit 1
-        fi 
-        VARIANT_TYPE=$2
-        if [[ "$VARIANT_TYPE" != "SOMATIC" ]] && [[ "$VARIANT_TYPE" != "GERMLINE" ]]; then
-            echo "Error: the second parameter must be SOMATIC or GERMLINE!"
-            exit 1
-        fi
-fi
-if [ $# -gt 3 ]; then
-        echo "Usage: four forms:"
-        echo "1. Only check have any new BAMs in the groups in Manifestsh"
-        echo " sh ./step8_sync_and_recalibrate_bam.sh [MANIFEST FILE] GERMLINE|SOMATIC"
-        echo " 2. check have any new BAMs in all the BAM_original and processed using the specific variant type"
-        echo "sh ./step8_sync_and_recalibrate_bam.sh GERMLINE|SOMATIC"
-        echo " 3. check all new BAMs in all the BAM_original with specific project type"
-        echo " sh ./step8_sync_and_recalibrate_bam.sh GERMLINE|SOMATIC"
-        echo " 4. check have any new BAMs in all the BAM_original and process that as Germline"
-        echo " sh ./step8_sync_and_recalibrate_bam.sh"
-        echo " If current recalication is for a somatic calling project, will generate additional BAMs with BQSR and without properly paired; If no option specified, will go with GERMLINE"
-        exit 1
-fi
-if [ $# -eq 1 ]; then
+    if [[ "$1" == "SOMATIC" ]] || [[ "$1" == "GERMLINE" ]]; then
+       VARIANT_TYPE=$1
        MANIFEST=NA
-       strKTName=$1
+    else
+       MANIFEST=$1
+       if [[ ! -f $MANIFEST ]]; then
+          echo "Error: $MANIFEST is not existed or please specify GERMLINE or SOMATIC as the project type!"
+          exit 1
+       fi
        VARIANT_TYPE=GERMLINE
+    fi
+
+    strKTName=$2
 fi
+
+if [ $# -eq 3 ]; then
+    # if there is an argument, enter patch mode
+    MANIFEST=$1
+    if [[ ! -f $MANIFEST ]]; then
+        echo "Error: $MANIFEST is not existed!"
+        exit 1
+    fi
+    VARIANT_TYPE=$2
+    if [[ "$VARIANT_TYPE" != "SOMATIC" ]] && [[ "$VARIANT_TYPE" != "GERMLINE" ]]; then
+        echo "Error: the second parameter must be SOMATIC or GERMLINE!"
+        exit 1
+    fi
+
+    strKTName=$3
+fi
+
+if [ $# -gt 3 ]; then
+    echo "Usage: four forms:"
+    echo "1. Only check have any new BAMs in the groups in Manifestsh"
+    echo " sh ./step8_sync_and_recalibrate_bam.sh [MANIFEST FILE] GERMLINE|SOMATIC"
+    echo " 2. check have any new BAMs in all the BAM_original and processed using the specific variant type"
+    echo "sh ./step8_sync_and_recalibrate_bam.sh GERMLINE|SOMATIC"
+    echo " 3. check all new BAMs in all the BAM_original with specific project type"
+    echo " sh ./step8_sync_and_recalibrate_bam.sh GERMLINE|SOMATIC"
+    echo " 4. check have any new BAMs in all the BAM_original and process that as Germline"
+    echo " sh ./step8_sync_and_recalibrate_bam.sh"
+    echo " If current recalication is for a somatic calling project, will generate additional BAMs with BQSR and without properly paired; If no option specified, will go with GERMLINE"
+    exit 1
+fi
+
+if [ $# -eq 1 ]; then
+    MANIFEST=NA
+    strKTName=$1
+    VARIANT_TYPE=GERMLINE
+fi
+
 if [[ "$MANIFEST" != "NA" ]]; then
 	echo "Screening only groups from manifest $MANIFEST_FILE file."
 	
@@ -67,10 +74,12 @@ if [[ "$MANIFEST" != "NA" ]]; then
 	
 	GROUP_COL=$(awk -F "," 'BEGIN{found=0; IGNORECASE = 1} {for (i=1;i<=NF;i++) if ($i=="GROUP") {print i; found=1; exit;}} END {if (found==0) {print 0}}' $MANIFEST)
 	DISEASE_GROUPS=""
-        if [[ $GROUP_COL -eq 0 ]]; then
-           echo "Error: cannot find the GROUP column in the manifest file!"
-           exit 1
-        fi
+
+  if [[ $GROUP_COL -eq 0 ]]; then
+     echo "Error: cannot find the GROUP column in the manifest file!"
+     exit 1
+  fi
+
 	for i in $(awk -F "," -v col=$GROUP_COL '{if (NR>1){print $col}}' $MANIFEST | sort | uniq);do 
 	   DISEASE_GROUPS="$DISEASE_GROUPS ${BAM_REFORMATTED_ORIGINAL_DIR}/${i}"
 	done
@@ -96,18 +105,25 @@ for GROUP in $(echo $DISEASE_GROUPS); do
     for IN_BAM in $GROUP/*.bam; do
 
       if [[ ! -f $IN_BAM ]]; then
+        echo
+        echo "Error: file does not exist: ${IN_BAM}"
+        echo
 	      continue
       fi
 
       BAM_NAME=`basename $IN_BAM`
       #echo "find ${BAM_REFORMATTED_RECALIBRATED_DIR}/${GROUP_NAME} -name $BAM_NAME -newer $IN_BAM 2>/dev/null | wc -l"
       HAS_NEWER=`find ${BAM_REFORMATTED_RECALIBRATED_DIR}/$GROUP_NAME -name $BAM_NAME -newer $IN_BAM 2>/dev/null | wc -l`
-      echo "$BAM_NAME $HAS_NEWER"
+      echo "BAM_NAME,HAS_NEWER: $BAM_NAME $HAS_NEWER"
       
       # this is a working flag indicating that an existing process
       # is already on this BAM file
       # Move flag files to a up level ${BAM_RECALIBRATED_DIR}  to avoid processing same BAM in different GROUP
       #FLG_WORKING="${BAM_REFORMATTED_RECALIBRATED_DIR}/${BAM_NAME}.$RECALIBRATION_WORKING_FLAG_EXTENSION"
+      inqueueDir="${BAM_REFORMATTED_RECALIBRATED_DIR}/InQueue"
+      if [ ! -d "${inqueueDir}" ]; then
+        mkdir -p "${inqueueDir}"
+      fi
       FLG_INQUEUE="${BAM_REFORMATTED_RECALIBRATED_DIR}/InQueue/${BAM_NAME}.$RECALIBRATION_INQUEUE_FLAG_EXTENSION"
       # echo "Flg_working:$FLG_WORKING"
       # echo "Flg_inqueue:$FLG_INQUEUE"
@@ -143,7 +159,7 @@ for GROUP in $(echo $DISEASE_GROUPS); do
           #Job Script in Biowulf -->
           CMD="sbatch --ntasks=8 \
                       --nodes=1 \
-                      --time=10-00:00:00 \
+                      --time=2-00:00:00 \
                       --mem=20G \
                       --job-name=RECAL.${BAM_NAME} \
                       --export=SCRIPT_DIR='${SCRIPT_DIR}' \
@@ -154,6 +170,11 @@ for GROUP in $(echo $DISEASE_GROUPS); do
           echo $CMD
           eval $CMD
         fi
+      else
+        echo
+        echo "WARNING: Failed to launch recalibration job for $BAM_NAME ..."
+        echo "  ------ HAS_NEWER: ${HAS_NEWER}"
+        echo
       fi
     done
   fi

@@ -61,7 +61,9 @@ class ClsSample:
         
         # Start to prepare job for current sample
         strCurDir = os.path.dirname(os.path.abspath(__file__))
-        strScript = strCurDir + "/RetrieveUSUBAM.sh"         
+        strScript = strCurDir + "/RetrieveUSUBAM.sh"
+        #strScript = strCurDir + "/RetrieveUSU2ndBAMOrg.sh"
+
         # CMD = ("obj_ls -v DCEG_COVID_WGS -h -m " + 
         #        "*" + self.strFlowcellID + "*" + self.strUSUID +  "*dedup_nophix.??? " + 
         #        "|awk 'NR>1 {print $8}' | " + 
@@ -70,6 +72,7 @@ class ClsSample:
         strBashScript = ("bash " + strScript + " " +
                                                self.strFlowcellID + " " +
                                                self.strUSUID + " " +
+                                               self.strCGRID + " " +
                                                strCurBAMDir + " " + 
                                                strFlagWorking + " " + 
                                                strFlagDone)        
@@ -80,7 +83,7 @@ class ClsSample:
         strJobName = "RTV-" + self.strUSUID + "-" + self.strCGRID + "-" + self.strFlowcellID
         
              
-        strRunningTime = "10-00:00:00"
+        strRunningTime = "1-00:00:00"
         strStdOut = strLogDir + "/" + outputPrefix + ".std.out"
         strStdErr = strLogDir + "/" + outputPrefix + ".std.err"        
                         

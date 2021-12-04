@@ -23,7 +23,7 @@ DIRBuffer = "/data/COVID_WGS/lix33/Test/2ndpipeline/Data/secondary_buf"
 DIRBAMReformat = "/data/COVID_WGS/lix33/Test/2ndpipeline/Data/BAM_reformatted"
 
 # Email notification List
-#EMAILReceiverEnd = "xin.li4@nih.gov,kristine.jones@nih.gov,dongjing.wu@nih.gov,wen.luo@nih.gov,hicksbel@mail.nih.gov"
+# EMAILReceiverEnd = "xin.li4@nih.gov,kristine.jones@nih.gov,dongjing.wu@nih.gov,wen.luo@nih.gov,hicksbel@mail.nih.gov"
 EMAILReceiverEnd = "xin.li4@nih.gov"
 EMAILSender = "xin.li4@nih.gov"
 
@@ -33,6 +33,7 @@ DONEFlagWarningEmail = "flag_email_warning_sent_done"
 
 # --> Defind the data structure to save the subject info from Keytable
 class ClsSample:
+
     def __init__(self):
         self.strUSUID = ""
         self.strCGRID = ""
@@ -45,14 +46,16 @@ class ClsSample:
     
     def InitByKTLine(self, strline):
         vItem = strline.split(',')
-        #print(vItem)
+        # print(vItem)
         self.strFlowcellID = vItem[0].split('_')[-1][1:]
         self.strUSUID = vItem[1]
         self.strCGRID = vItem[2].split('-')[-1]
         if len(vItem) == 4 and vItem[3] == "topoff":
             self.bTopoff = True
 
+
 class ClsSubject:
+
     def __init__(self):
         self.strCGRID = ""
         self.strAnalysisID = ""
@@ -68,7 +71,9 @@ class ClsSubject:
         self.strAnalysisID = strAnalysisID 
         return  strAnalysisID
 
+
 class ClsBuild:
+
     def __init__(self):
         self.vSubject = []
         self.strRootDir = ""
@@ -82,7 +87,7 @@ class ClsBuild:
         # 1: Get group info        
         file = open(strKeyTable, 'r')    
         iIndex = 0
-        while True:        
+        while True: 
             strline = file.readline()
             if not strline:
                 break;
@@ -115,11 +120,12 @@ class ClsBuild:
         self.strCurBAMDir = DIRBAMRoot + "/" + os.path.basename(strKeyTable).split('.')[0]
 # <--
 
-def MergeBAM(strKeytable, iSubjectNum, strKTName, objBuild):    
+
+def MergeBAM(strKeytable, iSubjectNum, strKTName, objBuild): 
     print("iSubjectNum      :", iSubjectNum)
     # Pre check if everything is all set! -->
     strFlagDir = DIRBAMRoot + "/" + strKTName + "/Flag/MergeSubject"
-    #bCallScript = True    
+    # bCallScript = True    
     if os.path.exists(strFlagDir):
         CMD = "find " + strFlagDir + " -iname '*.done' | wc -l"
         print("CMD:", CMD)
@@ -163,7 +169,8 @@ def MergeBAM(strKeytable, iSubjectNum, strKTName, objBuild):
     CMD = "python " + strScript + " " + strKeytable
     os.system(CMD)
     return 1
-    #<-- 
+    # <-- 
+
 
 def ReconstructBAMDir(strKTName):
     # Create working flag and done flag
@@ -195,27 +202,29 @@ def ReconstructBAMDir(strKTName):
     
     strScriptBash = "bash " + DIR2ndPipeline + "/step7b_take_incoming_bams.sh" + " " + strFlagWorking + " " + strFlagDone
     
-    #Submit jobs ->
+    # Submit jobs ->
     strNumCore = "8"
     strNodeNum = "1"
     strJobName = "RBD-" + strKTName
     strRunningTime = "10-00:00:00"
     strStdOut = strLogDir + "/reconstruct_BAM_Dir.std.out"
     strStdErr = strLogDir + "/reconstruct_BAM_Dir.std.err"
-    CMD = ("sbatch " + "--ntasks=" + strNumCore + " " +  
-                       "--nodes=" + strNodeNum + " " +
+    CMD = ("sbatch " + "--ntasks=" + strNumCore + " " + 
+                       "--nodes=" + strNodeNum + " " + 
                        "--job-name=" + strJobName + " " + 
                        "--time=" + strRunningTime + " " + 
-                       "--output=" + strStdOut + " " +
+                       "--output=" + strStdOut + " " + 
                        "--error=" + strStdErr + " " + 
                        "--wrap=\"" + strScriptBash + "\"")
     print(CMD)
     os.system(CMD)
     return 1                                        
 
+
 # Step 3
 def RecalibrateBAMFile(iSubjectNum, strKTName, objBuild):
     print("iSubjectNum      :", iSubjectNum)
+    strManifestFile = DIR2ndPipelineTMP + "/" + strKTName + "/Manifest_Mimic.csv"
     # Pre check if everything is all set! -->
     strFlagDir = DIRBAMRoot + "/" + strKTName + "/Flag/RecalibrateBAM"    
     if os.path.exists(strFlagDir):
@@ -256,20 +265,21 @@ def RecalibrateBAMFile(iSubjectNum, strKTName, objBuild):
     # if not, go ahead to call 
     print("\n", "Run: step8_sync_and_recalibrate_bam.sh -->", "\n")
     strScript = DIR2ndPipeline + "/step8_sync_and_recalibrate_bam.sh"
-    CMD = "bash " + strScript + " " + strKTName
+    CMD = "bash " + strScript + " " + strManifestFile + " " + "GERMLINE" + " " + strKTName
     os.system(CMD)
     return 1
 
+
 # step 4
 def ConstructBAMRecaliPerManifest(iSubjectNum, strKTName):
-    #1: Get Manifest file
+    # 1: Get Manifest file
     strManifestFile = DIR2ndPipelineTMP + "/" + strKTName + "/Manifest_Mimic.csv"
     if not os.path.exists(strManifestFile):
         print("Error: Manifest File is missing! ->", strManifestFile)
         return 1
     print("Got Manifest file:", strManifestFile)
     
-    #2: Create flag folder
+    # 2: Create flag folder
     strFlagDir = DIRBAMRoot + "/" + strKTName + "/Flag/ConstructBAMRecaliPerManifest"
     strLogDir = DIRBAMRoot + "/" + strKTName + "/Log/ConstructBAMRecaliPerManifest"
     
@@ -298,29 +308,30 @@ def ConstructBAMRecaliPerManifest(iSubjectNum, strKTName):
     
     strBuildName = "build_CGR_" + strKTName
     strScriptBash = ("bash " + DIR2ndPipeline + "/step9_construct_BAM_recaliberated_per_manifest.sh" + " " + 
-                                                strManifestFile + " " +
-                                                strBuildName + " " +
-                                                "GERMLINE" + " " +   
+                                                strManifestFile + " " + 
+                                                strBuildName + " " + 
+                                                "GERMLINE" + " " + 
                                                 strFlagWorking + " " + 
                                                 strFlagDone)
     
-    #Submit jobs ->
+    # Submit jobs ->
     strNumCore = "1"
     strNodeNum = "1"
     strJobName = "RBD-" + strKTName
-    strRunningTime = "10-00:00:00"
+    strRunningTime = "2-00:00:00"
     strStdOut = strLogDir + "/construct_BAM_recali_per_manifest.std.out"
     strStdErr = strLogDir + "/construct_BAM_recali_per_manifest.std.err"
-    CMD = ("sbatch " + "--ntasks=" + strNumCore + " " +  
-                       "--nodes=" + strNodeNum + " " +
+    CMD = ("sbatch " + "--ntasks=" + strNumCore + " " + 
+                       "--nodes=" + strNodeNum + " " + 
                        "--job-name=" + strJobName + " " + 
                        "--time=" + strRunningTime + " " + 
-                       "--output=" + strStdOut + " " +
+                       "--output=" + strStdOut + " " + 
                        "--error=" + strStdErr + " " + 
                        "--wrap=\"" + strScriptBash + "\"")
     print(CMD)
     os.system(CMD)
     return 1                                    
+
 
 # step 5
 def CoverageReport(iSubjectNum, strKTName):
@@ -383,6 +394,7 @@ def CoverageReport(iSubjectNum, strKTName):
     os.system(CMD)
     return 1
 
+
 # Step 6
 def PreCallingQCReport(iSubjectNum, strKTName):
     # 1: Get Manifest file
@@ -430,7 +442,7 @@ def PreCallingQCReport(iSubjectNum, strKTName):
                 # Collect Report
                 strScript = DIR2ndPipeline + "/step6_2_generating_pre_calling_qc_report_batch.sh"
                 CMD = "bash " + strScript + " " + strQCReport + " " + strKTName
-                #print("CMD:", CMD)
+                # print("CMD:", CMD)
                 os.system(CMD)
                 CMD = "touch " + strFlagDone
                 os.system(CMD)                
@@ -440,8 +452,8 @@ def PreCallingQCReport(iSubjectNum, strKTName):
                 print("Generating pre-calling QC report has been done before!")
                 print("Pre-calling QC report is located in:", "/data/COVID_WGS/lix33/Test/2ndpipeline/Data/secondary_buf/coverage_report/...")
             
-            #print("Log file is located in            :", "/data/COVID_WGS/lix33/Test/2ndpipeline/Data/secondary_buf/cluster_job_logs/...")
-            #print("Coverage report file is located in:", "/data/COVID_WGS/lix33/Test/2ndpipeline/Data/secondary_buf/coverage_report/...")
+            # print("Log file is located in            :", "/data/COVID_WGS/lix33/Test/2ndpipeline/Data/secondary_buf/cluster_job_logs/...")
+            # print("Coverage report file is located in:", "/data/COVID_WGS/lix33/Test/2ndpipeline/Data/secondary_buf/coverage_report/...")
             return 0
         
         if iTotalFlagNum == iSubjectNum:
@@ -458,6 +470,7 @@ def PreCallingQCReport(iSubjectNum, strKTName):
     print(CMD)
     os.system(CMD)
     return 1
+
 
 def BAMContaminationCheck(iSubjectNum, strKTName):
     # Check if all build dir contains the BAM contamination report
@@ -476,45 +489,46 @@ def BAMContaminationCheck(iSubjectNum, strKTName):
             print("vBuildList :", vBuildList)            
             return 0
         
-    #If not, run python script
+    # If not, run python script
     strScript = DIRCustomizedQC + "/Tools/BAMContaminationCheck/ContaminationCheck.py " + strKTName
     CMD = "python3 " + strScript
     os.system(CMD)
     return 1
+
 
 def SendEmailNotification(iSubjectNum, strKTName):
     strCurBuildFolder = DIRBAMRoot + "/" + strKTName
     strFlag = strCurBuildFolder + "/Flag/" + DONEFlagEmail
     
     strReportDir = strCurBuildFolder + "/Report"
-    #if True:
-    if not os.path.exists(strFlag):    
-        #Send email & add new email done flag
+    # if True:
+    if not os.path.exists(strFlag): 
+        # Send email & add new email done flag
         strMsg = "============ " + strKTName + " ============ \\n\\n"
-        strMsg += ("Good News              : The keytable " + strKTName + " IS ALL SET (COVID 2nd Analysis Pipeline) \\n\\n" +
-                   "Total Number of Subject: " + str(iSubjectNum) + "\\n\\n" +
+        strMsg += ("Good News              : The keytable " + strKTName + " IS ALL SET (COVID 2nd Analysis Pipeline) \\n\\n" + 
+                   "Total Number of Subject: " + str(iSubjectNum) + "\\n\\n" + 
                    "\\n\\n" + 
                    "======== Please Check the Results Below (Biowulf) ========  \\n\\n" + 
                    "Re-calibrated BAM File Path        : " + DIRBAMReformat + "/BAM_recalibrated/WGS" + "\\n\\n" + 
-                   "Coverage Report Path               : " + DIRBuffer + "/coverage_report/{contain keywords coverage}" + "\\n\\n" +
-                   "Pre-calling QC Report Path         : " + DIRBuffer + "/coverage_report/{contain keywords pre-calling QC}" + "\\n\\n" +
-                   "BAM Contamination Check Report Path: " +  DIRBuildProcess + "/build_CGR_" + strKTName + "/Report" + "\\n\\n" +
+                   "Coverage Report Path               : " + DIRBuffer + "/coverage_report/{contain keywords coverage}" + "\\n\\n" + 
+                   "Pre-calling QC Report Path         : " + DIRBuffer + "/coverage_report/{contain keywords pre-calling QC}" + "\\n\\n" + 
+                   "BAM Contamination Check Report Path: " + DIRBuildProcess + "/build_CGR_" + strKTName + "/Report" + "\\n\\n" + 
                    "\\n\\n" + 
-                   "======== Some Useful Directories are also listed below (Biowulf) ========  \\n\\n" +                   
-                   "Build Dir                     : " + DIRBuildProcess + "/build_CGR_" + strKTName + "\\n\\n" +
-                   "Original BAM Dir (after Merge): " + DIRBAMReformat + "/ BAM_original/WGS" + "\\n\\n" +
+                   "======== Some Useful Directories are also listed below (Biowulf) ========  \\n\\n" + 
+                   "Build Dir                     : " + DIRBuildProcess + "/build_CGR_" + strKTName + "\\n\\n" + 
+                   "Original BAM Dir (after Merge): " + DIRBAMReformat + "/ BAM_original/WGS" + "\\n\\n" + 
                    "Retrieved Flowcell (From S3)  : " + DIRBAMRoot + "/" + strKTName + "\\n\\n" + 
-                   "Flag Dir                      : " + DIRBAMReformat + "/BAM_recalibrated/Flag" + "\\n\\n" +
-                   "      >>>>>>>>>>>>>>>>>>>>>>> : " + DIRBAMRoot + "/" + strKTName + "/Flag" + "\\n\\n" +
-                   "      >>>>>>>>>>>>>>>>>>>>>>> : " + DIRBuildProcess + "/build_CGR_" + strKTName + "/Flag" + "\\n\\n" +
-                   "Log Dir:                      : " + DIRBuffer + "/cluster_job_logs" + "\\n\\n" +
-                   "      >>>>>>>>>>>>>>>>>>>>>>> : " + DIR2ndPipelineTMP + "/" + strKTName + "/Log" + "\\n\\n" +
-                   "      >>>>>>>>>>>>>>>>>>>>>>> : " + DIRBAMRoot + "/" + strKTName + "/Flag" + "\\n\\n" +
-                   "      >>>>>>>>>>>>>>>>>>>>>>> : " + DIR2ndPipelineTMP + "/" + strKTName + "/Script" + "\\n\\n" +
-                   "      >>>>>>>>>>>>>>>>>>>>>>> : " + DIRBuildProcess + "/build_CGR_" + strKTName + "/Log" + "\\n\\n" +
-                   "Report Dir                    : " + DIRBuffer + "/coverage_report" + "\\n\\n" +
+                   "Flag Dir                      : " + DIRBAMReformat + "/BAM_recalibrated/Flag" + "\\n\\n" + 
+                   "      >>>>>>>>>>>>>>>>>>>>>>> : " + DIRBAMRoot + "/" + strKTName + "/Flag" + "\\n\\n" + 
+                   "      >>>>>>>>>>>>>>>>>>>>>>> : " + DIRBuildProcess + "/build_CGR_" + strKTName + "/Flag" + "\\n\\n" + 
+                   "Log Dir:                      : " + DIRBuffer + "/cluster_job_logs" + "\\n\\n" + 
+                   "      >>>>>>>>>>>>>>>>>>>>>>> : " + DIR2ndPipelineTMP + "/" + strKTName + "/Log" + "\\n\\n" + 
+                   "      >>>>>>>>>>>>>>>>>>>>>>> : " + DIRBAMRoot + "/" + strKTName + "/Flag" + "\\n\\n" + 
+                   "      >>>>>>>>>>>>>>>>>>>>>>> : " + DIR2ndPipelineTMP + "/" + strKTName + "/Script" + "\\n\\n" + 
+                   "      >>>>>>>>>>>>>>>>>>>>>>> : " + DIRBuildProcess + "/build_CGR_" + strKTName + "/Log" + "\\n\\n" + 
+                   "Report Dir                    : " + DIRBuffer + "/coverage_report" + "\\n\\n" + 
                    "Pre-QC Tmp Result Dir         : " + DIRBuffer + "/PRE_QC" + "\\n\\n" + 
-                   "BAM Contamination Check Dir   : " + DIRBuildProcess + "/build_CGR_" + strKTName + "/Report,Log,Flag" + "\\n\\n" +                   
+                   "BAM Contamination Check Dir   : " + DIRBuildProcess + "/build_CGR_" + strKTName + "/Report,Log,Flag" + "\\n\\n" + 
                    "Mimic Manifest Dir            : " + DIR2ndPipelineTMP + "/" + strKTName + "/Manifest_Mimic.csv") 
                                                                             
         strSubject = strKTName + " is all Set (COVID 2nd Analysis Pipeline)"
@@ -531,7 +545,7 @@ def SendEmailNotification(iSubjectNum, strKTName):
         CMD = "echo -e \"" + strMsg + "\" | mail -r " + EMAILSender + strAttach + " -s \"" + strSubject + "\" " + EMAILReceiverEnd            
         print(CMD)               
         os.system(CMD)                 
-        #2: Set working flag to done and                
+        # 2: Set working flag to done and                
         CMD = "touch " + strFlag
         os.system(CMD)
         print("Email has been sent successfully! -->", strKTName)
@@ -539,25 +553,25 @@ def SendEmailNotification(iSubjectNum, strKTName):
         print("No action needed! Analysis has been finished! -->", strKTName)
     
             
-def main():        
+def main(): 
     strKeytable = sys.argv[1]
     if not os.path.exists(strKeytable):
         print("Error: Keytable does not exist! -->", strKeytable)
         return
     
-    #Print time stamp -->
+    # Print time stamp -->
     print()
     print("====== COVID Auto Framework ======", flush=True)
     print("strKeytable:", strKeytable)
     os.system("date")
     print()
-    #<--
+    # <--
     
     # Get the total number of subject in current keytable -> Go after lunch ->
     CMD = "awk 'NR > 1' " + strKeytable + " | grep -v 'topoff' | wc -l"
     iSubjectNum = int(subprocess.getoutput(CMD))
     
-    #Get Keytable Name
+    # Get Keytable Name
     strKTName = os.path.basename(strKeytable).split('.')[0]
     
     # --> Get subject info for current build (keytable)
@@ -567,7 +581,7 @@ def main():
     objBuild.GetGroupInfo(strKeytable)
     # <--
     
-    #SendEmailNotification(iSubjectNum, strKTName)
+    # SendEmailNotification(iSubjectNum, strKTName)
          
     # Step 1: Merge BAM file
     print("\n-----\n", "Step 1: Merge BAM file", "\n-----\n")
@@ -607,7 +621,7 @@ def main():
     print("\n-----\n", "Step 7: BAM contamination check", "\n-----\n")
     iReturnBAMContamCheck = BAMContaminationCheck(iSubjectNum, strKTName)
     
-    #Step 6 and step 7 can be run simutaniously
+    # Step 6 and step 7 can be run simutaniously
     if iReturnPreQC != 0:
         print("The phase of PreCallingQCReport is still running!")
         return 1

@@ -326,10 +326,15 @@ PERCENT_POOR_MAPPING_QUALITY=`echo "$POOR_MAPPING_QUALITY / $TOTAL_BASE " | bc -
 READS_ENDING_IN_INDELS=`head -1 ${BUFFER_DIR}/PRE_QC/${NAME}/output.txt | awk -F ": " '{print $2}'`
 READS_ENDING_IN_SOFTCLIPS=`head -2 ${BUFFER_DIR}/PRE_QC/${NAME}/output.txt  | tail -1 | awk -F ": " '{print $2}'`
 
-#GATK ReadLengthDistribution
-TOTAL_READS=`awk 'NR>4' ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_rld.tbl | awk '{sum+=$NF} END {print sum}'`
-TOTAL_BASES=`awk 'NR>4' ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_rld.tbl | awk '{sum+=$2*$1} END {print sum}'`
-TOTAL_READS_WITH_3LESS_CUT=`awk '/^$/ {nlstack=nlstack "\n";next;} {printf "%s",nlstack; nlstack=""; print;}' ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_rld.tbl | tail -4 | awk '{sum+=$2} END {print sum}'`
+#GATK ReadLengthDistribution --> bug -> Go to check it
+#TOTAL_READS=`awk 'NR>4' ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_rld.tbl | awk '{sum+=$NF} END {print sum}'`
+#TOTAL_BASES=`awk 'NR>4' ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_rld.tbl | awk '{sum+=$2*$1} END {print sum}'`
+#TOTAL_READS_WITH_3LESS_CUT=`awk '/^$/ {nlstack=nlstack "\n";next;} {printf "%s",nlstack; nlstack=""; print;}' ${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_rld.tbl | tail -4 | awk '{sum+=$2} END {print sum}'`
+tblFile=${BUFFER_DIR}/PRE_QC/${NAME}/${NAME}_rld.tbl
+TOTAL_READS=$(awk 'NR>4 {for (i=1;i<=NF;i++) sum[i]+=$i;}; END{for (i in sum) print sum[i]}' ${tblFile} | tail -n +2 | awk '{sum+=$NF}; END{print sum}')
+TOTAL_BASES=$(awk 'NR>4 {for (i=1;i<=NF;i++) sum[i]+=$i*$1;}; END{for (i in sum) print sum[i]}' ${tblFile} | tail -n +2 | awk '{sum+=$NF}; END{print sum}')
+TOTAL_READS_WITH_3LESS_CUT=$(awk '/^$/ {nlstack=nlstack "\n";next;} {printf "%s",nlstack; nlstack=""; print;}' ${tblFile} | tail -n 4 | awk '{for (i=1;i<=NF;i++) sum[i]+=$i;}; END{for (i in sum) print sum[i]}' | tail -n +2 | awk '{sum+=$NF}; END{print sum}')
+
 if [[ ! $TOTAL_READS -gt 0 ]]; then	
 	echo "Error. TOTAL_READS is less than 0, something is wrong."
 else

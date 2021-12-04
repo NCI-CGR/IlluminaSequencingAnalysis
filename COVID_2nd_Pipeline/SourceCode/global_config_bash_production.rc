@@ -6,9 +6,13 @@ DIRBuild="/data/COVID_WGS/lix33/Test/2ndpipeline/Build/processed"
 DIRRootBed="/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/bed"
 DIRCDS="/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/CDS"
 
+# upper level result directories
+DATA_ROOT_DIR=/data/COVID_WGS/lix33/Test/2ndpipeline/Data
+#DATA_ROOT_DIR=/data/COVID_WGS/lix33/Debug/low_input_01_96_keytable/WGS_SC740082_I8-02184/Data
+
 # For the all output/intermedia files
 #BUFFER_DIR=/DCEG/Projects/Exome/SequencingData/secondary_buf
-BUFFER_DIR=/data/COVID_WGS/lix33/Test/2ndpipeline/Data/secondary_buf
+BUFFER_DIR=${DATA_ROOT_DIR}/secondary_buf
 
 # For customized capturekit bed files
 CUSTOMIZED_BED_DIR=/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/customized_capturekit
@@ -41,9 +45,6 @@ LEFT_ALIGN_INDELS=true
 
 REPLACE_TABLE=false
 
-# upper level result directories
-DATA_ROOT_DIR=/data/COVID_WGS/lix33/Test/2ndpipeline/Data
-
 # This is the directory of all original BAMs
 BAM_ORIGINAL_DIR=$DATA_ROOT_DIR/BAM_original
 
@@ -70,7 +71,8 @@ COVERAGE_REPORT_DIR=${BUFFER_DIR}/coverage_report
 # Do not edit the two settings below if you don't know what they are
 # These are two very specific settings related to our particular file system
 # This is the "aboslute scratch" space without snapshot
-SCRATCH_DIR=/data/COVID_WGS/lix33/Test/2ndpipeline/Data/tmp
+SCRATCH_DIR=${DATA_ROOT_DIR}/tmp
+
 # This is the "local temp" space with snapshot
 # use in the last stage of the intermediate files for performance considerations
 TMP_DIR=$SCRATCH_DIR

@@ -24,7 +24,9 @@ DECORATEAnalysisIDPrefix = "WGS_"
 
 DIRBAMRoot = "/data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Data/BAM/Batch"
 
+
 class ClsSample:
+
     def __init__(self):
         self.strUSUID = ""
         self.strCGRID = ""
@@ -37,7 +39,7 @@ class ClsSample:
     
     def InitByKTLine(self, strline):
         vItem = strline.split(',')
-        #print(vItem)
+        # print(vItem)
         self.strFlowcellID = vItem[0].split('_')[-1][1:]
         self.strUSUID = vItem[1]
         self.strCGRID = vItem[2].split('-')[-1]
@@ -88,36 +90,36 @@ class ClsSample:
                 
         strRGLine = strRGList.split('\n')[0]
         vRG = strRGLine.split('\t')
-        #print(vRG)
+        # print(vRG)
         # --> Prepare info for current sample
         strInstrument = "E0180-03"
         strSeqDate = ""
         strLane = "1"
         strIndex = vRG[-2].split('.')[-1]
         strFullFlowcellID = vRG[-2].split('.')[0].split(':')[1]
-        #print(strFullFlowcellID)
-        #print(strIndex)
+        # print(strFullFlowcellID)
+        # print(strIndex)
         strGroup = "WGS"
         strLMSIndividual = "I-0000510733"
         strEXPECTEDGENDER = "M"
         strIDENTIFILERGENDER = "M"
         strUCSCAVGCOV = "99.99"
-        strASSAYID = "EZ_WGS_PE" #"EZ_Exome+UTR_PE"
-        #strANALYSISID = "NA12878_GDNA_HS4K_KHPL_1"
+        strASSAYID = "EZ_WGS_PE"  # "EZ_Exome+UTR_PE"
+        # strANALYSISID = "NA12878_GDNA_HS4K_KHPL_1"
         
         strLine = (strInstrument + "," + 
-                   strSeqDate + "," +
-                   strFullFlowcellID + "," +
-                   strLane  + "," +
-                   strIndex  + "," +
-                   self.strUSUID  + "," +
-                   strGroup  + "," +
-                   strLMSIndividual  + "," +
-                   strEXPECTEDGENDER  + "," +
-                   strIDENTIFILERGENDER  + "," +
-                   strUCSCAVGCOV  + "," +
-                   strASSAYID  + "," +
-                   strAnalysisID  + "," +
+                   strSeqDate + "," + 
+                   strFullFlowcellID + "," + 
+                   strLane + "," + 
+                   strIndex + "," + 
+                   self.strUSUID + "," + 
+                   strGroup + "," + 
+                   strLMSIndividual + "," + 
+                   strEXPECTEDGENDER + "," + 
+                   strIDENTIFILERGENDER + "," + 
+                   strUCSCAVGCOV + "," + 
+                   strASSAYID + "," + 
+                   strAnalysisID + "," + 
                    self.strCGRID + "\n")
         vContent.append(strLine)
         print(strLine)
@@ -125,6 +127,7 @@ class ClsSample:
         
     
 class ClsSubject:
+
     def __init__(self):
         self.strCGRID = ""
         self.strAnalysisID = ""
@@ -182,8 +185,8 @@ class ClsSubject:
         strCmdBashScript = ("bash " + SCRIPTMergeSample + " " + 
                             strDecorateAnalysisID + " " + 
                             "1" + " " + 
-                            strManifestFile + " " +
-                            strFlagWoking + " " +
+                            strManifestFile + " " + 
+                            strFlagWoking + " " + 
                             strFlagDone)
         strSamplelist = ""
         for sample in self.vSample:
@@ -197,7 +200,7 @@ class ClsSubject:
         f.close()        
         
         # Prepare slurm script
-        #1: Set std output and std error
+        # 1: Set std output and std error
         strStdOut = strLogDir + "/merge_sample_" + self.strAnalysisID + ".log.std"
         strStdErr = strLogDir + "/merge_sample_" + self.strAnalysisID + ".log.err"
         if os.path.exists(strStdOut):
@@ -209,20 +212,20 @@ class ClsSubject:
             
         # Get Script file
         str2ndPipelineDir = "/home/lix33/lxwg/Git/sync_script_biowulf"
-        strRunningTime = "10-00:00:00"
+        strRunningTime = "5-00:00:00"
         strNumCore = "8"
         strNodeNum = "1"
         strMem = "16g"
-        strJobName = "MSP." + self.strCGRID # Merge Sample
+        strJobName = "MSP." + self.strCGRID  # Merge Sample
         
         strSlurmScript = ("sbatch " + 
                           "--export=SCRIPT_HOME='" + str2ndPipelineDir + "' " + 
-                          "--ntasks=" + strNumCore + " " +  
-                          "--nodes=" + strNodeNum + " " +
-                          "--mem=" + strMem + " " +  
+                          "--ntasks=" + strNumCore + " " + 
+                          "--nodes=" + strNodeNum + " " + 
+                          "--mem=" + strMem + " " + 
                           "--job-name=" + strJobName + " " + 
                           "--time=" + strRunningTime + " " + 
-                          "--output=" + strStdOut + " " +
+                          "--output=" + strStdOut + " " + 
                           "--error=" + strStdErr)
         CMD = strSlurmScript + " " + strJobScript
         print(CMD)
@@ -231,7 +234,9 @@ class ClsSubject:
         CMD = "touch " + strFlagWoking
         os.system(CMD)
 
+
 class ClsBuild:
+
     def __init__(self):
         self.vSubject = []
         self.strRootDir = ""
@@ -245,7 +250,7 @@ class ClsBuild:
         # 1: Get group info        
         file = open(strKeyTable, 'r')    
         iIndex = 0
-        while True:        
+        while True: 
             strline = file.readline()
             if not strline:
                 break;
@@ -288,7 +293,7 @@ class ClsBuild:
         print(strKeyTableName)
         strDir = DIRRootBuild + "/" + strKeyTableName
         CMD = "mkdir -p " + strDir
-        #print(CMD)
+        # print(CMD)
         os.system(CMD)
         self.strRootDir = strDir 
          
@@ -313,12 +318,18 @@ class ClsBuild:
         self.strManifestFile = strFile
         
         # Create done flag to let people know the manifest has been created!
-        strBAMFlagDir = DIRBAMRoot + "/" + strKeyTableName + "/Flag/BuildManifest"
+        strBatchRootDir = DIRBAMRoot + "/" + strKeyTableName
+        strBAMFlagDir = strBatchRootDir + "/Flag/BuildManifest"
         strDoneFlag = strBAMFlagDir + "/" + strKeyTableName + ".build.manifest.done"
+         
         if not os.path.exists(strBAMFlagDir):
             CMD = "mkdir -p " + strBAMFlagDir
             os.system(CMD)
         CMD = "echo '" + strFile + "' > " + strDoneFlag
+        os.system(CMD)
+        
+        # back up to Batch Root Dir:
+        CMD = "cp " + strFile + " " + strBatchRootDir
         os.system(CMD)
         
         print("-->\n", "Mimic Manifest file:", strFile, "\n<--")
@@ -350,17 +361,18 @@ def main():
     # 2: Get BAM file for each sample
     print("\n", "==> GetBAMFile")
     objBuild.GetBAMFile()    
-    #print(len(objBuild.vSubject))
+    # print(len(objBuild.vSubject))
     
     # 3: Build Manifest file -> GO!
     print("\n", "==> BuidManifestFile")
     objBuild.BuidManifestFile(strKeyTable)
     
     # 4: Submit jobs
-    #print("\n", "==> SubmitJobs")
+    # print("\n", "==> SubmitJobs")
     objBuild.SubmitJobs()
     
     print("All Set!")
+
 
 if __name__ == "__main__":
     main()

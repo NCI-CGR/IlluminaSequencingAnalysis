@@ -37,19 +37,24 @@ import subprocess
 
 
 DATE = "10_27_2021"
-KEYTABLEName = "std_input_01_361_keytable"
+
+MAINKTName = "std_input_01_361_keytable"
+
+KEYTABLEName = "std_input_201_361_keytable"
+
 KEYWORD = "std_input"
 
 class ClsDirSet:
     def __init__(self):
         self.strS3Root = ""
         
-        self.strBiowulfBuidDir = ""
+        self.strBiowulfBuidDirProcess = ""
+        self.strBiowulfBuidDirTmp = ""
         self.strBiowulfBAMOrgDir = ""
         self.strBiowulfBAMRecalibrateDir = ""
         
-        self.strBiowulfSecondBufLogsDir = ""
-        self.strBiowulfSecondBufReportDir = ""
+        self.vBiowulfSecondBufLogsDir = ""
+        self.vBiowulfSecondBufReport = ""
         self.strBiowulfSecondBufPreQCDir = ""
                 
         self.arryBiowulfUpstreamFlag = []
@@ -63,22 +68,38 @@ class ClsDirSet:
     
     def Init(self):
         #->S3 root
-        self.strS3Root = "lix33/COVID19/UpstreamAnalysis/PostPrimaryRun/Data/" + DATE + "/" + KEYTABLEName
+        self.strS3Root = "lix33/COVID19/UpstreamAnalysis/PostPrimaryRun/Data/" + DATE + "/" + MAINKTName
         
         #-> Build Dir
         # --> this may contain softlink -> need to zip first
-        self.strBiowulfBuidDir = "/data/COVID_WGS/lix33/Test/2ndpipeline/Build"
-        self.strBiowulfBAMOrgDir = "/data/COVID_WGS/lix33/Test/2ndpipeline/Data/BAM_reformatted/BAM_original/WGS"
-        self.strBiowulfBAMRecalibrateDir = " /data/COVID_WGS/lix33/Test/2ndpipeline/Data/BAM_reformatted/BAM_recalibrated/WGS"
+        strBiowulfBuidDir = "/data/COVID_WGS/lix33/Test/2ndpipeline/Build"
+        CMD = "find " + strBiowulfBuidDir + " -maxdepth 2 -type d -iname '*" + KEYTABLEName + "*'"
+        vDir = subprocess.getoutput(CMD).split('\n') 
+        for strDir in vDir:
+            if "/processed" in strDir:
+                self.strBiowulfBuidDirProcess = strDir
+                continue
+            if "/tmp" in strDir:                
+                self.strBiowulfBuidDirTmp = strDir
+                continue
+        
+        self.strBiowulfBAMOrgDir = "/data/COVID_WGS/lix33/Test/2ndpipeline/Data/Backup/std_input_201_361_keytable/BAM_reformatted/BAM_original/WGS"
+        self.strBiowulfBAMRecalibrateDir = "/data/COVID_WGS/lix33/Test/2ndpipeline/Data/Backup/std_input_201_361_keytable/BAM_reformatted/BAM_recalibrated/WGS"
         
         #-> SecondBuf Dir
-        self.strBiowulfSecondBufLogsDir = "/data/COVID_WGS/lix33/Test/2ndpipeline/Data/secondary_buf/cluster_job_logs"
-        self.strBiowulfSecondBufReportDir = "/data/COVID_WGS/lix33/Test/2ndpipeline/Data/secondary_buf/coverage_report"
-        self.strBiowulfSecondBufPreQCDir = "/data/COVID_WGS/lix33/Test/2ndpipeline/Data/secondary_buf/PRE_QC"
+        strBiowulfSecondBufLogsDir = "/data/COVID_WGS/lix33/Test/2ndpipeline/Data/Backup/std_input_201_361_keytable/secondary_buf/cluster_job_logs"
+        CMD = "find " + strBiowulfSecondBufLogsDir + " -maxdepth 1 -type d -iname '*" + KEYTABLEName + "*'"
+        self.vBiowulfSecondBufLogsDir = subprocess.getoutput(CMD).split('\n')
         
+        strBiowulfSecondBufReportDir = "/data/COVID_WGS/lix33/Test/2ndpipeline/Data/Backup/std_input_201_361_keytable/secondary_buf/coverage_report"
+        CMD = "find " + strBiowulfSecondBufReportDir + " -maxdepth 1 -type f -iname '*" + KEYTABLEName + "*'"
+        self.vBiowulfSecondBufReport = subprocess.getoutput(CMD).split('\n')
+        
+        
+        self.strBiowulfSecondBufPreQCDir = "/data/COVID_WGS/lix33/Test/2ndpipeline/Data/Backup/std_input_201_361_keytable/secondary_buf/PRE_QC"
         
         strBiowulfUpstreamBatchDir = "/data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Data/BAM/Batch"
-        CMD = "find " + strBiowulfUpstreamBatchDir + " -maxdepth 1 -type d -iname '" + KEYWORD + "*'"
+        CMD = "find " + strBiowulfUpstreamBatchDir + " -maxdepth 1 -type d -iname '*" + KEYTABLEName + "*'"
         #print(CMD)
         vDir = subprocess.getoutput(CMD).split('\n')
         self.arryBatchDir = vDir 
@@ -108,12 +129,18 @@ class ClsDirSet:
         print()        
         
     def Upload(self):
-        BackupDirFromBiowulf2S3(self.strS3Root, self.strBiowulfBuidDir, "/data/COVID_WGS/lix33/Test/")
+        BackupDirFromBiowulf2S3(self.strS3Root, self.strBiowulfBuidDirProcess, "/data/COVID_WGS/lix33/Test/")
+        BackupDirFromBiowulf2S3(self.strS3Root, self.strBiowulfBuidDirTmp, "/data/COVID_WGS/lix33/Test/")
+        
         BackupDirFromBiowulf2S3(self.strS3Root, self.strBiowulfBAMOrgDir, "/data/COVID_WGS/lix33/Test/")
         BackupDirFromBiowulf2S3(self.strS3Root, self.strBiowulfBAMRecalibrateDir, "/data/COVID_WGS/lix33/Test/")
         
-        BackupDirFromBiowulf2S3(self.strS3Root, self.strBiowulfSecondBufLogsDir, "/data/COVID_WGS/lix33/Test/")
-        BackupDirFromBiowulf2S3(self.strS3Root, self.strBiowulfSecondBufReportDir, "/data/COVID_WGS/lix33/Test/")
+        for strDir in self.vBiowulfSecondBufLogsDir:
+            BackupDirFromBiowulf2S3(self.strS3Root, strDir, "/data/COVID_WGS/lix33/Test/")
+        
+        for strFile in self.strBiowulfSecondBufReport:
+            BackupFileFromBiowulf2S3(self.strS3Root, strFile, "/data/COVID_WGS/lix33/Test/")
+            
         BackupDirFromBiowulf2S3(self.strS3Root, self.strBiowulfSecondBufPreQCDir, "/data/COVID_WGS/lix33/Test/")
         
         for strFlagDir in self.arryBiowulfUpstreamFlag:
@@ -124,20 +151,26 @@ class ClsDirSet:
         
         for strReportDir in self.arryBiowulfUpstreamReport:
             BackupDirFromBiowulf2S3(self.strS3Root, strReportDir, "/data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/Data/BAM/")
-            
+        
         BackupDirFromBiowulf2S3(self.strS3Root, self.strBiowulfUpstreamKeyTableDir, "/data/COVID_WGS/UpstreamAnalysis/PostPrimaryRun/")
 
     def Remove(self):
         print("Remove data from Biowulf -->", "\n")
         
         print("******* Remove BiowulfBuidDir, BiowulfBAMOrgDir and BiowulfBAMRecalibrateDir **********")
-        RemoveDirFromBiowulf(self.strBiowulfBuidDir)
+        RemoveDirFromBiowulf(self.strBiowulfBuidDirProcess)
+        RemoveDirFromBiowulf(self.strBiowulfBuidDirTmp)
+        
         RemoveDirFromBiowulf(self.strBiowulfBAMOrgDir)
         RemoveDirFromBiowulf(self.strBiowulfBAMRecalibrateDir)
         
-        print("******* Remove BiowulfSecondBufLogsDir, BiowulfSecondBufReportDir and BiowulfSecondBufPreQCDir **********")
-        RemoveDirFromBiowulf(self.strBiowulfSecondBufLogsDir)
-        RemoveDirFromBiowulf(self.strBiowulfSecondBufReportDir)
+        print("******* Remove BiowulfSecondBufLogsDir, BiowulfSecondBufReportDir and BiowulfSecondBufPreQCDir **********")        
+        for strDir in self.vBiowulfSecondBufLogsDir:
+            RemoveDirFromBiowulf(strDir)
+                    
+        for strFile in self.strBiowulfSecondBufReport:
+            RemoveFileFromBiowulf(strFile)
+        
         RemoveDirFromBiowulf(self.strBiowulfSecondBufPreQCDir)
         
         print("******* Remove UpstreamAnalysisBatchDirs **********")
@@ -146,12 +179,22 @@ class ClsDirSet:
         
 
 def RemoveDirFromBiowulf(strDir):
+    print("Removing Dir:", strDir)
     if not os.path.exists(strDir):
         print("Error: Path do not exist!")
         return 1
-    
-    print("Removing Dir:", strDir)
+        
     CMD = "rm -r " + strDir
+    os.system(CMD)
+    print("Removing Done!", "\n")
+    
+def RemoveFileFromBiowulf(strFile):
+    print("Removing File:", strFile)
+    if not os.path.exists(strFile):
+        print("Error: Path do not exist!")
+        return 1
+        
+    CMD = "rm " + strFile
     os.system(CMD)
     print("Removing Done!", "\n")
             
@@ -185,7 +228,11 @@ def BackupDirFromBiowulf2S3(strS3Root, strOrgDir, strCutoffPrefix, bContainSoftL
     # strPrefix = strObjPrefix + os.path.dirname(strFile).replace(strRootDir, '') + "/"        
     # #CMD = "obj_put -v DCEG_COVID_WGS -p " + "\"" + strPrefix + "\" " + strFile + " --dry-run -V" # Dry run
     # CMD = "obj_put -v DCEG_COVID_WGS -p " + "\"" + strPrefix + "\" " + strFile + " -V" # wet run
-    
+
+def BackupFileFromBiowulf2S3(strS3Root, strFile, strCutoffPrefix):
+    strPrefix = strS3Root + "/" + os.path.dirname(strFile).split(strCutoffPrefix)[1] + "/"
+    CMD = "obj_put -v DCEG_COVID_WGS -p " + "\"" + strPrefix + "\" " + strFile + " -V" # Wet run
+    os.system(CMD)
 
 def BackUpToS3(objDirSet):
     objDirSet.Upload()
