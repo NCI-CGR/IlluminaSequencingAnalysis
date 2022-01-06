@@ -39,12 +39,10 @@ SC740170,12601,I-0002688243,Buffy Coat,1,standard,UPenn,USA,1992,28,F,No,No,mild
 SC740171,33412,I-0002688244,Buffy Coat,1,standard,UPenn,USA,1963,57,M,No,No,mild
 SC740172,51991,I-0002688245,Buffy Coat,1,standard,UPenn,USA,1961,59,M,No,No,mild
 SC740173,48456,I-0002688246,Buffy Coat,1,standard,UPenn,USA,1985,35,M,No,No,mild
-SC740173,48456,I-0002688246,Buffy Coat,1,standard,UPenn,USA,1985,35,M,No,No,mild
 SC740174,41558,I-0002688247,Buffy Coat,1,standard,UPenn,USA,1954,66,M,No,No,mild
 SC740175,43218,I-0002688248,Buffy Coat,1,standard,UPenn,USA,1963,57,M,No,No,mild
 SC740176,10000511,I-0002688249,Buffy Coat,1,standard,UPenn,USA,1954,66,M,No,No,mild
 SC740179,35880,I-0002688252,Buffy Coat,1,standard,UPenn,USA,1946,74,M,No,No,mild
-SC740181,46924,I-0002688254,Buffy Coat,1,standard,UPenn,USA,1958,62,F,No,No,mild
 SC740181,46924,I-0002688254,Buffy Coat,1,standard,UPenn,USA,1958,62,F,No,No,mild
 SC740182,41407,I-0002688255,Buffy Coat,1,standard,UPenn,USA,1982,38,F,No,No,mild
 SC740183,43305,I-0002688256,Buffy Coat,1,standard,UPenn,USA,1965,55,M,No,No,mild
@@ -129,7 +127,6 @@ SC740358,65786,I-0002688431,Buffy Coat,1,standard,UPenn,USA,1992,28,F,No,No,mild
 SC740359,15692,I-0002688432,Buffy Coat,1,standard,UPenn,USA,1956,64,F,No,No,mild
 SC740360,31608,I-0002688433,Buffy Coat,1,standard,UPenn,USA,1969,51,F,No,No,mild
 SC740363,15925,I-0002688436,Buffy Coat,1,standard,UPenn,USA,1958,62,M,No,No,mild
-SC740363,15925,I-0002688436,Buffy Coat,1,standard,UPenn,USA,1958,62,M,No,No,mild
 SC740364,39561,I-0002688437,Buffy Coat,1,standard,UPenn,USA,1977,43,F,No,No,mild
 SC740367,39495,I-0002688440,Buffy Coat,1,standard,UPenn,USA,1954,66,M,No,No,mild
 SC740368,16734,I-0002688441,Buffy Coat,1,standard,UPenn,USA,1986,34,M,No,No,mild
@@ -169,7 +166,6 @@ SC740427,54422,I-0002688500,Buffy Coat,1,standard,UPenn,USA,1955,65,M,No,No,mild
 SC740431,34555,I-0002688504,Buffy Coat,1,standard,UPenn,USA,1984,36,M,No,No,mild
 SC740433,54614,I-0002688506,Buffy Coat,1,standard,UPenn,USA,1968,52,M,No,No,mild
 SC740435,10002723,I-0002688508,Buffy Coat,1,standard,UPenn,USA,1981,39,F,No,No,mild
-SC740436,59198,I-0002688509,Buffy Coat,1,standard,UPenn,USA,1949,71,F,No,No,mild
 SC740436,59198,I-0002688509,Buffy Coat,1,standard,UPenn,USA,1949,71,F,No,No,mild
 SC740439,54914,I-0002688512,Buffy Coat,1,standard,UPenn,USA,1966,54,M,No,No,mild
 SC740444,56405,I-0002688517,Buffy Coat,1,standard,UPenn,USA,1977,43,F,No,No,mild
@@ -213,7 +209,6 @@ SC740372,26044,I-0002688445,Buffy Coat,2,low,UPenn,USA,1970,50,F,No,No,mild
 SC740399,27167,I-0002688472,Buffy Coat,2,low,UPenn,USA,1944,76,F,No,No,mild
 SC740425,48333,I-0002688498,Buffy Coat,2,low,UPenn,USA,1995,25,F,No,No,mild
 SC740438,56271,I-0002688511,Buffy Coat,2,low,UPenn,USA,1958,62,F,No,No,mild
-SC740438,56271,I-0002688511,Buffy Coat,2,low,UPenn,USA,1958,62,F,No,No,mild
 SC666763,1053_104,I-0002584506,Whole Blood,1,standard,Northwestern,US,1964,56,M,No,,mild
 SC666768,1053_109,I-0002584511,Whole Blood,1,standard,Northwestern,US,1966,54,F,No,,mild
 SC666779,1053_120,I-0002584522,Whole Blood,1,standard,Northwestern,US,1970,50,M,No,,mild
@@ -250,7 +245,6 @@ SC690091,1053_130,I-0002584532,Whole Blood,1,standard,Northwestern,US,1988,32,F,
 SC690093,1053_134,I-0002584536,Whole Blood,1,standard,Northwestern,US,1984,36,F,No,,mild
 SC691098,1053_164,I-0002584566,Whole Blood,1,standard,Northwestern,US,1963,57,F,No,,mild
 SC666764,1053_105,I-0002584507,Whole Blood,2,low,Northwestern,US,1982,38,M,No,,mild
-SC666764,1053_105,I-0002584507,Whole Blood,2,low,Northwestern,US,1982,38,M,No,,mild
 SC695934,FLD0001020,I-0002630988,Buffy Coat/RBCs,1,standard,COVIDcode,USA,1960,60,F,No,,mild
 SC706896,CV0012,I-0002656183,Buffy Coat/RBCs,1,standard,UAB,USA,1970,50,F,No,,mild
 SC682650,CP02,I-0002613066,Whole Blood,1,standard,CCR - Kreitman,USA,1962,58,M,No,,mild
@@ -285,7 +279,6 @@ SC695905,OMS0001172,I-0002631016,Buffy Coat/RBCs,1,standard,COVIDcode,USA,1971,4
 SC695907,OMS0001051,I-0002630998,Buffy Coat/RBCs,1,standard,COVIDcode,USA,1997,23,F,No,,mild
 SC695908,OMS0001166,I-0002631010,Buffy Coat/RBCs,1,standard,COVIDcode,USA,1965,55,F,No,,mild
 SC695911,OMS0001155,I-0002631002,Buffy Coat/RBCs,1,standard,COVIDcode,USA,1988,32,F,No,,mild
-SC695911,OMS0001155,I-0002631002,Buffy Coat/RBCs,1,standard,COVIDcode,USA,1988,32,F,No,,mild
 SC695924,OMS0001167,I-0002631011,Buffy Coat/RBCs,1,standard,COVIDcode,USA,1978,42,F,No,,mild
 SC695927,OMS0001157,I-0002631003,Buffy Coat/RBCs,1,standard,COVIDcode,USA,1988,32,F,No,,mild
 SC695931,OMS0001164,I-0002631008,Buffy Coat/RBCs,1,standard,COVIDcode,USA,1972,48,F,No,,mild
@@ -294,12 +287,10 @@ SC695935,OMS0001160,I-0002631005,Buffy Coat/RBCs,1,standard,COVIDcode,USA,1985,3
 SC695946,OMS0001152,I-0002630999,Buffy Coat/RBCs,1,standard,COVIDcode,USA,1991,29,F,No,,mild
 SC707207,CV0767,I-0002656494,Buffy Coat/RBCs,1,standard,UAB,USA,1982,38,M,No,,mild
 SC682651,CP03,I-0002613067,Whole Blood,2,low,CCR - Kreitman,USA,1969,51,F,No,,mild
-SC682651,CP03,I-0002613067,Whole Blood,2,low,CCR - Kreitman,USA,1969,51,F,No,,mild
 SC682658,CP16,I-0002613074,Whole Blood,2,low,CCR - Kreitman,USA,1953,67,M,No,,mild
 SC682660,CP18,I-0002613076,Whole Blood,2,low,CCR - Kreitman,USA,1963,57,M,No,,mild
 SC682667,CP29,I-0002613083,Whole Blood,2,low,CCR - Kreitman,USA,1982,38,M,No,,mild
 SC682669,CP39,I-0002613085,Whole Blood,2,low,CCR - Kreitman,USA,1962,58,F,No,,mild
-SC682672,CP47,I-0002613088,Whole Blood,2,low,CCR - Kreitman,USA,1980,40,F,No,,mild
 SC682672,CP47,I-0002613088,Whole Blood,2,low,CCR - Kreitman,USA,1980,40,F,No,,mild
 SC682679,CP63,I-0002613095,Whole Blood,2,low,CCR - Kreitman,USA,1992,28,F,No,,mild
 SC682685,CP71,I-0002613101,Whole Blood,2,low,CCR - Kreitman,USA,1948,72,M,No,,mild
@@ -314,7 +305,6 @@ SC740134,44799,I-0002688207,Buffy Coat,1,standard,UPenn,USA,1943,77,M,Yes,No,mod
 SC740135,25434,I-0002688208,Buffy Coat,1,standard,UPenn,USA,1959,61,F,Yes,No,moderate
 SC740137,10011902,I-0002688210,Buffy Coat,1,standard,UPenn,USA,1968,52,M,Yes,No,moderate
 SC740143,40530,I-0002688216,Buffy Coat,1,standard,UPenn,USA,1936,84,M,Yes,No,moderate
-SC740145,10006525,I-0002688218,Buffy Coat,1,standard,UPenn,USA,1932,88,M,Yes,No,moderate
 SC740145,10006525,I-0002688218,Buffy Coat,1,standard,UPenn,USA,1932,88,M,Yes,No,moderate
 SC740147,15928,I-0002688220,Buffy Coat,1,standard,UPenn,USA,1943,77,M,Yes,No,moderate
 SC740153,10013540,I-0002688226,Buffy Coat,1,standard,UPenn,USA,1972,48,F,Yes,No,moderate
@@ -344,7 +334,6 @@ SC740292,51140,I-0002688365,Buffy Coat,1,standard,UPenn,USA,1968,52,M,Yes,No,mod
 SC740297,20131,I-0002688370,Buffy Coat,1,standard,UPenn,USA,1965,55,F,Yes,No,moderate
 SC740305,31710,I-0002688378,Buffy Coat,1,standard,UPenn,USA,1944,76,F,Yes,No,moderate
 SC740327,32680,I-0002688400,Buffy Coat,1,standard,UPenn,USA,1975,45,F,Yes,No,moderate
-SC740327,32680,I-0002688400,Buffy Coat,1,standard,UPenn,USA,1975,45,F,Yes,No,moderate
 SC740330,62398,I-0002688403,Buffy Coat,1,standard,UPenn,USA,1959,61,F,Yes,No,moderate
 SC740336,2238,I-0002688409,Buffy Coat,1,standard,UPenn,USA,1960,60,M,Yes,No,moderate
 SC740339,45503,I-0002688412,Buffy Coat,1,standard,UPenn,USA,1951,69,M,Yes,No,moderate
@@ -365,7 +354,6 @@ SC740282,50929,I-0002688355,Buffy Coat,2,low,UPenn,USA,1958,62,F,Yes,No,moderate
 SC740287,24058,I-0002688360,Buffy Coat,2,low,UPenn,USA,1929,91,F,Yes,No,moderate
 SC740288,20802,I-0002688361,Buffy Coat,2,low,UPenn,USA,1958,62,M,Yes,No,moderate
 SC740432,56487,I-0002688505,Buffy Coat,2,low,UPenn,USA,1992,28,M,Yes,No,moderate
-SC704033,COV86,I-0002646680,PBMCs,1,standard,South Korea,SOUTHKOREA,1985,36,F,Yes,No,moderate
 SC704033,COV86,I-0002646680,PBMCs,1,standard,South Korea,SOUTHKOREA,1985,36,F,Yes,No,moderate
 SC704050,COV103,I-0002646697,PBMCs,2,low,South Korea,SOUTHKOREA,1941,80,M,Yes,No,moderate
 SC666765,1053_106,I-0002584508,Whole Blood,1,standard,Northwestern,US,1947,73,M,Yes,,moderate
@@ -390,7 +378,6 @@ SC682682,CP67,I-0002613098,Whole Blood,1,standard,CCR - Kreitman,USA,1976,44,F,Y
 SC695921,OMS0001174,I-0002631018,Buffy Coat/RBCs,1,standard,COVIDcode,USA,1977,43,M,Yes,,moderate
 SC695942,FLD0001087,I-0002630989,Buffy Coat/RBCs,1,standard,COVIDcode,USA,1958,62,M,Yes,,moderate
 SC695945,FLD0001094,I-0002630994,Buffy Coat/RBCs,1,standard,COVIDcode,USA,1945,75,M,Yes,,moderate
-SC695939,FLD0001089,I-0002630990,Buffy Coat/RBCs,1,standard,COVIDcode,USA,1964,56,F,Yes,,moderate
 SC695939,FLD0001089,I-0002630990,Buffy Coat/RBCs,1,standard,COVIDcode,USA,1964,56,F,Yes,,moderate
 SC695940,OMS0001168,I-0002631012,Buffy Coat/RBCs,1,standard,COVIDcode,USA,1968,52,F,Yes,,moderate
 SC699538,FLD0001096,I-0002630995,Buffy Coat/RBCs,1,standard,COVIDcode,USA,1947,73,M,Yes,,moderate
@@ -418,7 +405,6 @@ SC740429,10002737,I-0002688502,Buffy Coat,1,standard,UPenn,USA,1944,76,M,Yes,Yes
 SC740452,25344,I-0002688525,Buffy Coat,1,standard,UPenn,USA,1947,73,F,Yes,Yes,severe
 SC740190,43862,I-0002688263,Buffy Coat,2,low,UPenn,USA,1948,72,M,Yes,Yes,severe
 SC703967,COV10,I-0002646614,PBMCs,1,standard,South Korea,SOUTHKOREA,1938,83,M,Yes,Yes,severe
-SC703967,COV10,I-0002646614,PBMCs,1,standard,South Korea,SOUTHKOREA,1938,83,M,Yes,Yes,severe
 SC682691,CP84,I-0002613107,Whole Blood,1,standard,CCR - Kreitman,USA,1958,62,M,Yes,Yes,severe
 SC682695,CP91,I-0002613111,Whole Blood,1,standard,CCR - Kreitman,USA,1943,77,M,Yes,Yes,severe
 SC682698,CP94,I-0002613114,Whole Blood,1,standard,CCR - Kreitman,USA,1945,75,M,Yes,Yes,severe
@@ -431,7 +417,6 @@ SC739942,COV191,I-0002688015,Whole Blood,2,low,Athens,GREECE,1956,64,M,Yes,Yes,s
 SC739991,COV263,I-0002688064,Whole Blood,2,low,Athens,GREECE,1944,76,F,Yes,Yes,severe
 SC690092,1053_131,I-0002584533,Whole Blood,1,standard,Northwestern,US,1954,66,M,Yes,Yes,severe
 SC739872,COV90,I-0002687945,Whole Blood,2,low,Athens,GREECE,1982,38,M,Yes,No,severe
-SC704042,COV95,I-0002646689,PBMCs,1,standard,South Korea,SOUTHKOREA,1940,81,F,Yes,No,severe
 SC704042,COV95,I-0002646689,PBMCs,1,standard,South Korea,SOUTHKOREA,1940,81,F,Yes,No,severe
 SC678417,RAGN265836,I-0002605158,Whole Blood,1,standard,Carrington,USA,1957,63,M,Yes,No,severe
 SC740178,55288,I-0002688251,Buffy Coat,1,standard,UPenn,USA,1959,61,M,Yes,No,severe
