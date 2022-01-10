@@ -33,3 +33,7 @@ bash SGFBam.wrapper.sh
 ```
 python3 UpdateExcel.py
 ```
+
+### Related Development History
+Please check the ticket below:
+https://github.com/NCI-CGR/IlluminaSequencingAnalysis/issues/51
