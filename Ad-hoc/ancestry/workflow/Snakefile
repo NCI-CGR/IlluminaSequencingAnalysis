@@ -1,0 +1,63 @@
+# disable warnings about the object store's certificate
+import warnings
+warnings.filterwarnings("ignore", "Unverified HTTPS request is being made")
+
+# pick one of the accessors os{1,2}naccess{1,2,3}
+from snakemake.remote.S3 import RemoteProvider as S3RemoteProvider
+S3 = S3RemoteProvider(endpoint_url="https://os1naccess1", verify=False)
+
+import os
+import pandas as pd
+
+#Inputs
+#samples.txt contains the bam files (sampleID, bam) 
+refGenome = "/data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/ref38/Homo_sapiens_assembly38.fasta"
+
+#somalier
+sites_vcf = "/data/COVID_WGS/ancestry_analysis/somalier/sites.hg38.vcf.gz"
+ref_somalier = "/data/COVID_WGS/ancestry_analysis/somalier/1kg-somalier/"
+ref_ancestry = "/data/COVID_WGS/ancestry_analysis/somalier/ancestry-labels-1kg.tsv"
+
+#it should have 2 columns, sampleID, file
+samplesTable = pd.read_csv("samples.txt", sep="\t", 
+                   header='infer', dtype=str)
+sampleList=samplesTable['sampleID']
+sample2bam=dict(zip(samplesTable['sampleID'], samplesTable['bam']))
+
+# somalier executable
+# downloaded from https://github.com/brentp/somalier/releases/download/v0.2.14/somalier and renamed somalier_v0.2.14
+# could have used its docker image but we also need the obj command to deal with the s3 files
+
+rule all:
+    input:
+        expand('extracted/{sample}.somalier', sample=sampleList) 
+
+
+rule somalier_extract:
+    input:
+        ref=refGenome,
+        ref_index=refGenome + ".fai",
+        bam =lambda wc: S3.remote(sample2bam[wc.sample], stay_on_remote=True),
+        sites_vcf={sites_vcf}
+    output:
+         "extracted/{sample}.somalier"   
+    params:
+         vault = "DCEG_COVID_WGS"         
+    log:
+        "logs/run_somalier/{sample}.log" 
+    shell:
+        "bam=$(echo {input.bam} | sed -e 's|^s3://{params.vault}/||');"
+        "obj get -v {params.vault} -D /tmp --force $bam;"
+        "obj get -v {params.vault} -D /tmp --force $bam.bai;"
+        "/data/COVID_WGS/ancestry_analysis/somalier/somalier_v0.2.14 extract -d extracted/ --sites {input.sites_vcf} -f {input.ref} /tmp/$bam"    
+
+
+ #rule somalier_ancestry
+ #   input:
+ #       "extracted/{sample}.somalier"
+ #   output:
+
+ #   shell:
+ #       "somalier ancestry --labels ancestry-labels-1kg.tsv 1kg-somalier/*.somalier ++ query-samples-somalier/*.somalier"
+
+ #/data/COVID_WGS/ancestry_analysis/somalier/somalier_v0.2.14 extract -d ./ --sites //data/COVID_WGS/ancestry_analysis/somalier/sites.hg38.vcf.gz -f /data/COVID_WGS/lix33/DCEG/CGF/Bioinformatics/Production/data/ref38/Homo_sapiens_assembly38.fasta /data/COVID_WGS/test_pilot/data/bams/COVID-19_COVID-19_1053-112_A_BQSR_sorted.bam
