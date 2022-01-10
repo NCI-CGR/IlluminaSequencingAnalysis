@@ -1,14 +1,18 @@
 '''
-1: Check if the samples defined in excel can be found in S3
-2: Download the existing samples from S3
-3: Output a list of missing samples
+1: Extract sample from excel 
+2: Get related BAM from local dir
+3: Run samtools view
 '''
 import subprocess
 import sys
 import os
 
-DESTDir = "/data/COVID_ADHOC/Sequencing/COVID_WGS/Data/USU_First_Batch_low_std_96_361_18"
-LOGDir = DESTDir + "/Log" 
+BAMDir = "/data/COVID_ADHOC/Sequencing/COVID_WGS/Data/USU_First_Batch_low_std_96_361_18"
+LOGDir = BAMDir + "/Log"
+
+DESTDir = "/data/COVID_ADHOC/Sequencing/COVID_WGS/ad-hoc/Cenk/TargetBAM"
+DESTLogDir = DESTDir + "/Log"
+
 
 class ClsSample:
     def __init__(self):
@@ -19,7 +23,7 @@ class ClsSample:
     def Init(self, strCGRID):
         self.strCGRID = strCGRID
     
-    def RetrieveDataFromS3(self):
+    def GetTargetReadsByBed(self):
         # 1: Check if BAM is existed
         if self.strBAM == "":
             print("Error: BAM file is not existed in S3!", " ---> Sample ID:", self.strBAM)
@@ -33,19 +37,24 @@ class ClsSample:
             print("Warning: duplicate sample, skip it!", " ---> Sample ID:", self.strBAM)
             return
         
-        strFileName = os.path.basename(self.strBAM)
-        strBashScript = ("bash RetrieveFileFromS3.sh" + " '" + self.strBAM + "'" + 
-                                                        " '" + strFileName + "'" +
-                                                        " '" + DESTDir + "'")
-        
         # 2: Submit jobs
-        strNumCore = "1"
+        strNumCore = "12"
         strNodeNum = "1"
-        strJobName = "RTS3-" + self.strCGRID
+        strJobName = "Target-" + self.strCGRID
+        
+        strFileName = os.path.basename(self.strBAM).split('.')[0] + ".target.bam"
+        
+        # self.strBAM = "/data/COVID_WGS/lix33/Test/2ndpipeline/Data/BAM_reformatted/BAM_recalibrated/WGS/WGS_SC689824_I3-97832.bam"
+        # strFileName = "WGS_SC689824_I3-97832.target.bam"
+        
+        strBashScript = ("bash SliceTargetReadsByBed.sh" + " '" + self.strBAM + "'" + 
+                                                           " '" + strFileName + "'" +
+                                                           " '" + DESTDir + "'" + 
+                                                           " '" + strNumCore + "'")
                      
-        strRunningTime = "5-00:00:00"
-        strStdOut = LOGDir + "/" + strFileName.split('.')[0] + ".std.out"
-        strStdErr = LOGDir + "/" + strFileName.split('.')[0] + ".std.err"        
+        strRunningTime = "3-00:00:00"
+        strStdOut = DESTLogDir + "/" + strFileName.split('.')[0] + ".std.out"
+        strStdErr = DESTLogDir + "/" + strFileName.split('.')[0] + ".std.err"        
                         
         CMD = ("sbatch " + "--ntasks=" + strNumCore + " " +  
                            "--nodes=" + strNodeNum + " " +
@@ -57,7 +66,8 @@ class ClsSample:
         
         print(CMD)
         os.system(CMD)                                
-        print("Retrieving BAM ->", self.strCGRID, "\n")   
+        print("Get Target BAM ->", self.strCGRID, "\n") 
+        
 
 def InitSamples(vSample):
     CMD = "awk -F ',' '{print $1}' ../Files/COVIDwgs_Jan2022_NIAIDphenotypesLM_Comma_Delimited.csv | tail -n +2"
@@ -84,22 +94,22 @@ def InitSamples(vSample):
             print(key, ",", dictIDList[key])
             iDupNum += 1
     print(" ********", "\n", "iDupNum:", iDupNum, "\n", "********", "\n")
-        
 
-def MatchSampleWithS3Archive(vSample):
-    #Get S3 recalibrated BAM list from S3
-    CMD = "obj_ls -v DCEG_COVID_WGS -m '*recalibrated*.bam' | tail -n +2 | awk '{print $NF}'"
+def FindBAMInLocal(vSample):
+    CMD = "find " + BAMDir + " -type f -iname '*.bam'"
     strBAMList = subprocess.getoutput(CMD)
     vBAMList = strBAMList.split('\n')
+    
     dictBAMList = {}
     for strBAM in vBAMList:
         strCGRID = os.path.basename(strBAM).split('_')[1]
         if not strCGRID in dictBAMList:
               dictBAMList[strCGRID] = strBAM
+              
     for sample in vSample:
         if sample.strCGRID in dictBAMList:
             sample.strBAM = dictBAMList[sample.strCGRID]
-    
+        
     # Check the number of Sample that do not contain BAM Path
     iEmptyBAM = 0
     for sample in vSample:
@@ -107,18 +117,18 @@ def MatchSampleWithS3Archive(vSample):
             print(sample.strCGRID)
             iEmptyBAM += 1
     print(" ********", "\n", "iEmptyBAM:", iEmptyBAM, "\n", "********", "\n")
-    
-def RetrieveDataFromS3(vSample):
+
+def GetTargetReadsByBed(vSample):
     for sample in vSample:
-        sample.RetrieveDataFromS3()
+        sample.GetTargetReadsByBed()
         #return
 
 def main():
     #strExcel= sys.argv[1]
     vSample = []
     InitSamples(vSample)
-    MatchSampleWithS3Archive(vSample)
-    RetrieveDataFromS3(vSample)
+    FindBAMInLocal(vSample)
+    GetTargetReadsByBed(vSample)
 
 if __name__ == "__main__":
     main()
