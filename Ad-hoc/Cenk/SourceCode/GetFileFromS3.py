@@ -107,7 +107,7 @@ def InitSamples(vSample):
 
 def MatchSampleWithS3Archive(vSample):
     #Get S3 recalibrated BAM list from S3
-    CMD = "obj_ls -v DCEG_COVID_WGS -m '*recalibrated*.bam' | tail -n +2 | awk '{print $NF}'"
+    CMD = "/usr/local/bin/obj_ls -v DCEG_COVID_WGS -m '*recalibrated*.bam' | tail -n +2 | awk '{print $NF}'"
     strBAMList = subprocess.getoutput(CMD)
     vBAMList = strBAMList.split('\n')
     dictBAMList = {}
@@ -131,10 +131,17 @@ def RetrieveDataFromS3(vSample):
     iRunNum = 0 
     for sample in vSample:
         iRunNum += sample.RetrieveDataFromS3()
-        if iRunNum > 20: 
-            return
+        if iRunNum > 20:
+            break
     if iRunNum == 0:
         print("Everything is all set!")
+    else:
+        print("Jobs are still running!", "iRunNum:", iRunNum)
+    
+    # Collect the number of finished sample
+    CMD = "find " + FLAGDir + " -maxdepth 1 -type f -iname '*.done' | wc -l"    
+    iDoneNum = int(subprocess.getoutput(CMD))
+    print("Finished Jobs Number:", "iDoneNum:", iDoneNum)
 
 def main():
     # Print time stamp -->

@@ -23,7 +23,7 @@ SECONDS=0
 
 # Get BAM (do not add --checksum this time if this option did not be used in obj_put)
 #CMD="obj_get -v DCEG_COVID_WGS --checksum ${strBAMFileS3} -D ${strDestDir} -p -V --strip 12"
-CMD="obj_get -v DCEG_COVID_WGS ${strBAMFileS3} -D ${strDestDir} -p -V --strip 12"
+CMD="/usr/local/bin/obj_get -v DCEG_COVID_WGS ${strBAMFileS3} -D ${strDestDir} -p -V --strip 12"
 echo "${CMD}"
 eval "${CMD}"
 
@@ -42,7 +42,7 @@ echo
 
 # Get BAI (do not add --checksum this time if this option did not be used in obj_put)
 #CMD="obj_get -v DCEG_COVID_WGS --checksum ${strBAMFileS3}.bai -D ${strDestDir} -p -V --strip 12"
-CMD="obj_get -v DCEG_COVID_WGS ${strBAMFileS3}.bai -D ${strDestDir} -p -V --strip 12"
+CMD="/usr/local/bin/obj_get -v DCEG_COVID_WGS ${strBAMFileS3}.bai -D ${strDestDir} -p -V --strip 12"
 echo "${CMD}"
 eval "${CMD}"
 
