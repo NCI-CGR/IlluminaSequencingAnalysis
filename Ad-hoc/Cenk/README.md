@@ -1,11 +1,11 @@
 ### Introduction (Background)
 This is a project to prepare sliced BAM file for Cenk's team. 
-1. Test a computational tool, Immunotyper, by using the large scale COVID dataset.
-3. Original email
+  * Test a computational tool, Immunotyper, by using the large scale COVID dataset.
+  * Original email
 
 *I am a senior investigator in the Cancer Data Science Lab at CCR. My lab has been developing Immunotyper, a computational tool to genotype and identify the alleleic composition of the  IGH region at the germ line. We are especially interested in the IGH-V genes to understand the germ line contribution to the antibody repertoire. We have been working on a subset of the NIAID COVID Consortium data with the goal of identifying distinct germline IGH alleles associated with type 1 interferon autoantibodies. We would like to expand the cohort to increase our statistical significance and I understand that the COVIDNET cohort is fairly large, but as per Dr. Holland’s email below these are typically not severe cases and no autoantibody analysis has been performed on them. Nevertheless they could still be quite useful as controls. In particular I would be very much interested in checking out if any of the autoantibody associated alleles are commonly found in this cohort especially among the older patients. If you would open to collaboration towards a paper we are putting together, primarily describing our computational method but also reporting on any association we may find between distinct alleles and autoantibodies it would be great if we could get access to the WGS data from this cohort.*
 
-3. Our initial schedule
+### Our initial schedule
 ```
 (1) Amy, Vibha, Lisa, can you pull together a manifest of the first sets of samples that we sent to USU (the 96 low input + 384 standard)? 
    I know Clifton’s group is starting to deliver the set of 768 (first set, not second), but I believe that has just started so I don’t believe we need to consider those. 
@@ -36,7 +36,7 @@ How to deploy crontab:
 cd /home/lix33/lxwg/Git/IlluminaSequencingAnalysis/Ad-hoc/Cenk/SourceCode && */30 * * * * . ~/.bashrc && cd /home/lix33/lxwg/Git/IlluminaSequencingAnalysis/Ad-hoc/Cenk/SourceCode && python3 /home/lix33/lxwg/Git/IlluminaSequencingAnalysis/Ad-hoc/Cenk/SourceCode/GetFileFromS3.py >> /data/COVID_ADHOC/Sequencing/COVID_WGS/Data/USU_First_Batch_low_std_96_361_18/debug/Log/sum.log 2>&1
 ```
 
-cd /home/lix33/lxwg/Git/IlluminaSequencingAnalysis/Ad-hoc/Cenk/SourceCode && #### 2: Slice Region from BAM
+#### 2: Slice Region from BAM
 ```
 cd /home/lix33/lxwg/Git/IlluminaSequencingAnalysis/Ad-hoc/Cenk/SourceCode && bash SGFBam.wrapper.sh
 ```
