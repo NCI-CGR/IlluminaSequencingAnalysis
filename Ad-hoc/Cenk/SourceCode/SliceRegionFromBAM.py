@@ -27,15 +27,15 @@ class ClsSample:
         # 1: Check if BAM is existed
         if self.strBAM == "":
             print("Error: BAM file is not existed in S3!", " ---> Sample ID:", self.strBAM)
-            return
+            return 0
         
         if not os.path.exists(DESTDir):
             print("Error: Dest Dir is not existed!")
-            return
+            return 0
         
         if self.bDup:
             print("Warning: duplicate sample, skip it!", " ---> Sample ID:", self.strBAM)
-            return
+            return 0
         
         # 2: Submit jobs
         strNumCore = "12"
@@ -66,8 +66,8 @@ class ClsSample:
         
         print(CMD)
         os.system(CMD)                                
-        print("Get Target BAM ->", self.strCGRID, "\n") 
-        
+        print("Get Target BAM ->", self.strCGRID, "\n")
+        return 1        
 
 def InitSamples(vSample):
     CMD = "awk -F ',' '{print $1}' ../Files/COVIDwgs_Jan2022_NIAIDphenotypesLM_Comma_Delimited.csv | tail -n +2"
@@ -119,9 +119,13 @@ def FindBAMInLocal(vSample):
     print(" ********", "\n", "iEmptyBAM:", iEmptyBAM, "\n", "********", "\n")
 
 def GetTargetReadsByBed(vSample):
+    iRunNum = 0
     for sample in vSample:
-        sample.GetTargetReadsByBed()
+        iRunNum += sample.GetTargetReadsByBed()
         #return
+    print("The Number of vSample        :", len(vSample))
+    print("The Number of Running Samples:", iRunNum)
+    print()
 
 def main():
     #strExcel= sys.argv[1]

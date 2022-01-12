@@ -32,14 +32,16 @@ def UpdateExcel():
     vBAMList = strBAMList.split('\n')
     
     # Build dictionary based on current BAM List
-    print(vBAMList)
+    #print(vBAMList)
     dictBAM = {}
     for strBAM in vBAMList:
         strFileName = os.path.basename(strBAM)
         strCGRID = strFileName.split('_')[1]                 
-        if strCGRID not in dictIDList:
+        if strCGRID not in dictBAM:
             dictBAM[strCGRID] = strFileName
     
+    iRealBAMNum = 0
+    vEmptySample = []
     # Update Excel data framework
     df = pd.read_csv('../Files/COVIDwgs_Jan2022_NIAIDphenotypesLM_Comma_Delimited.csv')
     df["BAM_File_Name"] = ""
@@ -47,9 +49,16 @@ def UpdateExcel():
         strCGRID = df.at[i, 'LIMS_Sample_ID']
         if strCGRID in dictBAM:
             df.at[i, 'BAM_File_Name'] = dictBAM[strCGRID]
+            iRealBAMNum += 1
+        else:
+            vEmptySample.append(strCGRID)
             
     # Export Excel
-    df.to_excel(DESTDir + "/COVIDwgs_Jan2022_NIAIDphenotypesLM_Append_BAM.csv")
+    df.to_excel(DESTDir + "/COVIDwgs_Jan2022_NIAIDphenotypesLM_Append_BAM.xlsx")
+    print("Total Number of Sample in Excel:", iRealBAMNum + len(vEmptySample))
+    print("Total Number of Empty Sample   :", len(vEmptySample))
+    print("Empty Sample List:", vEmptySample)
+    print()
 
 def main():
     UpdateExcel()    
