@@ -1,16 +1,28 @@
 This is the workflow for generating the PCs and relatedness of the COVNET samples using somalier v0.2.14. The executable and related reference files are downloaded from https://github.com/brentp/somalier/releases
 
 1. Extract the informative sites from the BAM files
-We executed the Snakemake workflow in workflow/snakemake, the samples are listed in workflow/samples.txt
+We executed the Snakemake workflow in workflow/Snakefile, the samples are in samples.txt
 
-2a. Ran somalier ancestry
-data/COVID_WGS/ancestry_analysis/somalier/somalier_v0.2.14 ancestry --n-pcs 10 --labels /data/COVID_WGS/ancestry_analysis/somalier/ancestry-labels-1kg.tsv /data/COVID_WGS/ancestry_analysis/somalier/1kg-somalier/*.somalier ++ extracted/*
-.somalier
+2a Ran somalier relate
+/data/COVID_WGS/ancestry_analysis/somalier/somalier_v0.2.14 relate --ped samples.ped /data/COVID_WGS/ancestry_analysis/IlluminaSequencingAnalysis/Ad-hoc/ancestry/workflow/extracted/*.somalier
 
-2b. Remove 1000 genomes samples in somalier output
+2b. We checked and found WGS_SC682684_I3-97804 and WGS_SC682686_I3-97805 are genetically identical. They are removed and relatedness is rerun.
+
+3a. Ran somalier ancestry
+/data/COVID_WGS/ancestry_analysis/somalier/somalier_v0.2.14 ancestry --n-pcs 10 --labels /data/COVID_WGS/ancestry_analysis/somalier/ancestry-labels-1kg.tsv /data/COVID_WGS/ancestry_analysis/somalier/1kg-somalier/*.somalier ++ /data/COVID_WGS/ancestry_analysis/IlluminaSequencingAnalysis/Ad-hoc/ancestry/workflow/extracted/*.somalier
+
+3b. Remove 1000 genomes samples in somalier output
 By default, somalier generates an output files of the PCs including the reference 1000 genomes samples. They are removed in the final output.
+grep '^#\|^WGS' somalier-ancestry.somalier-ancestry.tsv >COVID_WGS_samples_ancestry_and_PCs_20220112.tab
 
-3. Ran somalier relate
-/data/COVID_WGS/ancestry_analysis/somalier/somalier_v0.2.14 relate --ped samples.ped extracted/*.somalier
 
-Please note that several pairs are closely related, WGS_SC682684_I3-97804	and WGS_SC682686_I3-97805	are genetically identical.
+Please note that these are the first degree relatives in our data set
+#sample_a          sample_b             relatedness         ibs0        ibs2  relationship
+WGS_SC682654_I3-97782            WGS_SC682659_I3-97786            0.496     0              9931 parent/child
+WGS_SC682662_I3-97788            WGS_SC682701_I3-97819            0.496     2              9987 parent/child
+WGS_SC682664_I3-97790            WGS_SC682665_I3-97791            0.495     1              9886 parent/child
+WGS_SC695932_I3-97882            WGS_SC695936_I3-97885            0.440     449         10632 sibs
+WGS_SC695932_I3-97882            WGS_SC695940_I3-97888            0.507     0              10030  parent/child
+WGS_SC695936_I3-97885            WGS_SC695940_I3-97888            0.502     0              10013  parent/child
+WGS_SC740190_I8-02201            WGS_SC740247_I8-02205            0.517     2              10403  parent/child
+WGS_SC740233_I3-97998            WGS_SC740265_I3-98013            0.506     1              10671  parent/child
