@@ -16,6 +16,7 @@
 $ tail -n +2 ./pI3.COVNET.batch3.N638.6topoffs.keytable.dec.16.2021.csv | awk -F ',' '{print $3}' | awk -F '-' '{print $NF}' > 3rdCol.txt
 $ tail -n +2 ./pI3.COVNET.batch3.N638.6topoffs.keytable.dec.16.2021.csv | awk -F ',' '{print $1","$2}' | less > 1st2ndCol.txt
 $ paste 1st2ndCol.txt 3rdCol.txt -d ',' > USU_CGR_ID_Table.csv
+$ <use vim to add the caption fields manually>
 ```
 
 6. Data screenshot
