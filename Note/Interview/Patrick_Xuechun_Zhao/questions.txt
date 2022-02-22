@@ -6,7 +6,8 @@ HPC -> three different ways to use the software resources in cluster.
    (2) container (sandbox) -> singularity
    (3) bioconda
   
-If a team member want to start a project or pipeline, and some of third party tools need to be used. May I know your suggestion about which strategy should be used in cluster. 
+If a team member want to start a project or pipeline, and some of third party tools need to be used. 
+May I know your suggestion about which strategy should be used in cluster. 
 
 
 
@@ -23,7 +24,9 @@ Assume the situation
    (1) make the coding easier. 
    (2) easy to be managed.
    
-So, if a people suggest you that in order to make everything be consistent & easy to be managed, please let your team member convert all old pipelines by using the new techs (such as snakemake). May I know what's your idea about this suggestion? 
+So, if a people suggest you that in order to make everything be consistent & easy to be managed, 
+please let your team member convert all old pipelines by using the new techs (such as snakemake). 
+May I know what's your idea about this suggestion? 
 
 
 
