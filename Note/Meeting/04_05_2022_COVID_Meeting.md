@@ -14,7 +14,7 @@ Hi all,
 
 ### For Question 1
 
-**1: How many samples we alreay received**
+#### 1: How many samples we alreay received
 
 We currently received 4 batches of data
 
@@ -60,11 +60,29 @@ We currently received 4 batches of data
 ![image](https://user-images.githubusercontent.com/11053933/161799717-9800c274-a4b8-4ff1-98e4-aa33cc9f196b.png)
 
 
-2: The working directory in biowulf
+#### 2: The working directory in biowulf
 (1) All works are on biowulf
 
+(2) Details
+  * Working Directory: /data/COVID_WGS/lix33
+  * Ad-hoc requirement Directory: /data/COVID_ADHOC/Sequencing/COVID_WGS
+  * Include Three parts:
+    * Customized QC (primary pipeline)
+    * 2nd pipeline (merge sample, bam contamination check, etc)
+    * COVID Automation framework (make all steps be processed automatically)
+  * Git Repo
+    * Custmized QC: https://github.com/NCI-CGR/IlluminaSequencingAnalysis/tree/main/CustomizedQC
+    * 2nd pipeline: https://github.com/NCI-CGR/IlluminaSequencingAnalysis/tree/main/COVID_2nd_Pipeline
+    * COVID Auto Framework: https://github.com/NCI-CGR/IlluminaSequencingAnalysis/tree/main/COVID_Auto_Framework
+  * How to understand Customized QC and 2nd pipeline (documentation) 
+    * https://github.com/NCI-CGR/IlluminaSequencingAnalysis/blob/main/Note/Project/COVID/COVID_2nd_pipeline.md
+    * https://github.com/NCI-CGR/IlluminaSequencingAnalysis/blob/main/Note/Project/COVID/COVID_2nd_pipeline_addendum.md
+    * https://github.com/NCI-CGR/IlluminaSequencingAnalysis/blob/main/Note/Project/COVID/COVID_primary_pipeline.md
 
-3: The specific folder in biowulf that was used for this project
+#### 3: The object oriented system that was used for this project
+(1) Vault: DCEG_COVID_WGS
+
+![image](https://user-images.githubusercontent.com/11053933/161803128-a0e4bb42-c69d-40f7-8e9e-b28e124f3e81.png)
 
 
 4: How many vaults were used 
