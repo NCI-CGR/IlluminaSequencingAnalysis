@@ -86,7 +86,7 @@ We currently received 4 batches of data
 
 
 
-### For Question 2: 
+### For Question 2
 #### 1: How many types of QC reports do we have currently.
 We typically has two different phases of COVID upstream analysis, including Custmized QC and 2nd pipeline 
 
@@ -112,12 +112,26 @@ We typically has two different phases of COVID upstream analysis, including Cust
 [2nd_QC_Report.zip](https://github.com/NCI-CGR/IlluminaSequencingAnalysis/files/8420210/2nd_QC_Report.zip)
 
 
-### For Question 3: 
+### For Question 3 
+We are talking about the data from Batch 4
+  * a) Std Input WGS
+  * b) Total number of Sample: 638
+  * c) Received Date: January, 2022
+  * d) Saved Location: GCP, pI8.covnet.N94.fastq.00/
+  * e) Analysis Status: Nil
+  * f) Keytable File
 
+![image](https://user-images.githubusercontent.com/11053933/161799717-9800c274-a4b8-4ff1-98e4-aa33cc9f196b.png)
 
+### For Question 4
+Some questions 
+1. Any similar jobs has been done? (GenScan)?
+2. Any small demo code availabe for testing? 
+3. If bioinfomatics tools are availabe in google cloud? 
+4. If the cloud has some issues as the zombie job in HPC? Any experiences to detect and re-submit jobs in this case?  
+5. Cost 
+  * 1) Due to the cost of cloud storage, do we have the plan to backup file and delete files periodly in cloud?
+  * 2) Any other concern the things need to pay attention to avoid the unnecessary cost in cloud? 
 
-### For Question 4: 
-
-
-
-For Question 5: 
+### For Question 5
+Any comments from Jia and Wen?
