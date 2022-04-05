@@ -67,7 +67,7 @@ We currently received 4 batches of data
   * Working Directory: /data/COVID_WGS/lix33
   * Ad-hoc requirement Directory: /data/COVID_ADHOC/Sequencing/COVID_WGS
   * Include Three parts:
-    * Customized QC (primary pipeline)
+    * Customized QC (primary pipeline, fastq -> BAM)
     * 2nd pipeline (merge sample, bam contamination check, etc)
     * COVID Automation framework (make all steps be processed automatically)
   * Git Repo
@@ -85,24 +85,38 @@ We currently received 4 batches of data
 ![image](https://user-images.githubusercontent.com/11053933/161803128-a0e4bb42-c69d-40f7-8e9e-b28e124f3e81.png)
 
 
-4: How many vaults were used 
+
+### For Question 2: 
+#### 1: How many types of QC reports do we have currently.
+We typically has two different phases of COVID upstream analysis, including Custmized QC and 2nd pipeline 
+
+(1) Custmized QC
+  * Generate ONE QC report (the same as our primary pipeline) 
+  * Please check the attachment for details (Customzied_QC_Report.zip)
+ 
+ [QCReport-BWA-v38.csv](https://github.com/NCI-CGR/IlluminaSequencingAnalysis/files/8420219/QCReport-BWA-v38.csv)
+
+  * For all QC report please check MS team
+ 
+ ![image](https://user-images.githubusercontent.com/11053933/161804939-d18e86eb-9d26-4167-8830-70f131f67bca.png)
+
+ 
+
+(2) 2nd pipeline
+  * Generate THREE QC reports, including 
+    *  Coverage QC Report
+    *  Pre Calling QC Report
+    *  BAM Contamination Report
+  * Please check the attachment for details (2nd_QC_Report.zip)
+ 
+[2nd_QC_Report.zip](https://github.com/NCI-CGR/IlluminaSequencingAnalysis/files/8420210/2nd_QC_Report.zip)
+
+
+### For Question 3: 
 
 
 
-For Question 2: 
-1: How many types of QC reports do we have currently.
-
-2: Details and Example
-
-
-
-
-
-For Question 3: 
-
-
-
-For Question 4: 
+### For Question 4: 
 
 
 
