@@ -130,8 +130,8 @@ Some questions
 3. If bioinfomatics tools are availabe in google cloud? 
 4. If the cloud has some issues as the zombie job in HPC? Any experiences to detect and re-submit jobs in this case?  
 5. Cost 
-  * 1) Due to the cost of cloud storage, do we have the plan to backup file and delete files periodly in cloud?
-  * 2) Any other concern the things need to pay attention to avoid the unnecessary cost in cloud? 
+    * 1) Due to the cost of cloud storage, do we have the plan to backup file and delete files periodly in cloud?
+    * 2) Any other concern the things need to pay attention to avoid the unnecessary cost in cloud? 
 
 ### For Question 5
 Any comments from Jia and Wen?
