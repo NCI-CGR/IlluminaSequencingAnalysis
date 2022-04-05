@@ -22,18 +22,42 @@ We currently received 4 batches of data
   * a) Standard Input WGS	
   * b) Total number of Sample: 379
   * c) Received Date: July, 2021
-  * d) Details 
+  * d) Saved Location: Object Oriented Storage System，DCEG_COVID_WGS
+  * e) Analysis Status: Completed
+  * f) Details 
     * i) 18 samples with 15 topoffs 
     * ii) 361 regular samples (no topoffs)
-  * e) Keytable File
+  * g) Keytable File
 ![image](https://user-images.githubusercontent.com/11053933/161784598-adbf4a53-09ae-4096-8d8f-84972d3b9bea.png)
 	
 (2) Batch 2
   * a) Low Input WGS	
   * b) Total number of Sample: 96
   * c) Received Date: July, 2021
-  * d) Keytable File
+  * d) Saved Location: Object Oriented Storage System，DCEG_COVID_WGS
+  * e) Analysis Status: Completed
+  * f) Keytable File
 ![image](https://user-images.githubusercontent.com/11053933/161785628-528e0e72-baf8-4a5b-831a-4abf7d3c8512.png)
+
+(3) Batch 3
+  * a) Std Input WGS	
+  * b) Total number of Sample: 94
+  * c) Received Date: November, 2021
+  * d) Saved Location: GCP,  pI8.covnet.N94.fastq.00/
+  * e) Analysis Status: Completed
+  * f) Keytable File
+
+![image](https://user-images.githubusercontent.com/11053933/161797533-4c6df4ff-dfb8-4a9c-95ff-32fdf4bc2dd4.png)
+
+(4) Batch 4
+  * a) Std Input WGS	
+  * b) Total number of Sample: 638
+  * c) Received Date: January, 2022
+  * d) Saved Location: GCP,  pI8.covnet.N94.fastq.00/
+  * e) Analysis Status: Nil
+  * f) Keytable File
+  
+![image](https://user-images.githubusercontent.com/11053933/161799717-9800c274-a4b8-4ff1-98e4-aa33cc9f196b.png)
 
 
 2: The working directory in biowulf
