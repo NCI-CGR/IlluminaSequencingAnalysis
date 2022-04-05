@@ -29,8 +29,11 @@ We currently received 4 batches of data
 ![image](https://user-images.githubusercontent.com/11053933/161784598-adbf4a53-09ae-4096-8d8f-84972d3b9bea.png)
 	
 (2) Batch 2
-    a) Low Input WGS
-	b) 96 Sample
+  * a) Low Input WGS	
+  * b) Total number of Sample: 96
+  * c) Received Date: July, 2021
+  * d) Keytable File
+![image](https://user-images.githubusercontent.com/11053933/161785628-528e0e72-baf8-4a5b-831a-4abf7d3c8512.png)
 
 
 2: The working directory in biowulf
