@@ -116,7 +116,8 @@ We currently received 4 batches of data
 We typically has two different phases of COVID upstream analysis, including Custmized QC and 2nd pipeline 
 
 (1) Custmized QC
-  * Generate ONE QC report (the same as our primary pipeline) 
+  * Classify the raw fastq files with the same flwocell name together, and generate differnet flowcells.
+  * Generate ONE QC report FOR EACH FLOWCELL (the same as our primary pipeline) 
   * Please check the attachment for details (Customzied_QC_Report.zip)
  
  [QCReport-BWA-v38.csv](https://github.com/NCI-CGR/IlluminaSequencingAnalysis/files/8420219/QCReport-BWA-v38.csv)
