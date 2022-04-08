@@ -130,12 +130,31 @@ We typically has two different phases of COVID upstream analysis, including Cust
 
 (2) 2nd pipeline
   * Generate THREE QC reports, including 
-    *  Coverage QC Report
-    *  Pre Calling QC Report
-    *  BAM Contamination Report
+    *  Coverage QC Report (txt)
+    *  Pre Calling QC Report (txt)
+    *  BAM Contamination Report (csv)
   * Please check the attachment for details (2nd_QC_Report.zip)
  
 [2nd_QC_Report.zip](https://github.com/NCI-CGR/IlluminaSequencingAnalysis/files/8420210/2nd_QC_Report.zip)
+
+  * All 2nd QC reports (3 types) have been saved in object oriented storage system.
+    * For BAM contamination QC report (CSV)
+    ```
+    obj_ls -v DCEG_COVID_WGS -h -m "*SumContaminationReport.csv"| less -SN
+    ```
+    ![image](https://user-images.githubusercontent.com/11053933/162489838-87de18d2-307c-4681-bf6f-493655a0df16.png)
+    
+    *  For Coverage QC Report (txt)
+    ```
+    obj_ls -v DCEG_COVID_WGS -h -m "*coverage_report_*.txt"| less -SN
+    ```
+    ![image](https://user-images.githubusercontent.com/11053933/162490379-2e2a36d6-0110-4cfc-aff6-937f53e4063f.png)
+    
+    *  For pre calling QC Report (txt)
+    ```
+    obj_ls -v DCEG_COVID_WGS -h -m "*pre_calling_qc_report_*.txt"| less -SN
+    ```
+    ![image](https://user-images.githubusercontent.com/11053933/162490652-fa279bf6-2ed5-4c21-b44d-1df503965960.png)
 
 
 ### For Question 3 
