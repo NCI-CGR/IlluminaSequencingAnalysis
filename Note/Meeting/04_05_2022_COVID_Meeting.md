@@ -63,6 +63,7 @@ We currently received 4 batches of data
   * b) Total number of Sample: 94
   * c) Received Date: November, 2021
   * d) Saved Location: GCP,  pI8.covnet.N94.fastq.00/
+    * We downloaded these samples from GCP to biowulf and did analysis on Biowulf (NOT on GCP).
     * GCP location
     ```
     https://console.cloud.google.com/storage/browser/dceg-covnet-wgs-useast1;tab=objects?forceOnBucketsSortingFiltering=false&project=nih-nci-dceg-cgr&prefix=&forceOnObjectsSortingFiltering=false
@@ -89,6 +90,7 @@ We currently received 4 batches of data
 (2) Details
   * Working Directory: /data/COVID_WGS/lix33
   * Ad-hoc requirement Directory: /data/COVID_ADHOC/Sequencing/COVID_WGS
+    * Dr Cenk's research lab. 
   * Include Three parts:
     * Customized QC (primary pipeline, fastq -> BAM)
     * 2nd pipeline (merge sample, bam contamination check, etc)
