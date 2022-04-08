@@ -13,6 +13,7 @@ Hi all,
 5) eventually loop in others to discuss the larger analytical plan post variant calling (including potential use for informing/improving imputation for some of our Hispanic GWAS efforts.
 
 ### For Question 1
+Question 1: Need to start addressing the WGS data that has been generated to date,
 
 #### 1: How many samples we alreay received
 
@@ -23,6 +24,14 @@ We currently received 4 batches of data
   * b) Total number of Sample: 379
   * c) Received Date: July, 2021
   * d) Saved Location: Object Oriented Storage System，DCEG_COVID_WGS
+    * Use obj_ls to check it:  
+      ```
+      obj_ls -v DCEG_COVID_WGS -h -m "*fastq.gz"| less -SN
+      Notice: contains other fastq files, need check the code which part belongs to current batch
+      ```
+    * Screenshot example
+    ![image](https://user-images.githubusercontent.com/11053933/162484986-436a5802-a960-4daa-a440-5b89d02cf9bf.png)
+
   * e) Analysis Status: Completed
   * f) Details 
     * i) 18 samples with 15 topoffs 
@@ -35,6 +44,16 @@ We currently received 4 batches of data
   * b) Total number of Sample: 96
   * c) Received Date: July, 2021
   * d) Saved Location: Object Oriented Storage System，DCEG_COVID_WGS
+    * Use obj_ls to check it:
+    ```
+    obj_ls -v DCEG_COVID_WGS -h -m "*PI8.Tagmentation.N96.00*fastq.gz"| less -SN
+    Notice: contains other fastq files, need check the code which part belongs to current batch
+    ```
+    * Screenshot example
+    
+    ![image](https://user-images.githubusercontent.com/11053933/162485635-251b15d0-9464-45c3-8d53-fff7527e71d0.png)
+
+    
   * e) Analysis Status: Completed
   * f) Keytable File
 ![image](https://user-images.githubusercontent.com/11053933/161785628-528e0e72-baf8-4a5b-831a-4abf7d3c8512.png)
@@ -44,6 +63,10 @@ We currently received 4 batches of data
   * b) Total number of Sample: 94
   * c) Received Date: November, 2021
   * d) Saved Location: GCP,  pI8.covnet.N94.fastq.00/
+    * GCP location
+    ```
+    https://console.cloud.google.com/storage/browser/dceg-covnet-wgs-useast1;tab=objects?forceOnBucketsSortingFiltering=false&project=nih-nci-dceg-cgr&prefix=&forceOnObjectsSortingFiltering=false
+    ```
   * e) Analysis Status: Completed
   * f) Keytable File
 
