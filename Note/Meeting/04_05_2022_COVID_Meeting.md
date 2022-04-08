@@ -77,7 +77,7 @@ We currently received 4 batches of data
   * a) Std Input WGS	
   * b) Total number of Sample: 638
   * c) Received Date: January, 2022
-  * d) Saved Location: GCP,   pI3.COVNET.batch3.N638.6topoffs.keytable.dec.16.202
+  * d) Saved Location: GCP, pI3.COVNET.batch3.N638.6topoffs.keytable.dec.16.202
   * e) Analysis Status: Nil
   * f) Keytable File
   
@@ -112,6 +112,7 @@ We currently received 4 batches of data
 
 
 ### For Question 2
+Question 2: review QC metrics for what we have been able to analyze on Biowulf/CCAD for some, and reconcile files received with samples sent.
 #### 1: How many types of QC reports do we have currently.
 We typically has two different phases of COVID upstream analysis, including Custmized QC and 2nd pipeline 
 
@@ -152,6 +153,7 @@ We typically has two different phases of COVID upstream analysis, including Cust
     ![image](https://user-images.githubusercontent.com/11053933/162490379-2e2a36d6-0110-4cfc-aff6-937f53e4063f.png)
     
     *  For pre calling QC Report (txt)
+       * overlap some info with primary pipeline QC, but contains many new info.
     ```
     obj_ls -v DCEG_COVID_WGS -h -m "*pre_calling_qc_report_*.txt"| less -SN
     ```
@@ -159,25 +161,56 @@ We typically has two different phases of COVID upstream analysis, including Cust
 
 
 ### For Question 3 
-We are talking about the data from Batch 4
-  * a) Std Input WGS
-  * b) Total number of Sample: 638
-  * c) Received Date: January, 2022
-  * d) Saved Location: GCP, pI8.covnet.N94.fastq.00/
-  * e) Analysis Status: Nil
-  * f) Keytable File
+Question 3: We’ll follow up this first meeting with a larger one that will start to address data that is currently received and stored on GCP
+
+#### Current Status
+1. Currently both Batch 3 and Batch 4 were stored in GCP
+2. For Batch 3 (Completed)
+   * a) Std Input WGS	
+   * b) Total number of Sample: 94
+   * c) Received Date: November, 2021
+   * d) Saved Location: GCP,  pI8.covnet.N94.fastq.00/
+      * We downloaded these samples from GCP to biowulf and did analysis on Biowulf (NOT on GCP).
+      * GCP location
+    ```
+    https://console.cloud.google.com/storage/browser/dceg-covnet-wgs-useast1;tab=objects?forceOnBucketsSortingFiltering=false&project=nih-nci-dceg-cgr&prefix=&forceOnObjectsSortingFiltering=false
+    ```
+   * e) Analysis Status: Completed
+   * f) Keytable File
+
+![image](https://user-images.githubusercontent.com/11053933/161797533-4c6df4ff-dfb8-4a9c-95ff-32fdf4bc2dd4.png)
+
+3. We are talking about the data from Batch 4 (This is our target)
+   * a) Std Input WGS
+   * b) Total number of Sample: 638
+   * c) Received Date: January, 2022
+   * d) Saved Location: GCP, pI3.COVNET.batch3.N638.6topoffs.keytable.dec.16.202
+   * e) Analysis Status: Nil
+   * f) Keytable File
 
 ![image](https://user-images.githubusercontent.com/11053933/161799717-9800c274-a4b8-4ff1-98e4-aa33cc9f196b.png)
 
 ### For Question 4
-Some questions 
-1. Any similar jobs has been done? (GenScan)?
-2. Any small demo code availabe for testing? 
-3. If bioinfomatics tools are availabe in google cloud? 
-4. If the cloud has some issues as the zombie job in HPC? Any experiences to detect and re-submit jobs in this case?  
-5. Cost 
-    * 1) Due to the cost of cloud storage, do we have the plan to backup file and delete files periodly in cloud?
-    * 2) Any other concern the things need to pay attention to avoid the unnecessary cost in cloud? 
+Question 4: Discuss potential use of Nvidia/parabricks for analysis,
+#### Some questions/discussions
+1. Regarding parabricks
+   * Optimize the existing popular bioinfomatics tools by fully taking advantage of GPU cards.
+   * Any benchmark comparsion? 
+   * Based on our CGR in-house experience, how about its performance in real case.
+2. Regarding using Nvidia/parabricks for analysis
+   * Any similar jobs has been done? (GenScan)?
+   * Any small demo code availabe for testing? 
+3: Reoarding using GCP for the implementation of the whole calculation logic 
+   * If bioinfomatics tools are availabe in google cloud? 
+   * Do we need to deploy our our env in cluster. Or we can reused some existed & well-buit env in cloud (e.g. conda).
+   * If the cloud has some issues? 
+      * e.g. the zombie job in HPC? Any experiences to detect and re-submit jobs for this case?   
+4. Cost 
+    * Due to the cost of cloud storage, do we have the plan to backup file and delete files periodly in cloud?
+    * Any other concerns/strategies to avoid the unnecessary cost in cloud? 
 
 ### For Question 5
-Any comments from Jia and Wen?
+Question 5: eventually loop in others to discuss the larger analytical plan post variant calling (including potential use for informing/improving imputation for some of our Hispanic GWAS efforts
+#### Discussions
+1. Any comments from Jia and Wen?
+2. Do we need to make our Pacbio SV pipeline suppot cloud eventually? 
