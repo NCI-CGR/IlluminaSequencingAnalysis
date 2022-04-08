@@ -209,6 +209,8 @@ Question 4: Discuss potential use of Nvidia/parabricks for analysis,
 4. Cost 
     * Due to the cost of cloud storage, do we have the plan to backup file and delete files periodly in cloud?
     * Any other concerns/strategies to avoid the unnecessary cost in cloud? 
+5. Reference
+   * Parabricks: https://docs.nvidia.com/clara/parabricks/v3.5/text/software_overview.html
 
 ### For Question 5
 Question 5: eventually loop in others to discuss the larger analytical plan post variant calling (including potential use for informing/improving imputation for some of our Hispanic GWAS efforts
