@@ -145,6 +145,7 @@ We typically has two different phases of COVID upstream analysis, including Cust
     ![image](https://user-images.githubusercontent.com/11053933/162489838-87de18d2-307c-4681-bf6f-493655a0df16.png)
     
     *  For Coverage QC Report (txt)
+      * Comparing with primary pipeline: has additional statistic info of 1x, 5x, 50x
     ```
     obj_ls -v DCEG_COVID_WGS -h -m "*coverage_report_*.txt"| less -SN
     ```
