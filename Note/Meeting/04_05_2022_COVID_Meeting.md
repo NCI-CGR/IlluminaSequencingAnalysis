@@ -53,7 +53,7 @@ We currently received 4 batches of data
   * a) Std Input WGS	
   * b) Total number of Sample: 638
   * c) Received Date: January, 2022
-  * d) Saved Location: GCP,  pI8.covnet.N94.fastq.00/
+  * d) Saved Location: GCP,   pI3.COVNET.batch3.N638.6topoffs.keytable.dec.16.202
   * e) Analysis Status: Nil
   * f) Keytable File
   
