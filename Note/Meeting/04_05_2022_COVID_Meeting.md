@@ -1,4 +1,5 @@
 ## Discussion
+### Original Email
 Hi all,
 
 1) Need to start addressing the WGS data that has been generated to date, 
