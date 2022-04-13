@@ -128,7 +128,8 @@ Question 2: review QC metrics for what we have been able to analyze on Biowulf/C
 #### 1: How many types of QC reports do we have currently.
 We typically has two different phases of COVID upstream analysis, including Custmized QC and 2nd pipeline 
 
-![image](https://user-images.githubusercontent.com/11053933/163253879-8487f0f8-a3f9-4511-a2ba-8104acc636f8.png)
+![image](https://user-images.githubusercontent.com/11053933/163254417-ed95ca78-fb79-4e09-9d02-4af3ba52a67c.png)
+
 
 (1) Custmized QC
   * Classify the raw fastq files with the same flwocell name together, and generate differnet flowcells.
