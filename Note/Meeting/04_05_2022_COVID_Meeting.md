@@ -205,6 +205,8 @@ Question 3: We’ll follow up this first meeting with a larger one that will sta
 
 ![image](https://user-images.githubusercontent.com/11053933/161799717-9800c274-a4b8-4ff1-98e4-aa33cc9f196b.png)
 
+4. Similar thing for Batch 5 (pI3.COVNET.NCI.batch4.N1512.01)
+
 ### For Question 4
 Question 4: Discuss potential use of Nvidia/parabricks for analysis,
 #### Some questions/discussions
