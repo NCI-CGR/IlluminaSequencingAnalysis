@@ -213,7 +213,7 @@ Question 4: Discuss potential use of Nvidia/parabricks for analysis,
 1. Regarding parabricks
    * Optimize the existing popular bioinfomatics tools by fully taking advantage of GPU cards.
    * Any benchmark comparsion? 
-   * Based on our CGR in-house experience, how about its performance in real case.
+   * Based on our CGR in-house experience, how about its performance for real case.
 2. Regarding using Nvidia/parabricks for analysis
    * Any similar jobs has been done? (GenScan)?
    * Any small demo code availabe for testing? 
