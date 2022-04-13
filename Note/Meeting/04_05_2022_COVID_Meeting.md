@@ -214,17 +214,21 @@ Question 4: Discuss potential use of Nvidia/parabricks for analysis,
    * Optimize the existing popular bioinfomatics tools by fully taking advantage of GPU cards.
    * Any benchmark comparsion? 
    * Based on our CGR in-house experience, how about its performance for real case.
+   
 2. Regarding using Nvidia/parabricks for analysis
    * Any similar jobs has been done? (GenScan)?
    * Any small demo code availabe for testing? 
-3: Reoarding using GCP for the implementation of the whole calculation logic 
-   * If bioinfomatics tools are availabe in google cloud? 
+  
+3: Regarding using GCP for the implementation of the whole calculation logic 
+   * If bioinfomatics tools are all availabe in google cloud? 
    * Do we need to deploy our our env in cluster. Or we can reused some existed & well-buit env in cloud (e.g. conda).
    * If the cloud has some issues? 
       * e.g. the zombie job in HPC? Any experiences to detect and re-submit jobs for this case?   
+   
 4. Cost 
     * Due to the cost of cloud storage, do we have the plan to backup file and delete files periodly in cloud?
     * Any other concerns/strategies to avoid the unnecessary cost in cloud? 
+  
 5. Reference
    * Parabricks: https://docs.nvidia.com/clara/parabricks/v3.5/text/software_overview.html
 
