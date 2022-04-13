@@ -85,6 +85,17 @@ We currently received 4 batches of data
 ![image](https://user-images.githubusercontent.com/11053933/161799717-9800c274-a4b8-4ff1-98e4-aa33cc9f196b.png)
 
 
+(4) Batch 5 (newly added)
+   * a) It looks like we just got batch 5 on April 7,8, 2022. 
+   * b) The name of Batch: pI3.COVNET.NCI.batch4.N1512.01/
+   ![image](https://user-images.githubusercontent.com/11053933/163228922-7b8885e9-7f17-4570-bad9-529c9b060791.png)
+
+   * b) Details
+      *  i) Number of sample: 1512
+   * c) Question
+      * i) one fastq outside sub folders: dceg-covnet-wgs-useast1/I3-18752_S14_L001_R1_001.fastq.gz
+      * ii)missing keytable csv file
+
 #### 2: The working directory in biowulf
 (1) All works are on biowulf
 
@@ -174,7 +185,7 @@ Question 3: We’ll follow up this first meeting with a larger one that will sta
       * We downloaded these samples from GCP to biowulf and did analysis on Biowulf (NOT on GCP).
       * GCP location
     ```
-    https://console.cloud.google.com/storage/browser/dceg-covnet-wgs-useast1;tab=objects?forceOnBucketsSortingFiltering=false&project=nih-nci-dceg-cgr&prefix=&forceOnObjectsSortingFiltering=false
+    https://console.cloud.google.com/storage/browser/dceg-covnet-wgs-useast1;tab=objects?forceOnBucketsSortingFiltering=false&project=nih-nci-dceg-cgr&prefix=&forceOnObjectsSortingFiltering=false&pageState=(%22StorageObjectListTable%22:(%22f%22:%22%255B%255D%22))
     ```
    * e) Analysis Status: Completed
    * f) Keytable File
