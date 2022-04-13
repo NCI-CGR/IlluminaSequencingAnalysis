@@ -18,7 +18,7 @@ Question 1: Need to start addressing the WGS data that has been generated to dat
 
 #### 1: How many samples we alreay received
 
-We currently received 4 batches of data
+We currently received 4 + 1 batches of data
 
 (1) Batch 1
   * a) Standard Input WGS	
