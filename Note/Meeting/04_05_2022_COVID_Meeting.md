@@ -219,7 +219,7 @@ Question 4: Discuss potential use of Nvidia/parabricks for analysis,
    * Any similar jobs has been done? (GenScan)?
    * Any small demo code availabe for testing? 
   
-3: Regarding using GCP for the implementation of the whole calculation logic 
+3. Regarding using GCP for the implementation of the whole calculation logic 
    * If bioinfomatics tools are all availabe in google cloud? 
    * Do we need to deploy our our env in cluster. Or we can reused some existed & well-buit env in cloud (e.g. conda).
    * If the cloud has some issues? 
