@@ -28,7 +28,7 @@ We currently received 4 + 1 batches of data
     * Use obj_ls to check it:  
       ```
       obj_ls -v DCEG_COVID_WGS -h -m "*fastq.gz"| less -SN
-      Notice: contains other fastq files, need check the code which part belongs to current batch
+      Notice: contains other fastq files, need to check the output to know which part belongs to current batch
       ```
     * Screenshot example
     ![image](https://user-images.githubusercontent.com/11053933/162484986-436a5802-a960-4daa-a440-5b89d02cf9bf.png)
