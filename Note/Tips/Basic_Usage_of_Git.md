@@ -7,7 +7,13 @@
 ## Scenario Demo
 
 ### Step 1: Grab source code from public repo to local
-1. Prepare 2 local working-dirs, including:
+1. Load the latest verion of git
+
+```
+module load git/2.12.0
+```
+
+2. Prepare 2 local working-dirs, including:
    * Production Dir
      * Purpose: run production data
    * Development Dir
@@ -19,12 +25,12 @@
    $git clone ${gitRepo}
    ```
 
-2. For Production Dir
+3. For Production Dir
    * Use the code to run prodicton flowcells
    * For all standard analysis, which need to shared by others
    * Never edit any files manually in this folder   
 
-3. For Development Dir
+4. For Development Dir
    * Use this code for development, including
      * Debug
      * New Feature
