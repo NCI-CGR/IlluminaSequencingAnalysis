@@ -57,8 +57,8 @@ git add -A
 4. make comments 
     * Notice
        * Format, including caption, main body and ref
-       * do not write too long for each line
-       * make sure you linked this commit to the correct ticket.
+       * Do not write too long for each line
+       * Make sure you linked this commit to the correct ticket.
        * Save it as Dos format
     * Command line and example 
 ```
