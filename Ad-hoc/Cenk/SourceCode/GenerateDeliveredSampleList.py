@@ -5,13 +5,15 @@ import subprocess
 import sys
 import os
 
+BAMFolder = "/data/COVID_ADHOC/Sequencing/COVID_WGS/ad-hoc/Cenk/TargetBAM_TCR_IGK"
+DELIVERSampleListFile = "/data/COVID_ADHOC/Sequencing/COVID_WGS/ad-hoc/Cenk/UpdatedExcel/TargetBAM_TCR_IGK/Delivered_sample_list_09_07_2022.txt"
 
 def GenerateStatisticSampleList():
-    strFilePath = "/data/COVID_ADHOC/Sequencing/COVID_WGS/ad-hoc/Cenk/TargetBAM"
+    strFilePath = BAMFolder
     
     CMD = 'find ' + strFilePath + " -iname '*.bam'"
     vLine = subprocess.getoutput(CMD).split('\n')
-    strFileName = "/data/COVID_ADHOC/Sequencing/COVID_WGS/ad-hoc/Cenk/Delivered_sample_list.txt"
+    strFileName = DELIVERSampleListFile
     osf = open(strFileName, "w")
     strRow = "SequenceType\tReadsType\tUSU_ID\tCGR_ID\n"
     osf.write(strRow) 

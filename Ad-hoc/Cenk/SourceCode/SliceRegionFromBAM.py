@@ -10,7 +10,8 @@ import os
 BAMDir = "/data/COVID_ADHOC/Sequencing/COVID_WGS/Data/USU_First_Batch_low_std_96_361_18"
 LOGDir = BAMDir + "/Log"
 
-DESTDir = "/data/COVID_ADHOC/Sequencing/COVID_WGS/ad-hoc/Cenk/TargetBAM"
+#DESTDir = "/data/COVID_ADHOC/Sequencing/COVID_WGS/ad-hoc/Cenk/TargetBAM"
+DESTDir = "/data/COVID_ADHOC/Sequencing/COVID_WGS/ad-hoc/Cenk/TargetBAM_TCR_IGK"
 DESTLogDir = DESTDir + "/Log"
 
 

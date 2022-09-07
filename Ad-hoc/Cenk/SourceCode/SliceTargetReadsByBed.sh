@@ -19,7 +19,8 @@ done
 
 SECONDS=0
 
-strBEDFile="../Files/igh_orphons_GRCh38.bed"
+#strBEDFile="../Files/igh_orphons_GRCh38.bed"
+strBEDFile="../Files/ImmunoTyper_regions_of_interest_GRCh38.bed"
 
 strDestBAM="${strDestDir}"/"${strDestFileName}"
 

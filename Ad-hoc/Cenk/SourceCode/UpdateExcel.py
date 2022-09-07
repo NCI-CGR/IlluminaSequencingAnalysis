@@ -4,8 +4,8 @@
 3: Notify the related people
 '''
 
-SOURCEDir = "/data/COVID_ADHOC/Sequencing/COVID_WGS/ad-hoc/Cenk/TargetBAM"
-DESTDir = "/data/COVID_ADHOC/Sequencing/COVID_WGS/ad-hoc/Cenk"
+SOURCEDir = "/data/COVID_ADHOC/Sequencing/COVID_WGS/ad-hoc/Cenk/TargetBAM_TCR_IGK"
+DESTDir = "/data/COVID_ADHOC/Sequencing/COVID_WGS/ad-hoc/Cenk/UpdatedExcel/TargetBAM_TCR_IGK"
 
 import pandas as pd
 import subprocess
