@@ -68,6 +68,12 @@ We currently received 4 + 1 batches of data
     * GCP location
     ```
     https://console.cloud.google.com/storage/browser/dceg-covnet-wgs-useast1;tab=objects?forceOnBucketsSortingFiltering=false&project=nih-nci-dceg-cgr&prefix=&forceOnObjectsSortingFiltering=false
+    
+    Notice: if the link above does not work, try
+    https://console.cloud.google.com/storage
+    Then use your piv card to login (both chrom and IE works).
+    
+    If you still get trouble, try to contact: Daneil Russ
     ```
   * e) Analysis Status: Completed
   * f) Keytable File
