@@ -76,7 +76,8 @@ class ClsReads:
             objVariant = ClsVariant()
             objVariant.Init(self.strName, iPos, tuple)
             vVariant.append(objVariant)
-            iPos += int(tuple[1])
+            if DICCIGAR[tuple[0]] == "D" or DICCIGAR[tuple[0]] == "N" or DICCIGAR[tuple[0]] == "X": 
+                iPos += int(tuple[1])
 
 def OutputVairant(vVariant, strVariantFile):
     #Sort vVariant
