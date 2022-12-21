@@ -1,5 +1,8 @@
 import pysam
 import csv
+import sys
+import os
+import subprocess
 
 DICCIGAR = {0: "M",
             1: "I",
@@ -23,6 +26,7 @@ DICCIGAREDRTAIL = {0: "BAM_CMATCH",
                    8: "BAM_CDIFF",
                    9: "BAM_CBACK"}
 
+BAMDir = "/scratch/lix33/lxwg/Project/H_pylori/Processed/BAM"
 
 class ClsVariant():
     def __init__(self):
@@ -100,7 +104,7 @@ def OutputNoneReads(vNoneReads, strUnalignedReads):
         f.write(reads.strReadsSeq + "\n")
     f.close()
 
-def AlignAnalyze(dicAlignment):
+def AlignAnalyze(dicAlignment, strBAMFile):
     # for key in dicAlignment.keys():
     #     if len(dicAlignment[key]) > 1:
     #         print(key)
@@ -109,6 +113,7 @@ def AlignAnalyze(dicAlignment):
     #             print(read.iAlignedLen, read.strCIGAR) 
     #         print("----------")
     
+
     # Get best Alignment (refine the dictionary)
     for key in dicAlignment.keys():
         if len(dicAlignment[key]) > 1:
@@ -128,16 +133,16 @@ def AlignAnalyze(dicAlignment):
         for reads in dicAlignment[key]:
             reads.GetVariant(vVariant, vNoneReads)
     
-    strVariantFile = "/home/lixin/lxwg/ad-hoc/H_Pylori/CallVariant/VariantProfile.vcf"
+    strVariantFile = "/scratch/lix33/lxwg/Project/H_pylori/Processed/CSV/" + strBAMFile.split('/')[-1].split('.sorted')[0] + ".csv"
     OutputVairant(vVariant, strVariantFile)
     
-    strUnalignedGenome = "/home/lixin/lxwg/ad-hoc/H_Pylori/CallVariant/UnalignedGenome.ffa"
+    strUnalignedGenome = "/scratch/lix33/lxwg/Project/H_pylori/Processed/CSV/" + strBAMFile.split('/')[-1].split('.sorted')[0] + ".UnalignedGenome.ffa"
     OutputNoneReads(vNoneReads, strUnalignedGenome)
        
 def ReadBAM(strBAMFile):
     bamfile = pysam.AlignmentFile(strBAMFile, "rb")
     header = bamfile.header.copy()
-    print(header)
+    #print(header)
     #print(type(bamfile.fetch(until_eof=True)))
     dicAlignment = {}
     for reads in bamfile.fetch(until_eof=True):
@@ -156,12 +161,17 @@ def ReadBAM(strBAMFile):
                 dicAlignment[objReads.strName].append(objReads)
         
     print(len(dicAlignment))
-    AlignAnalyze(dicAlignment)
+    AlignAnalyze(dicAlignment, strBAMFile)
     
     
 def main():
-    fileName = "/home/lixin/lxwg/ad-hoc/H_Pylori/Data/Merged.all.sorted.bam"
-    ReadBAM(fileName)
+    #fileName = "/home/lixin/lxwg/ad-hoc/H_Pylori/Data/HpGP-26695-ATCC.sorted.bam"
+    CMD = "find " + BAMDir + " -type f -iname 'merged.all.*.sorted.bam'"
+    vMergedBAM = subprocess.getoutput(CMD).split('\n')
+    print(vMergedBAM)
+    
+    for strBAMFile in vMergedBAM: 
+        ReadBAM(strBAMFile)
 
 if __name__ == "__main__":
     main()
