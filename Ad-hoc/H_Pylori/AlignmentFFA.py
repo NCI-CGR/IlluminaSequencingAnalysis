@@ -1,28 +1,85 @@
 import sys
 import os
 import subprocess
+import gzip
 
-LSTRefName       = ["26695-1MET", "26695", "ELS37", "F57"]
-SUFFIXRef        = "fsa"
-SUFFIXReads      = "ffa.gz"
-DIRRef           = "/scratch/lix33/lxwg/Project/H_pylori/Data/to-Xin/ref"
-DIROutputBAMRoot = "/scratch/lix33/lxwg/Project/H_pylori/Processed/BAM"
-DIROutputLogRoot = "/scratch/lix33/lxwg/Project/H_pylori/Processed/Log"
-DIROutputFlagRoot = "/scratch/lix33/lxwg/Project/H_pylori/Processed/Flag"
-DIRRawSample     = "/scratch/lix33/lxwg/Project/H_pylori/Data/to-Xin/1012set"
+LSTRefName  = ["26695-1MET", "26695", "ELS37", "F57"]
+SUFFIXRef   = "fsa"
+SUFFIXReads = "ffa.gz"
+
+DIRRef              = "/scratch/lix33/lxwg/Project/H_pylori/Data/to-Xin/ref"
+DIROutputBAMRoot    = "/scratch/lix33/lxwg/Project/H_pylori/Processed/BAM"
+DIROutputLogRoot    = "/scratch/lix33/lxwg/Project/H_pylori/Processed/Log"
+DIROutputFlagRoot   = "/scratch/lix33/lxwg/Project/H_pylori/Processed/Flag"
+DIRRawSample        = "/scratch/lix33/lxwg/Project/H_pylori/Data/to-Xin/1012set"
+DIRUpdatedRawSample = "/scratch/lix33/lxwg/Project/H_pylori/Processed/UpdatedRawSample"
+
+# DIRRawSample        = "/home/lixin/lxwg/Data/H-Pylori/RawReads"
+# DIRUpdatedRawSample = "/home/lixin/lxwg/Data/H-Pylori/UpdatedRawSample"
 
 CORE = "2"
 BASHScript = "/scratch/lix33/lxwg/SourceCode/H_Pylori/Alignment.sh"
 
-class Sample:
+class ClsReads:
+    def __init__(self):
+        self.strName = ""
+        self.strSeq = ""
+        self.iIndex = 0
+    
+    def UpdateReadsName(self):
+        if self.strName == "":
+            return
+        vItem = self.strName.split(' ')
+        vItem[0] += "|" + str(self.iIndex)
+        self.strName = ' '.join(vItem)
+
+class ClsSample :
     def __init__(self):
         self.strName = ""
         self.strReads = ""
+        self.strUpdatedReads = ""
     
     def Init(self, strReadsPath):
         self.strName = strReadsPath.split('/')[-1].split('.')[0]
         self.strReads = strReadsPath
     
+    def UpdateReads(self):
+        # 1: Get File Name
+        strFileName = os.path.basename(self.strReads)
+        # Update reads Name (by adding index in the end of the reads)
+        vReads = []
+        objReads = ClsReads()
+        print(self.strReads)
+        ifs = gzip.GzipFile(self.strReads)
+        strSeq = ""
+        iCount = 0
+        for line in ifs: 
+            strLine = line.decode("utf-8")
+            if strLine[0] == '>':
+                iCount += 1
+                if strSeq != "":
+                    objReads.strSeq = strSeq
+                    vReads.append(objReads)
+                    strSeq = ""
+                objReads = ClsReads()
+                objReads.strName = strLine
+                objReads.iIndex = iCount
+                objReads.UpdateReadsName()
+            else:
+                strSeq += strLine
+        # Add the last reads
+        objReads.strSeq = strSeq
+        vReads.append(objReads) 
+        ifs.close()
+        
+        # Save updated reads to file
+        strUpdatedReads = DIRUpdatedRawSample + "/" + strFileName
+        with gzip.open(strUpdatedReads, 'wb') as f:
+            for reads in vReads:
+                f.write(reads.strName.encode())
+                f.write(reads.strSeq.encode())
+        self.strUpdatedReads = strUpdatedReads
+
     def SubmitJob(self, strRefName, strRefFile, strOutputBAMDir, strOutputLogDir, strOutputFlagDir):
         
         flagWorking = strOutputFlagDir + "/" + self.strName + ".mapping.working"
@@ -38,7 +95,7 @@ class Sample:
               "-o " + strOutStd + " -e " + strOutErr + " " + \
               "-N " + strName + " " + \
               "-S /bin/bash " + BASHScript + " " + strRefFile + " " + \
-               self.strReads + " " + self.strName + " " + \
+               self.strUpdatedReads + " " + self.strName + " " + \
                strOutputBAMDir + " " + strOutputFlagDir + " " + CORE
         print(CMD)
         os.system(CMD)
@@ -47,16 +104,16 @@ def InitSample(vSample):
     # Notice: ignore hidden files
     CMD = "find " + DIRRawSample + " -maxdepth 1 -mindepth 1 -not -path '*/.*' -type f -iname '*" + SUFFIXReads + "'"
     vReadsList = subprocess.getoutput(CMD).split('\n')
-    print(len(vReadsList), vReadsList[0])
+    #print(len(vReadsList), vReadsList[0])
     
     # Init Sample
     vSample.clear()
     for reads in vReadsList:
-        objSample = Sample()
+        objSample = ClsSample()
         objSample.Init(reads)
         vSample.append(objSample)
     
-    print(vSample[0].strName)
+    #print(vSample[0].strName)
     
 
 def MergeBAM(strRefName, strOutputBAMDir, strOutputFlagDir):
@@ -98,6 +155,9 @@ def main():
     vSample = []
     InitSample(vSample)
     
+    for sample in vSample:
+        sample.UpdateReads()
+    
     # Prepare
     for strRefName in LSTRefName:
         # Ref File 
@@ -115,13 +175,11 @@ def main():
         CMD = "mkdir -p " + strOutputFlagDir
         os.system(CMD)
         
-        for sample in vSample:     
+        for sample in vSample:
             sample.SubmitJob(strRefName, strRefFile, strOutputBAMDir, strOutputLogDir, strOutputFlagDir)
     
         # MergeBAM
         #MergeBAM(strRefName, strOutputBAMDir, strOutputFlagDir)
             
-    
-
 if __name__ == "__main__":
     main()

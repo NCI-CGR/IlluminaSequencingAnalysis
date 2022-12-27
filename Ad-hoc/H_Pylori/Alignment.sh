@@ -112,7 +112,7 @@ eval ${CMD}
 
 # Get gene list
 listGene="${mappedReadsBAM}.gene.list"
-CMD="samtools view ${mappedReadsBAM} | awk '{print $1}' > ${listGene}"
+CMD="samtools view ${mappedReadsBAM} | awk '{print \$1}' > ${listGene}"
 echo
 echo ${CMD}
 eval ${CMD}
@@ -138,7 +138,7 @@ eval ${CMD}
 
 # Get gene list
 listGene="${unmappedReadsBAM}.gene.list"
-CMD="samtools view ${unmappedReadsBAM} | awk '{print $1}' > ${listGene}"
+CMD="samtools view ${unmappedReadsBAM} | awk '{print \$1}' > ${listGene}"
 echo
 echo ${CMD}
 eval ${CMD}
