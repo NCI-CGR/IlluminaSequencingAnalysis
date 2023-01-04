@@ -11,6 +11,7 @@ import gzip
 import pysam
 import csv
 import ast
+from Bio import SeqIO
 
 LSTRefName  = ["26695-1MET", "26695", "ELS37", "F57"]
 SUFFIXRef   = "fsa"
@@ -32,6 +33,7 @@ DIRUpdatedRawSample      = "/home/lixin/lxwg/Data/H-Pylori/UpdatedRawSample"
 DIROutputBAMRoot         = "/home/lixin/lxwg/Data/H-Pylori/BAM"
 DIROutputMethylationRoot = "/home/lixin/lxwg/Data/H-Pylori/Methylation"
 DIRGFFV3                 = "/home/lixin/lxwg/Data/H-Pylori/GFFV3" 
+DIRRef                   = "/home/lixin/lxwg/Data/H-Pylori/Ref"
 
 CORE = "2"
 BASHScript = "/scratch/lix33/lxwg/SourceCode/H_Pylori/Alignment.sh"
@@ -80,6 +82,17 @@ DICCIGAROFFSETREADS = {"M": 1,
                        "X": 1,
                        "B": 1}
 
+
+class ClsRef:
+    def __init__(self):
+        self.dicInfo = {}
+    
+    def Init(self, strRefFile):
+        fasta_sequences = SeqIO.parse(open(strRefFile),'fasta')       
+        for fasta in fasta_sequences:
+            name, sequence = fasta.id, str(fasta.seq)
+            self.dicInfo[name] = sequence
+
 class ClsReads:
     def __init__(self):
         self.strName = ""
@@ -93,14 +106,20 @@ class ClsReads:
         self.iReadsLength = ""
         self.strReadsSeq = ""
         self.strOrgName = ""
+        self.strRefName = ""
         # <--
         self.strRawReadsName = ""
         self.iRawStartPos = -1
         self.iRawEndPos = -1
+        
         self.vMathyPos = []
+        self.vMathyMask = []
+        self.vMathyStrand = []
+        
         self.vMathyPosOffSetInGene = []
         self.vMathyPosRef = []
         self.vMathyCIGAR = []
+        self.vMathyRefBase = []
     
     def UpdateReadsName(self):
         if self.strName == "":
@@ -117,8 +136,10 @@ class ClsReads:
         self.iReadsLength = reads.query_length
         self.iAlignedLen = reads.reference_length
         self.strOrgName = '|'.join(self.strName.split('|')[:-1])
+        self.strRefName = reads. reference_name
+        #print("Referene Name:", self.strRefName)
     
-    def GetRawReadsInfo(self, strRawReads, vMathyPos):
+    def GetRawReadsInfo(self, strRawReads, vMathyPos, vMathyMask, vMathyStrand, objRef):
         strPatten = self.strOrgName
         strPatten = strPatten.replace("[", "\[" )
         strPatten = strPatten.replace("]", "\]" )
@@ -134,20 +155,25 @@ class ClsReads:
         #print(strTmp)
         self.iRawStartPos = int(strTmp.split(':')[0])
         self.iRawEndPos = int(strTmp.split(':')[1])
-        # Get the related Mathylation 
+        # Get the related Mathylation
+        iIndex = 0
         for strPos in vMathyPos:
             if (int(strPos) >= self.iRawStartPos and
                 int(strPos) <= self.iRawEndPos):
                 self.vMathyPos.append(int(strPos))
+                self.vMathyMask.append(vMathyMask[iIndex])
+                self.vMathyStrand.append(vMathyStrand[iIndex])
                 iOffset = int(strPos) - self.iRawStartPos
                 self.vMathyPosOffSetInGene.append(iOffset)
             if int(strPos) > self.iRawEndPos:
                 break
+            else:
+                iIndex += 1
         #print(self.vMathyPos)
         #print(self.vMathyPosOffSetInGene)
-        self.GetMathylationRefPos()
+        self.GetMathylationRefPos(objRef)
     
-    def GetMathylationRefPos(self):
+    def GetMathylationRefPos(self, objRef):
         #print(self.strCIGAR)
         # print(self.listCIGAR)
         # for cigar in self.listCIGAR:
@@ -166,8 +192,16 @@ class ClsReads:
                     iPos += (iOffSet - iCount) * DICCIGAROFFSETREF[DICCIGAR[cigar[0]]]
                     strCIGAR += str(iOffSet - iCount) + DICCIGAR[cigar[0]]
                     break
+            strRefBase = ""
+            if DICCIGAROFFSETREF[strCIGAR[-1]] == 0:
+                strRefBase = "*"
+                iPos = str(iPos) + "(*)"
+            else:
+                strRefBase = objRef.dicInfo[self.strRefName][iPos-1]
             self.vMathyPosRef.append(iPos)
             self.vMathyCIGAR.append(strCIGAR)
+            self.vMathyRefBase.append(strRefBase)
+            
         #print(self.iPos)
         #print(self.vMathyPosRef)
         #print(self.vMathyCIGAR)
@@ -182,6 +216,11 @@ class ClsReads:
         listRow.append(str(self.vMathyPos[iIndex]))
         listRow.append(str(self.vMathyPosOffSetInGene[iIndex]))
         listRow.append(str(self.vMathyPosRef[iIndex]))
+        #-> new info
+        listRow.append(str(self.vMathyMask[iIndex]))
+        listRow.append(str(self.vMathyRefBase[iIndex]))
+        listRow.append(str(self.vMathyStrand[iIndex]))
+        #<-
         listRow.append(str(self.vMathyCIGAR[iIndex]))
 
 class ClsSample :
@@ -340,7 +379,7 @@ class ClsSample :
         ofs.close()
     
     
-    def GetMethylationCoordinate(self, strRefName):
+    def GetMethylationCoordinate(self, strRefName, objRef):
         strMappedBAMFile = DIROutputBAMRoot + "/" + strRefName + "/Mapped/" + self.strName + ".mapped.sorted.bam"
         strGeneListFile = DIROutputBAMRoot + "/" + strRefName + "/Mapped/" + self.strName + ".mapped.sorted.bam.gene.list"
         strGFFV3File = DIRGFFV3 + "/" + self.strName + ".gff3.gz"
@@ -361,12 +400,18 @@ class ClsSample :
         # 4: Get the correct coordinate for each Mathylation
         # 5: Save the result to csv file
         # Go -> Parse current BAM file
-        self.ParseBAM(strMappedBAMFile, strRawReads, strGFFV3File)
+        self.ParseBAM(strMappedBAMFile, strRawReads, strGFFV3File, objRef)
     
-    def ParseBAM(self, strMappedBAMFile, strRawReads, strGFFV3File):
+    def ParseBAM(self, strMappedBAMFile, strRawReads, strGFFV3File, objRef):
         # 1: Get the Methylation Pos
         CMD = "zcat " + strGFFV3File + " | tail -n +4 | awk '{print $4}' | sort -n"
-        vMathyPos = subprocess.getoutput(CMD).split('\n')  
+        vMathyPos = subprocess.getoutput(CMD).split('\n')
+        
+        CMD = "zcat " + strGFFV3File + " | tail -n +4 | awk '{print $3}' | sort -n"
+        vMathyMask = subprocess.getoutput(CMD).split('\n')
+        
+        CMD = "zcat " + strGFFV3File + " | tail -n +4 | awk '{print $7}' | sort -n"
+        vMathyStrand = subprocess.getoutput(CMD).split('\n')
         #print(vMathyPos)
         #return 
         
@@ -381,7 +426,7 @@ class ClsSample :
             objReads = ClsReads()
             objReads.Init(reads)
             #print(objReads.strOrgName)
-            objReads.GetRawReadsInfo(strRawReads, vMathyPos)
+            objReads.GetRawReadsInfo(strRawReads, vMathyPos, vMathyMask, vMathyStrand, objRef)
             #print(objReads.strRawReadsName)
             self.vReads.append(objReads)
             # #break
@@ -413,7 +458,7 @@ class ClsSample :
         print("Preparing CSV File:", strCSVFile)
         f = open(strCSVFile, 'w')
         writer = csv.writer(f)
-        listRow = ["GeneName", "AlignedRefPos(Gene)", "RawStartPosRef(Gene)", "RawEndPosRef(Gene)", "RawPosRef(Methylation)", "OffSetPosGene(Methylation)", "LiftoverAlignedPosRef(Methylation)", "CIGAR(Calculation)"]
+        listRow = ["GeneName", "AlignedRefPos(Gene)", "RawStartPosRef(Gene)", "RawEndPosRef(Gene)", "RawPosRef(Methylation)", "OffSetPosGene(Methylation)", "LiftoverAlignedPosRef(Methylation)", "MethyMask", "RefBase", "Strand(GFF3)", "CIGAR(Calculation)"]
         writer.writerow(listRow)
         
         for reads in self.vReads:
@@ -476,6 +521,7 @@ def MergeBAM(strRefName, strOutputBAMDir, strOutputFlagDir):
     CMD = "rm " + strMergedBAM
     os.system(CMD)
     
+    
 def main():
     # Prepare Sample
     vSample = []
@@ -522,8 +568,13 @@ def main():
     # Prepare Aligned BAM
     
     for strRefName in LSTRefName:
+        # Read current reference 
+        strRefFile = DIRRef + "/" + strRefName + "." + SUFFIXRef
+        objRef = ClsRef()
+        objRef.Init(strRefFile)
+        #print(objRef.dicInfo)
         for sample in vSample:
-            sample.GetMethylationCoordinate(strRefName)
+            sample.GetMethylationCoordinate(strRefName, objRef)
             # Print Result 
             sample.PrintMethylationCoordinate(strRefName)
     
