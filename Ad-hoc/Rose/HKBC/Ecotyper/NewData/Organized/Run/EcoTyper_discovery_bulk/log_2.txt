@@ -1,0 +1,54 @@
+lixin@lixin-VirtualBox:~/lxwg/ad-hoc/Ecotyper/NewData/Organized/Run/EcoTyper_discovery_bulk$ bash ./run.sh 
+Skipping step 1 (cell type fraction estimation)...
+Skipping step 2 (cell type expression purification)...
+Skipping step 3 (cell state discovery)...
+
+Step 4 (choosing the number of cell states)...
+Number of states has been successfully selected for each cell type! Please inspect the final output file 'rank_plot.pdf' to ensure that the selected number of states is appropriate!
+Warning messages:
+1: The `size` argument of `element_line()` is deprecated as of ggplot2 3.4.0.
+ℹ Please use the `linewidth` argument instead. 
+2: The `size` argument of `element_rect()` is deprecated as of ggplot2 3.4.0.
+ℹ Please use the `linewidth` argument instead. 
+Step 4 (choosing the number of cell states) finished successfully!
+
+Step 5 (extracting cell state information)...
+Extracting cell states information for: B.cells 
+Extracting cell states information for: CD4.T.cells 
+Extracting cell states information for: CD8.T.cells 
+Extracting cell states information for: Dendritic.cells 
+Extracting cell states information for: Endothelial.cells 
+Extracting cell states information for: Epithelial.cells 
+Extracting cell states information for: Fibroblasts 
+Extracting cell states information for: Mast.cells 
+Extracting cell states information for: Monocytes.and.Macrophages 
+Extracting cell states information for: NK.cells 
+Extracting cell states information for: PCs 
+Extracting cell states information for: PMNs 
+Step 5 (extracting cell state information) finished successfully!
+
+Step 6 (cell state QC filter)...
+Filtering low-quality cell states for: B.cells 
+Filtering low-quality cell states for: CD4.T.cells 
+Filtering low-quality cell states for: CD8.T.cells 
+Filtering low-quality cell states for: Dendritic.cells 
+Filtering low-quality cell states for: Endothelial.cells 
+Filtering low-quality cell states for: Epithelial.cells 
+Filtering low-quality cell states for: Fibroblasts 
+Filtering low-quality cell states for: Mast.cells 
+Filtering low-quality cell states for: Monocytes.and.Macrophages 
+Filtering low-quality cell states for: NK.cells 
+Filtering low-quality cell states for: PCs 
+Filtering low-quality cell states for: PMNs 
+Step 6 (cell state QC filter) finished successfully!
+
+Skipping step 7 (advanced cell state QC filter)...
+
+Step 8 (ecotype discovery)...
+Step 8 (ecotype discovery) finished successfully!
+
+Copying EcoTyper results to the output folder!
+
+EcoTyper finished succesfully! Please find the results in: '/home/lixin/lxwg/ad-hoc/Ecotyper/ecotyper/DiscoveryOutput_TCGA'.
+Run time: 6 mins
+

@@ -1,0 +1,28 @@
+>Running CIBERSORTx GEP imputation (representative profiles only)...
+>[Options] mixture: files/xin.li4@nih.gov/all-231tumor-normal-renamed.txt
+>[Options] sigmatrix: files/common/LM22.update-gene-symbols.txt
+>[Options] threads: 7
+>[Options] nsampling: 30
+>[Options] redo: TRUE [to rerun CIBERSORT, set 'redocibersort' to TRUE]
+>[Options] QN: FALSE
+>[Options] outdir: files/xin.li4@nih.gov/results/
+>[Options] label: Job8
+>Estimating cell proportions...
+done.
+>Loaded 231 mixture samples, 20532 genes, and 22 cell subsets...
+>Imputing representative cell type GEPs...done.
+>Writing output to disk...done.
+>Running time (sec): 501
+  adding: CIBERSORTxGEP_Job8_Fractions.txt (deflated 56%)
+  adding: CIBERSORTxGEP_Job8_GEPs.txt (deflated 53%)
+  adding: CIBERSORTxGEP_Job8_GEPs_CVs.txt (deflated 54%)
+  adding: CIBERSORTxGEP_Job8_GEPs_Filtered.txt (deflated 58%)
+  adding: CIBERSORTxGEP_Job8_GEPs_Pvals.txt (deflated 54%)
+  adding: CIBERSORTxGEP_Job8_GEPs_Qvals.txt (deflated 56%)
+  adding: CIBERSORTxGEP_Job8_GEPs_StdErrs.txt (deflated 52%)
+  adding: CIBERSORTxGEP_Job8_GEPs_ThresholdPlots.jpg (deflated 2%)
+  adding: CIBERSORTxGEP_Job8_GEPs_ThresholdPlots.pdf (deflated 51%)
+  adding: CIBERSORTxGEP_Job8_SM_GEPs_Filtered.txt (deflated 58%)
+  adding: CIBERSORTxGEP_Job8_Weights.txt (deflated 62%)
+  adding: CIBERSORTx_Job8_error_log.txt (deflated 17%)
+  adding: CIBERSORTx_Job8_runtime_log.txt

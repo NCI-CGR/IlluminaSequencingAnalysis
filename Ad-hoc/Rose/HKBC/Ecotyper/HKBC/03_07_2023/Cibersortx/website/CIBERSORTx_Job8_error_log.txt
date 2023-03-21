@@ -1,0 +1,3 @@
+Warning message:
+In CIBERSORTxFractions(sigmatrix = sigmatrix, mixture = mixture,  :
+  28 duplicated gene symbol(s) found in mixture file!
