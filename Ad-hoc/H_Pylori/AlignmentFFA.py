@@ -10,7 +10,7 @@ import subprocess
 import gzip
 import pysam
 import csv
-import ast
+#import ast
 from Bio import SeqIO
 
 LSTRefName  = ["26695-1MET", "26695", "ELS37", "F57"]
@@ -28,12 +28,12 @@ DIROutputMethylationRoot = "/scratch/lix33/lxwg/Project/H_pylori/Processed/Methy
 
 
 
-DIRRawSample             = "/home/lixin/lxwg/Data/H-Pylori/RawReads"
-DIRUpdatedRawSample      = "/home/lixin/lxwg/Data/H-Pylori/UpdatedRawSample"
-DIROutputBAMRoot         = "/home/lixin/lxwg/Data/H-Pylori/BAM"
-DIROutputMethylationRoot = "/home/lixin/lxwg/Data/H-Pylori/Methylation"
-DIRGFFV3                 = "/home/lixin/lxwg/Data/H-Pylori/GFFV3" 
-DIRRef                   = "/home/lixin/lxwg/Data/H-Pylori/Ref"
+# DIRRawSample             = "/home/lixin/lxwg/Data/H-Pylori/RawReads"
+# DIRUpdatedRawSample      = "/home/lixin/lxwg/Data/H-Pylori/UpdatedRawSample"
+# DIROutputBAMRoot         = "/home/lixin/lxwg/Data/H-Pylori/BAM"
+# DIROutputMethylationRoot = "/home/lixin/lxwg/Data/H-Pylori/Methylation"
+# DIRGFFV3                 = "/home/lixin/lxwg/Data/H-Pylori/GFFV3" 
+# DIRRef                   = "/home/lixin/lxwg/Data/H-Pylori/Ref"
 
 CORE = "2"
 BASHScript = "/scratch/lix33/lxwg/SourceCode/H_Pylori/Alignment.sh"
@@ -120,6 +120,10 @@ class ClsReads:
         self.vMathyPosRef = []
         self.vMathyCIGAR = []
         self.vMathyRefBase = []
+        
+        #tripleSeq for both ref and reads
+        self.vTripleSeqRef = []
+        self.vTripleSeqReads = []
     
     def UpdateReadsName(self):
         if self.strName == "":
@@ -130,6 +134,7 @@ class ClsReads:
     
     def Init(self, reads):
         self.strName = reads.query_name
+        self.strSeq = reads.query_sequence
         self.iPos = reads.reference_start
         self.strCIGAR = reads.cigarstring
         self.listCIGAR = reads.cigartuples
@@ -137,9 +142,11 @@ class ClsReads:
         self.iAlignedLen = reads.reference_length
         self.strOrgName = '|'.join(self.strName.split('|')[:-1])
         self.strRefName = reads. reference_name
+        
         #print("Referene Name:", self.strRefName)
     
     def GetRawReadsInfo(self, strRawReads, vMathyPos, vMathyMask, vMathyStrand, objRef):
+        print(strRawReads)
         strPatten = self.strOrgName
         strPatten = strPatten.replace("[", "\[" )
         strPatten = strPatten.replace("]", "\]" )
@@ -152,7 +159,7 @@ class ClsReads:
             strTmp = self.strRawReadsName.split(' Reverse')[0].split('|')[-1]
         elif "Forward" in self.strRawReadsName:
             strTmp = self.strRawReadsName.split(' Forward')[0].split('|')[-1]
-        #print(strTmp)
+        print(strTmp)
         self.iRawStartPos = int(strTmp.split(':')[0])
         self.iRawEndPos = int(strTmp.split(':')[1])
         # Get the related Mathylation
@@ -160,19 +167,48 @@ class ClsReads:
         for strPos in vMathyPos:
             if (int(strPos) >= self.iRawStartPos and
                 int(strPos) <= self.iRawEndPos):
+                # print("vMathyPos:", len(vMathyPos))
+                # print("vMathyMask:", len(vMathyMask))
+                # print("vMathyStrand:", len(vMathyStrand))
+                # print("iIndex", iIndex)
+                # print(strRawReads)
+                # print()
+                
                 self.vMathyPos.append(int(strPos))
                 self.vMathyMask.append(vMathyMask[iIndex])
                 self.vMathyStrand.append(vMathyStrand[iIndex])
                 iOffset = int(strPos) - self.iRawStartPos
                 self.vMathyPosOffSetInGene.append(iOffset)
+                
+                strReadsTripleSeq = ""
+                if iOffset-1 < 0:
+                    if iOffset + 2 <= len(self.strSeq):
+                        strReadsTripleSeq = "#" + self.strSeq[iOffset:iOffset+2]
+                    else:
+                        strReadsTripleSeq = "#" + self.strSeq[iOffset] + "#"
+                else:
+                    if iOffset + 2 <= len(self.strSeq):
+                        strReadsTripleSeq = self.strSeq[iOffset-1:iOffset+2]
+                    else:
+                        strReadsTripleSeq = self.strSeq[iOffset-1:iOffset+1] + "#" 
+                self.vTripleSeqReads.append(strReadsTripleSeq)
+                
+            # Index only need to be increased here -->     
             if int(strPos) > self.iRawEndPos:
                 break
             else:
                 iIndex += 1
+            # <--
         #print(self.vMathyPos)
         #print(self.vMathyPosOffSetInGene)
         self.GetMathylationRefPos(objRef)
-    
+        
+        # print("self.vMathyPos            :", self.vMathyPos)
+        # print("self.vMathyPosOffSetInGene:", self.vMathyPosOffSetInGene)
+        # print("self.vTripleSeqReads      :", self.vTripleSeqReads)
+        # print("ReadsLength               :", len(self.strSeq))
+        # print()
+        
     def GetMathylationRefPos(self, objRef):
         #print(self.strCIGAR)
         # print(self.listCIGAR)
@@ -180,32 +216,42 @@ class ClsReads:
         #     print(cigar[0])
         #     print(cigar[1])
         for iOffSet in self.vMathyPosOffSetInGene:
-            iCount = 0
-            iPos = self.iPos
-            strCIGAR = ""
-            for cigar in self.listCIGAR:
-                if iCount + cigar[1] * DICCIGAROFFSETREADS[DICCIGAR[cigar[0]]] < iOffSet:
-                    iPos += cigar[1] * DICCIGAROFFSETREF[DICCIGAR[cigar[0]]]
-                    iCount += cigar[1] * DICCIGAROFFSETREADS[DICCIGAR[cigar[0]]]
-                    strCIGAR += str(cigar[1]) + DICCIGAR[cigar[0]]
-                else:
-                    iPos += (iOffSet - iCount) * DICCIGAROFFSETREF[DICCIGAR[cigar[0]]]
-                    strCIGAR += str(iOffSet - iCount) + DICCIGAR[cigar[0]]
-                    break
-            strRefBase = ""
-            if DICCIGAROFFSETREF[strCIGAR[-1]] == 0:
-                strRefBase = "*"
-                iPos = str(iPos) + "(*)"
-            else:
-                strRefBase = objRef.dicInfo[self.strRefName][iPos-1]
-            self.vMathyPosRef.append(iPos)
-            self.vMathyCIGAR.append(strCIGAR)
-            self.vMathyRefBase.append(strRefBase)
+            
+            iPosLeft, strRefBaseLeft, strCIGARLeft = self.GetSingleRefSeqInfo(objRef, iOffSet-1)
+            # This is info for current Methylation -->
+            iPosMiddle, strRefBaseMiddle, strCIGARMiddle = self.GetSingleRefSeqInfo(objRef, iOffSet)
+            # <--
+            iPosRight, strRefBaseRight, strCIGARRight = self.GetSingleRefSeqInfo(objRef, iOffSet+1)
+            
+            self.vMathyPosRef.append(iPosMiddle)
+            self.vMathyCIGAR.append(strCIGARMiddle)
+            self.vMathyRefBase.append(strRefBaseMiddle)
+            self.vTripleSeqRef.append(strRefBaseLeft + strRefBaseMiddle + strRefBaseRight)
             
         #print(self.iPos)
         #print(self.vMathyPosRef)
         #print(self.vMathyCIGAR)
         #print()  
+    def GetSingleRefSeqInfo(self, objRef, iOffSet):
+        iCount = 0
+        iPos = self.iPos
+        strCIGAR = ""
+        for cigar in self.listCIGAR:
+            if iCount + cigar[1] * DICCIGAROFFSETREADS[DICCIGAR[cigar[0]]] < iOffSet:
+                iPos += cigar[1] * DICCIGAROFFSETREF[DICCIGAR[cigar[0]]]
+                iCount += cigar[1] * DICCIGAROFFSETREADS[DICCIGAR[cigar[0]]]
+                strCIGAR += str(cigar[1]) + DICCIGAR[cigar[0]]
+            else:
+                iPos += (iOffSet - iCount) * DICCIGAROFFSETREF[DICCIGAR[cigar[0]]]
+                strCIGAR += str(iOffSet - iCount) + DICCIGAR[cigar[0]]
+                break
+        strRefBase = ""
+        if DICCIGAROFFSETREF[strCIGAR[-1]] == 0:
+            strRefBase = "#"
+            iPos = str(iPos) + "(#)"
+        else:
+            strRefBase = objRef.dicInfo[self.strRefName][iPos-1]
+        return iPos, strRefBase, strCIGAR
     
     def GetInfo(self, listRow, iIndex):
         listRow.clear()
@@ -221,6 +267,11 @@ class ClsReads:
         listRow.append(str(self.vMathyRefBase[iIndex]))
         listRow.append(str(self.vMathyStrand[iIndex]))
         #<-
+        #-> Obtain triple sequence
+        listRow.append(self.vTripleSeqRef[iIndex])
+        listRow.append(self.vTripleSeqReads[iIndex])
+        #<-
+        
         listRow.append(str(self.vMathyCIGAR[iIndex]))
 
 class ClsSample :
@@ -458,7 +509,7 @@ class ClsSample :
         print("Preparing CSV File:", strCSVFile)
         f = open(strCSVFile, 'w')
         writer = csv.writer(f)
-        listRow = ["GeneName", "AlignedRefPos(Gene)", "RawStartPosRef(Gene)", "RawEndPosRef(Gene)", "RawPosRef(Methylation)", "OffSetPosGene(Methylation)", "LiftoverAlignedPosRef(Methylation)", "MethyMask", "RefBase", "Strand(GFF3)", "CIGAR(Calculation)"]
+        listRow = ["GeneName", "AlignedRefPos(Gene)", "RawStartPosRef(Gene)", "RawEndPosRef(Gene)", "RawPosRef(Methylation)", "OffSetPosGene(Methylation)", "LiftoverAlignedPosRef(Methylation)", "MethyMask", "RefBase", "Strand(GFF3)", "TripleSeqRef", "TripleSeqReads", "CIGAR(Calculation)"]
         writer.writerow(listRow)
         
         for reads in self.vReads:
@@ -528,6 +579,7 @@ def main():
     InitSample(vSample)
     
     for sample in vSample:
+        # update the reads name by binding "index" and grab the reads sequence
         sample.UpdateReads()
     
     # # Prepare Aligned BAM
@@ -572,11 +624,13 @@ def main():
         strRefFile = DIRRef + "/" + strRefName + "." + SUFFIXRef
         objRef = ClsRef()
         objRef.Init(strRefFile)
+        #print(strRefFile)
         #print(objRef.dicInfo)
         for sample in vSample:
             sample.GetMethylationCoordinate(strRefName, objRef)
             # Print Result 
             sample.PrintMethylationCoordinate(strRefName)
+            #break
     
         
 if __name__ == "__main__":
