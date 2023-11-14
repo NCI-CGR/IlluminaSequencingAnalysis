@@ -278,7 +278,10 @@ class ClsReads:
             self.vMathyPosRef.append(iPosMiddle)
             self.vMathyCIGAR.append(strCIGARMiddle)
             self.vMathyRefBase.append(strRefBaseMiddle)
-            self.vTripleSeqRef.append(strRefBaseLeft + strRefBaseMiddle + strRefBaseRight)
+            if self.bIsReverse:
+                self.vTripleSeqRef.append(strRefBaseRight + strRefBaseMiddle + strRefBaseLeft)
+            else: # this is the normal string
+                self.vTripleSeqRef.append(strRefBaseLeft + strRefBaseMiddle + strRefBaseRight)
               
     def GetSingleRefSeqInfo(self, objRef, iOffSet):
         iCount = 0
@@ -507,13 +510,13 @@ class ClsSample :
     
     def ParseBAM(self, strMappedBAMFile, strRawReads, strGFFV3File, objRef):
         # 1: Get the Methylation Pos
-        CMD = "zcat " + strGFFV3File + " | tail -n +4 | awk '{print $4}' | sort -n"
+        CMD = "zcat " + strGFFV3File + " | tail -n +4 | awk '{print $4}'" #| sort -n"
         vMathyPos = subprocess.getoutput(CMD).split('\n')
         
-        CMD = "zcat " + strGFFV3File + " | tail -n +4 | awk '{print $3}' | sort -n"
+        CMD = "zcat " + strGFFV3File + " | tail -n +4 | awk '{print $3}'" # | sort -n"
         vMathyMask = subprocess.getoutput(CMD).split('\n')
         
-        CMD = "zcat " + strGFFV3File + " | tail -n +4 | awk '{print $7}' | sort -n"
+        CMD = "zcat " + strGFFV3File + " | tail -n +4 | awk '{print $7}'" # | sort -n"
         vMathyStrand = subprocess.getoutput(CMD).split('\n')
         #print(vMathyPos)
         #return 
