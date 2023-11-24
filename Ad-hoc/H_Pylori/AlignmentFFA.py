@@ -112,6 +112,7 @@ class ClsReads:
         self.iRawStartPos = -1
         self.iRawEndPos = -1
         
+        self.vMathyGFFV3Pos = []
         self.vMathyPos = []
         self.vMathyMask = []
         self.vMathyStrand = []
@@ -129,6 +130,8 @@ class ClsReads:
         self.bIsReverse = False
         self.strRefSeq = ""
         self.vAdjustOffsetInRef = []
+        
+        self.strReadsFFAStrand = ""
     
     def UpdateReadsName(self):
         if self.strName == "":
@@ -151,6 +154,18 @@ class ClsReads:
         self.bIsReverse = reads.is_reverse
         
         #print("Referene Name:", self.strRefName)
+        
+    def GetReadsMathyPos(self, stTmpStrand, strGFFV3Strand, iRawStartPos, iRawEndPos, iGFFV3MathyPos):
+        if strGFFV3Strand == "+":
+            if stTmpStrand == '+':
+                return iGFFV3MathyPos
+            else:
+                return iRawEndPos - (iGFFV3MathyPos - iRawStartPos)
+        else: # for the case in the - strand
+            if stTmpStrand == '-':
+                return iGFFV3MathyPos
+            else:
+                return iRawEndPos - (iGFFV3MathyPos - iRawStartPos)
     
     def GetRawReadsInfo(self, strRawReads, vMathyPos, vMathyMask, vMathyStrand, objRef):
         print(strRawReads)
@@ -162,20 +177,24 @@ class ClsReads:
         self.strRawReadsName = subprocess.getoutput(CMD)
         #print(self.strRawReadsName)
         strTmp = ""
+        stTmpStrand = ""
         if "Reverse" in self.strRawReadsName:
             strTmp = self.strRawReadsName.split(' Reverse')[0].split('|')[-1]
+            stTmpStrand = "-"
         elif "Forward" in self.strRawReadsName:
             strTmp = self.strRawReadsName.split(' Forward')[0].split('|')[-1]
+            stTmpStrand = "+"
         print(strTmp)
         self.iRawStartPos = int(strTmp.split(':')[0])
         self.iRawEndPos = int(strTmp.split(':')[1])
+        self.strReadsFFAStrand = stTmpStrand
         # Get the related Mathylation
         iIndex = 0
         for strPos in vMathyPos:
             if (int(strPos) >= self.iRawStartPos and
                 int(strPos) <= self.iRawEndPos):
-                
-                self.vMathyPos.append(int(strPos))
+                self.vMathyGFFV3Pos.append(int(strPos))
+                self.vMathyPos.append(self.GetReadsMathyPos(stTmpStrand, vMathyStrand[iIndex], self.iRawStartPos, self.iRawEndPos, int(strPos)))
                 self.vMathyMask.append(vMathyMask[iIndex])
                 self.vMathyStrand.append(vMathyStrand[iIndex])
                 iOffset = int(strPos) - self.iRawStartPos
@@ -321,6 +340,8 @@ class ClsReads:
         listRow.append(str(self.vMathyMask[iIndex]))
         listRow.append(str(self.vMathyRefBase[iIndex]))
         listRow.append(str(self.vMathyStrand[iIndex]))
+        listRow.append(str(self.strReadsFFAStrand))
+        listRow.append(str(self.vMathyGFFV3Pos[iIndex]))
         #<-
         #-> Obtain triple sequence
         listRow.append(self.vTripleSeqRef[iIndex])
@@ -564,7 +585,7 @@ class ClsSample :
         print("Preparing CSV File:", strCSVFile)
         f = open(strCSVFile, 'w')
         writer = csv.writer(f)
-        listRow = ["GeneName", "AlignedRefPos(Gene)", "RawStartPosRef(Gene)", "RawEndPosRef(Gene)", "RawPosRef(Methylation)", "OffSetPosGene(Methylation)", "OffSetPosRef(Methylation)", "IsReverseComplement", "LiftoverAlignedPosRef(Methylation)", "MethyMask", "RefBase", "Strand(GFF3)", "TripleSeqRef", "TripleSeqReads", "CIGAR(Calculation)"]
+        listRow = ["GeneName", "AlignedRefPos(Gene)", "RawStartPosRef(Gene)", "RawEndPosRef(Gene)", "RawPosRef(Methylation)", "OffSetPosGene(Methylation)", "OffSetPosRef(Methylation)", "IsReverseComplement", "LiftoverAlignedPosRef(Methylation)", "MethyMask", "RefBase", "Strand(GFF3)", "Strand(FFA)", "MethyPos(GFF3)", "TripleSeqRef", "TripleSeqReads", "CIGAR(Calculation)"]
         writer.writerow(listRow)
         
         for reads in self.vReads:
@@ -686,7 +707,6 @@ def main():
             # Print Result 
             sample.PrintMethylationCoordinate(strRefName)
             #break
-    
         
 if __name__ == "__main__":
     main()
