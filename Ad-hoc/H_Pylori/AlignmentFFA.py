@@ -114,6 +114,7 @@ class ClsReads:
         
         self.vMathyGFFV3Pos = []
         self.vMathyPos = []
+        self.vOrgGFFV3MathyPos = []
         self.vMathyMask = []
         self.vMathyStrand = []
         
@@ -194,10 +195,12 @@ class ClsReads:
             if (int(strPos) >= self.iRawStartPos and
                 int(strPos) <= self.iRawEndPos):
                 self.vMathyGFFV3Pos.append(int(strPos))
-                self.vMathyPos.append(self.GetReadsMathyPos(stTmpStrand, vMathyStrand[iIndex], self.iRawStartPos, self.iRawEndPos, int(strPos)))
+                iAdjustMethyPos = self.GetReadsMathyPos(stTmpStrand, vMathyStrand[iIndex], self.iRawStartPos, self.iRawEndPos, int(strPos))
+                self.vMathyPos.append(iAdjustMethyPos)
+                self.vOrgGFFV3MathyPos.append(int(strPos))
                 self.vMathyMask.append(vMathyMask[iIndex])
                 self.vMathyStrand.append(vMathyStrand[iIndex])
-                iOffset = int(strPos) - self.iRawStartPos
+                iOffset = int(iAdjustMethyPos) - self.iRawStartPos
                 self.vMathyPosOffSetInGene.append(iOffset)
                 
                 strReadsTripleSeq = ""
@@ -257,6 +260,7 @@ class ClsReads:
         print("iPos                 :", self.iPos)
         print("iRawStartPos         :", self.iRawStartPos)
         print("iRawEndPos           :", self.iRawEndPos)
+        print("vOrgGFFV3MathyPos    :", self.vOrgGFFV3MathyPos)
         print("vMathyPos            :", self.vMathyPos)
         print("vMathyPosOffSetInGene:", self.vMathyPosOffSetInGene)
         print("vAdjustOffsetInRef   :", self.vAdjustOffsetInRef)
@@ -288,6 +292,7 @@ class ClsReads:
                 iAdjustOffSet = len(self.strSeq) - 1 - iOffSet
             self.vAdjustOffsetInRef.append(iAdjustOffSet)
             
+        
             iPosLeft, strRefBaseLeft, strCIGARLeft = self.GetSingleRefSeqInfo(objRef, iAdjustOffSet-1)
             # This is info for current Methylation -->
             iPosMiddle, strRefBaseMiddle, strCIGARMiddle = self.GetSingleRefSeqInfo(objRef, iAdjustOffSet)
@@ -297,10 +302,11 @@ class ClsReads:
             self.vMathyPosRef.append(iPosMiddle)
             self.vMathyCIGAR.append(strCIGARMiddle)
             self.vMathyRefBase.append(strRefBaseMiddle)
-            if self.bIsReverse:
-                self.vTripleSeqRef.append(strRefBaseRight + strRefBaseMiddle + strRefBaseLeft)
-            else: # this is the normal string
-                self.vTripleSeqRef.append(strRefBaseLeft + strRefBaseMiddle + strRefBaseRight)
+            # if self.bIsReverse:
+            #     self.vTripleSeqRef.append(strRefBaseRight + strRefBaseMiddle + strRefBaseLeft)
+            # else: # this is the normal string
+            #     self.vTripleSeqRef.append(strRefBaseLeft + strRefBaseMiddle + strRefBaseRight)
+            self.vTripleSeqRef.append(strRefBaseLeft + strRefBaseMiddle + strRefBaseRight)
               
     def GetSingleRefSeqInfo(self, objRef, iOffSet):
         iCount = 0
@@ -560,6 +566,7 @@ class ClsSample :
             # iCount += 1
             # if iCount == 5:
             #     break
+            # break
         
         print(len(self.vReads))
     
@@ -703,10 +710,12 @@ def main():
         #print(strRefFile)
         #print(objRef.dicInfo)
         for sample in vSample:
+            print(sample.strName)
             sample.GetMethylationCoordinate(strRefName, objRef)
             # Print Result 
             sample.PrintMethylationCoordinate(strRefName)
-            #break
+            # break
+        #break
         
 if __name__ == "__main__":
     main()
